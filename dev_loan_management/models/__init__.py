@@ -32,7 +32,7 @@ from . import loan_notice
 from . import loan_eligibility_criteria
 from . import dev_project_task
 from . import reminder_days
-from . import crm_lead
+from . import loan_lead
 from . import dev_loan_restructure
 from . import dev_loan_restructure_line
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

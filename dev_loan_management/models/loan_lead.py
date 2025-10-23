@@ -10,8 +10,9 @@
 
 from odoo import fields, models, api
 
-class loan_lead(models.Model):
+class LoanLead(models.Model):
     _inherit = 'crm.lead'
+    _description = "Loan Lead"
     
     
     def create_loan_request(self):
@@ -19,8 +20,11 @@ class loan_lead(models.Model):
             'client_id': self.partner_id.id if self.partner_id else False,
             'loan_type_id': self.loan_type_id.id if self.loan_type_id else False,
             'loan_amount': self.loan_amount,
-            'loan_term' : self.loan_term, 
+            'loan_term': self.loan_term,
             'lead_id': self.id,
+            'collateral': self.collateral,
+            'source_of_repayment': self.source_of_repayment,
+            'loan_purpose': self.loan_purpose,
         }
         loan_request = self.env['dev.loan.loan'].create(vals)
         loan_request.onchange_loan_type()
@@ -31,7 +35,7 @@ class loan_lead(models.Model):
         
     def _compute_loan_count(self):
         for lead in self:
-            loan_ids = self.env['dev.loan.loan'].search([('lead_id','=',self.id)])
+            loan_ids = self.env['dev.loan.loan'].search([('lead_id','=',lead.id)])
             lead.loan_count = len(loan_ids)
             
     def action_view_loan(self):
@@ -58,9 +62,10 @@ class loan_lead(models.Model):
     #Other Application Details
     bvn = fields.Char('BVN')
     nin = fields.Char('NIN')
+    partner_tin = fields.Char(string="TIN")
     bank_name = fields.Char('Bank Name')
     account_number = fields.Char('Account Number')
-    marital_status = fields.Selection([('single', 'Single'), ('married', 'Married'), ('divorced', 'Divorced'), ('widowed', 'Widowed')], string='Marital Status')
+    marital_status = fields.Char('Marital Status')
 
     #Next of Kin Details
     nok_name = fields.Char('Next Of Kin Name')
@@ -105,8 +110,6 @@ class loan_lead(models.Model):
     #CORPORATE LOAN DETAILS
 
     #Company Information
-    company_name = fields.Char('Company Name')
-    company_email = fields.Char('Company Email')
     company_phone = fields.Char('Phone Number')
     date_of_incorporation = fields.Date('Date of Incorporation')
     annual_turnover = fields.Float('Annual Turnover')
@@ -123,12 +126,7 @@ class loan_lead(models.Model):
     director_date_of_birth = fields.Date('Director\'s Date of Birth')
     director_bvn = fields.Char('Director\'s BVN')
     director_address = fields.Char('Director\'s Address')
-    director_marital_status = fields.Selection([
-        ('single', 'Single'), 
-        ('married', 'Married'), 
-        ('divorced', 'Divorced'), 
-        ('widowed', 'Widowed')], 
-        string='Director\'s Marital Status')
+    director_marital_status = fields.Char('Director\'s Marital Status')
     director_designation = fields.Char('Director\'s Designation')
     
 

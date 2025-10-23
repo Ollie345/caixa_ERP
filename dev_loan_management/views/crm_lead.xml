@@ -13,7 +13,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
             <xpath expr="//group[@name='lead_partner']" position="replace">
                 <group name="lead_partner" string="Applicant Bio">
                     <!-- your new content here -->
-                    <field name="partner_id" required="1"/>-->
+                    <field name="partner_id" required="1"/>
                     <field name="email_from" required="1"/>
                     <field name="phone" required="1"/>
                     <field name="bvn" required="1"/>

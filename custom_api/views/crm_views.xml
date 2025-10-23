@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Form view -->
+        <record id="res_partner_form_lead_image_page" model="ir.ui.view">
+            <field name="name">res.partner.form.lead.image.page</field>
+            <field name="model">res.partner</field>
+            <!-- use the base form as reference -->
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='geo_location']" position="after">
+                    <page string="Lead Picture" name="lead_picture">
+                        <group col="2">
+                            <field name="lead_image" widget="image" class="oe_avatar"
+                                   options="{'preview_image': 'avatar_128'}"/>
+                        </group>
+                    </page>
+                </xpath>
+                <xpath expr="//field[@name='vat']" position="after">
+                    <field name="lead_status"/>
+                </xpath>
+                <!--                <xpath expr="//field[@name='lead_status']" position="after">-->
+                <!--                    <field name="lead_erp_id"/>-->
+                <!--                </xpath>-->
+                <xpath expr="//notebook" position="inside">
+                    <field name="lead_image" widget="image" class="oe_avatar"/>
+                </xpath>
+            </field>
+        </record>
+
+
+        <!-- List / Tree view for Leads -->
+        <!--        <record id="crm_lead_tree_partner_image_leads" model="ir.ui.view">-->
+        <!--            <field name="name">crm.lead.tree.partner.image.leads</field>-->
+        <!--            <field name="model">crm.lead</field>-->
+        <!--            <field name="inherit_id" ref="crm.crm_case_tree_view_leads"/>-->
+        <!--            <field name="arch" type="xml">-->
+        <!--                <xpath expr="//field[@name='partner_id']" position="after">-->
+        <!--                    <field name="partner_lead_image" widget="image" class="oe_avatar"/>-->
+        <!--                </xpath>-->
+        <!--            </field>-->
+        <!--        </record>-->
+
+        <!--        &lt;!&ndash; List / Tree view for Opportunities &ndash;&gt;-->
+        <!--        <record id="crm_lead_tree_partner_image_oppor" model="ir.ui.view">-->
+        <!--            <field name="name">crm.lead.tree.partner.image.oppor</field>-->
+        <!--            <field name="model">crm.lead</field>-->
+        <!--            <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>-->
+        <!--            <field name="arch" type="xml">-->
+        <!--                <xpath expr="//field[@name='partner_id']" position="after">-->
+        <!--                    <field name="partner_lead_image" widget="image" class="oe_avatar"/>-->
+        <!--                </xpath>-->
+        <!--            </field>-->
+        <!--        </record>-->
+        <record id="crm_lead_form_edit" model="ir.ui.view">
+            <field name="name">crm.lead.form.edit</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='tag_ids']" position="after">
+                    <field name="building_stage"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Page with the custom image, inserted after Partner Assignment -->
+        <!--        <record id="res_partner_form_lead_image_page" model="ir.ui.view">-->
+        <!--            <field name="name">res.partner.form.lead.image.page</field>-->
+        <!--            <field name="model">res.partner</field>-->
+        <!--            &lt;!&ndash; use the base form as reference &ndash;&gt;-->
+        <!--            <field name="inherit_id" ref="base.view_partner_form"/>-->
+        <!--            <field name="arch" type="xml">-->
+
+        <!--                &lt;!&ndash; insert a new page just AFTER the Partner Assignment page &ndash;&gt;-->
+        <!--                <xpath expr="//page[@name='geo_location']" position="after">-->
+        <!--                    <page string="Lead Picture" name="lead_picture">-->
+        <!--                        <group col="2">-->
+        <!--                            <field name="lead_image" widget="image" class="oe_avatar"-->
+        <!--                                   options="{'preview_image': 'avatar_128'}"/>-->
+        <!--                        </group>-->
+        <!--                    </page>-->
+        <!--                </xpath>-->
+
+        <!--            </field>-->
+        <!--        </record>-->
+    </data>
+</odoo>

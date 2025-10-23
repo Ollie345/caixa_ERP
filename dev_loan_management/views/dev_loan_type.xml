@@ -11,7 +11,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
         <field name="arch" type="xml">
             <form string="Loan Type">
                 <sheet>
-                   <field name="image" widget="image" class="oe_avatar" required="1"/>
+                   <field name="image" widget="image" class="oe_avatar"/>
                     <div class="oe_title">
                          <field name="name" style="font-size: 22px;font-weight: bold;" placeholder="Loan Type Name"/>
                     </div>

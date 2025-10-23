@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
+
+For Module Support : devintelle@gmail.com  or Skype : devintelle
+ -->
+<odoo>
+    <record id="form_loan_checklist_template_view" model="ir.ui.view">
+        <field name="name">form.loan.checklist.template.view</field>
+        <field name="model">loan.checklist.template</field>
+        <field name="arch" type="xml">
+            <form string="Loan Checklist Template Form">
+                <sheet>
+		         <group>
+				   <group>
+				         <field name="name" />
+				   </group>
+		         </group>
+		         <separator string="Required Documents"/>
+                 <field name="checklist_ids" />
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_loan_checklist_template_tree" model="ir.ui.view">
+        <field name="name">view.loan.checklist.template.tree</field>
+        <field name="model">loan.checklist.template</field>
+        <field name="arch" type="xml">
+            <list string="Loan Checklist Template Tree" >
+                <field name="name" />
+            </list>
+        </field>
+    </record>
+
+    <record id="action_loan_checklist_template" model="ir.actions.act_window">
+        <field name="name">Document Checklist Template</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">loan.checklist.template</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem name="Document Checklist Template" id="menu_loan_checklist_template" parent='main_menu_dev_loan_document_checklist'
+              action="action_loan_checklist_template" sequence="1"/>
+</odoo>

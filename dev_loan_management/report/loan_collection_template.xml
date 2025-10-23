@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="loan_collection_template_main">
+        <t t-call="dev_loan_management.dev_loan_external_layout">
+            <div class="page" style="font-size:15px;">
+
+                <h2 style="text-align:center;">Loan Collection Report</h2>
+                <br></br>
+
+                <!-- Current Month Table -->
+                <t t-if="o.current_month">
+                    <h4>This Month's Collectables</h4>
+                    <table class="table table-primary table-striped">
+                        <thead>
+                            <tr>
+                                <th>S. No.</th>
+                                <th>Date</th>
+                                <th>Name</th>
+                                <th>Principle interest</th>
+                                <th>Amount To Be Collect</th>
+                                <th>Outstanding Loan Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="index" t-value="0"/>
+                            <t t-set="total_amount" t-value="0.0"/>
+                            <t t-if="get_current_installments(o)">
+                                <t t-foreach="get_current_installments(o)" t-as="installment">
+                                    <tr>
+                                        <t t-set="index" t-value="index+1"/>
+                                        <t t-set="total_amount" t-value="total_amount + (installment.total_amount or 0.0)"/>
+                                        <td>
+                                            <span t-esc="index"/>
+                                        </td>
+                                        <!-- <td><span t-esc="installment.date"/></td> -->
+                                        <td>
+                                            <span t-esc="installment.date.strftime('%d-%m-%Y') if installment.date else ''"/>
+                                        </td>
+                                        <td>
+                                            <span t-esc="installment.client_id.name"/>
+                                        </td>
+                                        <!-- <td><t t-esc="installment.interest"/></td> -->
+                                        <td class="text-end">
+                                            <span t-esc="installment.interest" t-options="{'widget': 'monetary', 'display_currency': installment.currency_id}"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-esc="installment.total_amount" t-options="{'widget': 'monetary', 'display_currency': installment.currency_id}"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-esc="installment.opening_balance" t-options="{'widget': 'monetary', 'display_currency': installment.currency_id}"/>
+                                        </td>
+                                        <!-- <td ><t t-esc="installment.total_amount" t-options="{'widget': 'monetary', 'display_currency': installment.currency_id}"/></td> -->
+                                        <!-- <td><t t-esc="installment.opening_balance" t-options="{'widget': 'monetary', 'display_currency': installment.currency_id}"/></td> -->
+                                        <td>
+                                            <t t-if="installment.state == 'paid'">Paid
+                                    
+                                            </t>
+                                            <t t-else="">Unpaid
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <tr t-if="get_current_installments(o)">
+                                    <td colspan="4" class="text-end font-weight-bold">Total</td>
+                                    <td class="text-end">
+                                        <span t-esc="total_amount" t-options="{'widget': 'monetary', 'display_currency': installment.currency_id}"/>
+                                    </td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </t>
+                            <t t-else="">
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">No installments found.</td>
+                                </tr>
+                            </t>
+
+                        </tbody>
+                    </table>
+                </t>
+                <br></br>
+                <t t-if="o.next_month">
+                    <h4>This Next's Collectables</h4>
+                    <table class="table table-primary table-striped">
+                        <thead>
+                            <tr>
+                                <th>S. No.</th>
+                                <th>Date</th>
+                                <th>Name</th>
+                                <th>Principle interest</th>
+                                <th>Amount To Be Collect</th>
+                                <th>Outstanding Loan Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="index" t-value="0"/>
+                            <t t-set="total_amount" t-value="0.0"/>
+                            <t t-if="get_next_installments(o)">
+                                <t t-foreach="get_next_installments(o)" t-as="installment">
+                                    <tr>
+                                        <t t-set="index" t-value="index+1"/>
+                                        <t t-set="total_amount" t-value="total_amount + (installment.total_amount or 0.0)"/>
+                                        <td>
+                                            <span t-esc="index"/>
+                                        </td>
+                                        <td>
+                                            <span t-esc="installment.date.strftime('%d-%m-%Y') if installment.date else ''"/>
+                                        </td>
+                                        <td>
+                                            <span t-esc="installment.client_id.name"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-esc="installment.interest" t-options="{'widget': 'monetary', 'display_currency': installment.currency_id}"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-esc="installment.total_amount" t-options="{'widget': 'monetary', 'display_currency': installment.currency_id}"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-esc="installment.opening_balance" t-options="{'widget': 'monetary', 'display_currency': installment.currency_id}"/>
+                                        </td>
+
+                                        <td>
+                                            <t t-if="installment.state == 'paid'">Paid
+                                    
+                                            </t>
+                                            <t t-else="">Unpaid
+                                            </t>
+                                        </td>
+                                    </tr>
+
+                                </t>
+                                <tr>
+                                    <td colspan="4" class="text-end font-weight-bold">Total</td>
+                                    <td class="text-end">
+                                        <span t-esc="total_amount" t-options="{'widget': 'monetary', 'display_currency': installment.currency_id}"/>
+                                    </td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </t>
+                            <t t-else="">
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">No installments found.</td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </t>
+                <br></br>
+                <t t-if="o.overdue_month">
+                    <h4>This Overdue's Collectables</h4>
+                    <table class="table table-primary table-striped">
+                        <thead>
+                            <tr>
+                                <th>S. No.</th>
+                                <th>Date</th>
+                                <th>Name</th>
+                                <th>Principle interest</th>
+                                <th>Amount To Be Collect</th>
+                                <th>Outstanding Loan Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="index" t-value="0"/>
+                            <t t-set="total_amount" t-value="0.0"/>
+                            <t t-if="get_overdue_installments(o)">
+
+                                <t t-foreach="get_overdue_installments(o)" t-as="installment" t-enumerate="true" t-as-index="i">
+                                    <tr>
+                                        <t t-set="index" t-value="index+1"/>
+                                        <t t-set="total_amount" t-value="total_amount + (installment.total_amount or 0.0)"/>
+                                        <td>
+                                            <span t-esc="index"/>
+                                        </td>
+                                        <td>
+                                            <span t-esc="installment.date.strftime('%d-%m-%Y') if installment.date else ''"/>
+                                        </td>
+                                        <td>
+                                            <span t-esc="installment.client_id.name"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-esc="installment.interest" t-options="{'widget': 'monetary', 'display_currency': installment.currency_id}"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-esc="installment.total_amount" t-options="{'widget': 'monetary', 'display_currency': installment.currency_id}"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-esc="installment.opening_balance" t-options="{'widget': 'monetary', 'display_currency': installment.currency_id}"/>
+                                        </td>
+                                        <td>
+                                            <t t-if="installment.state == 'paid'">Paid
+                                    
+                                            </t>
+                                            <t t-else="">Unpaid
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <tr>
+                                    <td colspan="4" class="text-end font-weight-bold">Total</td>
+                                    <td class="text-end">
+                                        <span t-esc="total_amount" t-options="{'widget': 'monetary', 'display_currency': installment.currency_id}"/>
+                                    </td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </t>
+                            <t t-else="">
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">No installments found.</td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </t>
+
+
+
+            </div>
+        </t>
+    </template>
+
+    <template id="loan_collection_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="dev_loan_management.loan_collection_template_main" />
+            </t>
+        </t>
+    </template>
+
+</odoo>

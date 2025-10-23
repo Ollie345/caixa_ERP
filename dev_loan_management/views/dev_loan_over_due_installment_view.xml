@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
+
+For Module Support : devintelle@gmail.com  or Skype : devintelle 
+ -->
+<odoo>
+
+    <record id="view_dev_loan_over_due_installment_tree" model="ir.ui.view">
+        <field name="name">view.dev.loan.over.due.installment.tree</field>
+        <field name="model">dev.loan.installment</field>
+        <field name="arch" type="xml">
+            <list string="Loan Over Due Installments" create="false" edit="false">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="mobile"/>
+                <field name="email"/>
+                <field name="loan_id"/>
+                <field name="date"/>
+                <field name="amount"/>
+                <field name="interest"/>
+                <field name="total_amount"/>
+                <field name="state"/>
+                <field name="currency_id" column_invisible="1"/>
+                <button name="action_open_installment_form" string="View" type="object" class="btn-primary" icon="fa-eye"/>
+                <button name="send_by_mail" type="object" string="Send Email" class="oe_highlight" icon="fa-envelope"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="filter_dev_loan_overdue_installment" model="ir.ui.view">
+        <field name="name">filter.dev.loan.installment</field>
+        <field name="model">dev.loan.installment</field>
+        <field name="arch" type="xml">
+            <search string="Search Loan Installment">
+                <field name="name" string="Loan" filter_domain="[('name','ilike',self)]"/>
+                <filter string="Unpaid" name="state" domain="[('state','=','unpaid')]" help="Unpaid Loan"/>
+                <group expand="0" string="Group By">
+                    <filter string="Borrower" name="client_id" context="{'group_by':'client_id'}"/>
+                    <filter string="Loan" name="loan_id" context="{'group_by':'loan_id'}"/>
+                    <filter string="Date" name="date" context="{'group_by':'date'}"/>
+                    <filter string="Status" name="state" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_dev_loan_over_due_installment_calendar" model="ir.ui.view">
+        <field name="name">dev.loan.installment.calendar</field>
+        <field name="model">dev.loan.installment</field>
+        <field name="arch" type="xml">
+            <calendar string="Overdue Installments" date_start="date" color="loan_id" >
+                <field name="loan_id"/>
+                <field name="name"/>
+                <field name="amount"/>
+                <field name="state"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="action_dev_loan_over_due_installment" model="ir.actions.act_window">
+        <field name="name">Over Due Installment</field>
+        <field name="res_model">dev.loan.installment</field>
+        <field name="domain">[
+            ('loan_id.state', 'not in', ['draft', 'reject', 'cancel']),
+            ('date', '&lt;=', context_today()),
+            ('state', '=', 'unpaid')
+        ]</field>
+        <field name="context">{'search_default_loan_id':1}</field>
+        <field name="view_mode">list,calendar</field>
+        <field name="search_view_id" ref="filter_dev_loan_overdue_installment"/>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_dev_loan_over_due_installment_tree')}),
+                                        (0, 0, {'view_mode': 'calendar', 'view_id': ref('view_dev_loan_over_due_installment_calendar')})]"/>
+    </record>
+    
+    
+    <menuitem name="Over Due Installment" id="menu_dev_loan_over_due_installment" parent="dev_loan_management.menu_dev_loan_request_main" action="action_dev_loan_over_due_installment" sequence="6"/>
+
+</odoo>

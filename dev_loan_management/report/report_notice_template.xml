@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="loan_notice_template_main">
+        <t t-call="web.external_layout">
+            <div class="page" style="font-size:15px;">
+                <style>
+                    .page-header{
+                        font-size: 28px;
+                        text-align: center;
+                    }
+                </style>
+                <div class="page-header"><span t-esc="o.header if o.header else 'Notice'"/></div>
+                <div class="page-body" style="margin-top:50px;">
+                    <div class="page-body-content">
+                        <span t-field="o.description"/>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="loan_notice_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="dev_loan_management.loan_notice_template_main" />
+            </t>
+        </t>
+    </template>
+
+</odoo>

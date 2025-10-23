@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
+
+For Module Support : devintelle@gmail.com  or Skype : devintelle
+ -->
+<odoo>
+    <template id="main_tmpl_loan_ltr">
+        <t t-call="web.external_layout">
+            <div class="page" style="font-size: 18px;">
+                Dear <span t-field="o.client_id"/>,
+                <br/><br/>
+                I hope this letter finds you well. This correspondence is to provide an update regarding the loan
+                with reference to <span t-field="o.name"/>.
+                <br/><br/>
+                Loan Type :
+                <span t-field="o.loan_type_id"/>
+                <br/>
+                Total Loan Amount :
+                <span t-field="o.loan_amount"/>
+                <br/>
+                Paid Amount :
+                <span t-field="o.paid_amount"/>
+                <br/>
+                Remaining Amount Due :
+                <span t-field="o.remaing_amount"/>
+                <br/><br/>
+                Please note that the outstanding balance on your loan stands at <span t-field="o.remaing_amount"/>.
+                This remaining sum represents the amount left to be repaid, following a total loan amount
+                of <span t-field="o.loan_amount"/>.
+                <br/><br/>
+                Should you have any questions or require further details regarding your loan, please do not hesitate
+                to reach out to our customer service team.
+                <br/><br/>
+                Thank you for your prompt attention to this matter.
+                <br/><br/>
+                Best Regards.
+            </div>
+        </t>
+    </template>
+
+    <template id="tmpl_loan_ltr">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="dev_loan_management.main_tmpl_loan_ltr"/>
+            </t>
+        </t>
+    </template>
+</odoo>

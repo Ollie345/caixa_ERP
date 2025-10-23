@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="template_overdue_installment_send_by_mail" model="mail.template">
+        <field name="name">Over Due Installment</field>
+        <field name="subject">({{object.name}}) Installment Details</field>
+        <field name="email_from">{{ user.partner_id and user.partner_id.email or '' }}</field>
+        <field name="partner_to">{{ object.client_id and object.client_id.id or False }}</field>
+        <field name="model_id" ref="dev_loan_management.model_dev_loan_installment"/>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <p>
+                Dear
+                <t t-out="object.client_id.name"/>,
+                </p>
+
+            <p>We hope this message finds you well. We would like to bring to your attention that your loan installment due on <strong><t t-out="object.date" /></strong> remains unpaid. Below are the details of the overdue installment:</p>
+
+            <table style="width:100%; border: 1px solid #ddd; border-collapse: collapse;">
+                <tr>
+                    <th style="text-align: left; border: 1px solid #ddd; padding: 8px;">Loan Number</th>
+                    <td style="border: 1px solid #ddd; padding: 8px;"><t t-out="object.loan_id.name" /></td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; border: 1px solid #ddd; padding: 8px;">Loan Type</th>
+                    <td style="border: 1px solid #ddd; padding: 8px;"><t t-out="object.loan_id.loan_type_id.name" /></td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; border: 1px solid #ddd; padding: 8px;">Installment Number</th>
+                    <td style="border: 1px solid #ddd; padding: 8px;"><t t-out="object.name" /></td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; border: 1px solid #ddd; padding: 8px;">EMI</th>
+                    <td style="border: 1px solid #ddd; padding: 8px;"><t t-out="object.currency_id.symbol" /> <t t-out="object.total_amount" /></td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; border: 1px solid #ddd; padding: 8px;">Date</th>
+                    <td style="border: 1px solid #ddd; padding: 8px;"><t t-out="object.date" /></td>
+                </tr>
+            </table>
+
+            <p>We kindly request you to make the payment at the earliest to avoid additional penalties or disruption to your loan agreement.</p>
+
+            <p>If you have already made the payment, please ignore this message. If you have any questions or need assistance, feel free to contact us at <strong><t t-out="object.company_id.email" /></strong> or call us at <strong><t t-out="object.company_id.phone" /></strong>.</p>
+
+            <p>Thank you for your prompt attention to this matter.</p>
+
+            <p>Best regards,<br />
+            The <t t-out="object.company_id.name" /> Team</p>
+        </field>
+
+
+    </record>
+
+</odoo>

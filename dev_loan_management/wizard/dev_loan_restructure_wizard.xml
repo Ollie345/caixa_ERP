@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Restructure Wizard Form View -->
+        <record id="view_dev_loan_restructure_wizard_form" model="ir.ui.view">
+            <field name="name">dev.loan.restructure.wizard.form</field>
+            <field name="model">dev.loan.restructure.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Restructure Loan">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>Restructure Loan</h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="loan_id"/>
+                                <field name="action_type" widget="radio" required="1"/>
+                                <field name="date" required="1"/>
+                            </group>
+                            <group string="New Terms" invisible="action_type != 'restructure'">
+                                <field name="new_amount"/>
+                                <field name="period_months"/>
+                                <field name="interest_rate"/>
+                                <field name="generate_schedule"/>
+                            </group>
+                            <group invisible="action_type == 'restructure'">
+                                <field name="settlement_account_id" required="action_type in ['payoff', 'writeoff']"/>
+                            </group>
+                        </group>
+                        <group string="Notes">
+                            <field name="note" nolabel="1" placeholder="Add any additional notes or justification for this request..."/>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="action_create_request" string="Create Request" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Restructure Wizard Action -->
+        <record id="action_dev_loan_restructure_wizard" model="ir.actions.act_window">
+            <field name="name">Restructure Loan</field>
+            <field name="res_model">dev.loan.restructure.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- Extend Loan form to add button and history page -->
+        <record id="view_dev_loan_form_inherit_restructure" model="ir.ui.view">
+            <field name="name">dev.loan.loan.form.inherit.restructure</field>
+            <field name="model">dev.loan.loan</field>
+            <field name="inherit_id" ref="dev_loan_management.view_dev_loan_loan_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header" position="inside">
+                    <button name="%(action_dev_loan_restructure_wizard)d" type="action" string="Restructure / Payoff / Writeoff"
+                            class="btn-secondary" invisible="state != 'open'"/>
+                </xpath>
+                <xpath expr="//notebook" position="inside">
+                    <page string="Restructure History">
+                        <field name="restructure_ids" nolabel="1" readonly="1">
+                            <list>
+                                <field name="name"/>
+                                <field name="action_type"/>
+                                <field name="date"/>
+                                <field name="state"/>
+                            </list>
+                        </field>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

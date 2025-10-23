@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
+
+For Module Support : devintelle@gmail.com  or Skype : devintelle 
+ -->
+<odoo>
+    
+    <record id="view_dev_add_advance_payment_form" model="ir.ui.view">
+         <field name="name">view.dev.add.advance.payment.form</field>
+         <field name="model">dev.add.advance.payment</field>
+         <field name="arch" type="xml">
+            <form string="Add Advance Payment">
+                <group>
+                    <group>
+                        <field name="loan_id" readonly="1"/>
+                        <field name="date"/>
+                    </group>
+                    <group>
+                        <field name="paid_amount"/>
+                        <field name="interest"/>
+                        <field name="amount"/>
+                        
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_add_payment" string="Add Payment" type="object" class="btn-primary"/>
+                    or
+                    <button string="Cancel" class="btn-default" special="cancel"/>
+                </footer>
+            </form>
+         </field>
+    </record>
+    
+    <record id="action_add_payment_line" model="ir.actions.act_window">
+        <field name="name">Add Advance Payment</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">dev.add.advance.payment</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+    
+    <record id="view_dev_add_advance_payment_form_2" model="ir.ui.view">
+         <field name="name">view.dev.add.advance.payment.sec.form</field>
+         <field name="model">dev.add.advance.payment</field>
+         <field name="arch" type="xml">
+            <form string="Add Advance Payment">
+                <group>
+                    <group>
+                        <field name="loan_id" domain="[('state','=','open')]" required="1"/>
+                        <field name="date"/>
+                    </group>
+                    <group>
+                        <field name="paid_amount"/>
+                        <field name="interest"/>
+                        <field name="amount"/>
+                        
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_add_payment" string="Add Payment" type="object" class="btn-primary"/>
+                    or
+                    <button string="Cancel" class="btn-default" special="cancel"/>
+                </footer>
+            </form>
+         </field>
+    </record>
+    
+    <record id="action_add_payment_line_2" model="ir.actions.act_window">
+        <field name="name">Add Advance Payment</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">dev.add.advance.payment</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_dev_add_advance_payment_form_2"/>
+        <field name="target">new</field>
+    </record>
+    
+    
+    <menuitem name="Advance Payment" id="menu_dev_advance_payment" parent="dev_loan_management.menu_dev_loan_request_main" action="action_add_payment_line_2" sequence="100"/>
+
+</odoo>

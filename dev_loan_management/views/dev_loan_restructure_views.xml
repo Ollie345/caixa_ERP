@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Restructure Request Form View -->
+        <record id="view_dev_loan_restructure_form" model="ir.ui.view">
+            <field name="name">dev.loan.restructure.form</field>
+            <field name="model">dev.loan.restructure</field>
+            <field name="arch" type="xml">
+                <form string="Loan Restructure Request">
+                    <header>
+                        <button name="action_submit_for_approval" string="Submit" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                        <button name="action_approve" string="Approve" type="object" class="btn-success" invisible="state != 'pending_cfo'"/>
+                        <button name="action_reject" string="Reject" type="object" class="btn-danger" invisible="state != 'pending_cfo'"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,pending_cfo,approved,rejected"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name" readonly="1"/>
+                                <field name="loan_id"/>
+                                <field name="action_type" widget="radio"/>
+                                <field name="date"/>
+                            </group>
+                            <group>
+                                <field name="company_id" invisible="1"/>
+                                <field name="currency_id" invisible="1"/>
+                                <field name="treasurer_id" readonly="1"/>
+                                <field name="cfo_id" readonly="1"/>
+                                <field name="approval_date" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <group string="New Terms" invisible="action_type != 'restructure'">
+                            <group>
+                                <field name="new_amount"/>
+                                <field name="period_months"/>
+                                <field name="interest_rate"/>
+                            </group>
+                            <field name="new_schedule_ids" invisible="1"/>
+                        </group>
+
+                        <group string="Settlement" invisible="action_type == 'restructure'">
+                            <field name="settlement_account_id"/>
+                        </group>
+
+                        <group string="Notes">
+                            <field name="note" nolabel="1" placeholder="Add notes..."/>
+                        </group>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <!-- Restructure Request Tree/List View -->
+        <record id="view_dev_loan_restructure_tree" model="ir.ui.view">
+            <field name="name">dev.loan.restructure.tree</field>
+            <field name="model">dev.loan.restructure</field>
+            <field name="arch" type="xml">
+                <list string="Loan Restructure Requests">
+                    <field name="name"/>
+                    <field name="loan_id"/>
+                    <field name="action_type"/>
+                    <field name="date"/>
+                    <field name="state"/>
+                    <field name="treasurer_id"/>
+                    <field name="cfo_id"/>
+                    <field name="approval_date"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Restructure Request Search View -->
+        <record id="view_dev_loan_restructure_search" model="ir.ui.view">
+            <field name="name">dev.loan.restructure.search</field>
+            <field name="model">dev.loan.restructure</field>
+            <field name="arch" type="xml">
+                <search string="Loan Restructure Requests">
+                    <field name="name"/>
+                    <field name="loan_id"/>
+                    <field name="action_type"/>
+                    <field name="date"/>
+                    <field name="state"/>
+                    <separator/>
+                    <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                    <filter string="Pending CFO" name="pending_cfo" domain="[('state', '=', 'pending_cfo')]"/>
+                    <filter string="Approved" name="approved" domain="[('state', '=', 'approved')]"/>
+                    <filter string="Rejected" name="rejected" domain="[('state', '=', 'rejected')]"/>
+                    <separator/>
+                    <filter string="Restructure" name="restructure" domain="[('action_type', '=', 'restructure')]"/>
+                    <filter string="Payoff" name="payoff" domain="[('action_type', '=', 'payoff')]"/>
+                    <filter string="Writeoff" name="writeoff" domain="[('action_type', '=', 'writeoff')]"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter string="Action Type" name="groupby_action_type" context="{'group_by': 'action_type'}"/>
+                        <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
+                        <filter string="Treasurer" name="groupby_treasurer" context="{'group_by': 'treasurer_id'}"/>
+                        <filter string="CFO" name="groupby_cfo" context="{'group_by': 'cfo_id'}"/>
+                        <filter string="Date" name="groupby_date" context="{'group_by': 'date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Restructure Request Action -->
+        <record id="action_dev_loan_restructure" model="ir.actions.act_window">
+            <field name="name">Loan Restructure Requests</field>
+            <field name="res_model">dev.loan.restructure</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_dev_loan_restructure_search"/>
+        </record>
+
+        <!-- Menu under "Loans" -->
+        <menuitem id="menu_dev_loan_restructure_root" name="Loan Restructure" parent="dev_loan_management.menu_account_loan_main" action="action_dev_loan_restructure" sequence="50"/>
+    </data>
+</odoo>

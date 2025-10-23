@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="loan_agreement_template_main">
+        <t t-call="web.external_layout">
+            <div class="page" style="font-size:15px;">
+                <style>
+                    .page-header{
+                        font-size: 28px;
+                        text-align: center;
+                    }
+                </style>
+                <div class="page-header"><span t-field="o.header"/></div>
+                <div class="page-body" style="margin-top:50px;">
+                    <div class="page-body-content">
+                        <span t-field="o.description"/>
+                    </div>
+                </div>
+
+                <t t-if="o.agreement_signature">
+                    <br/>
+                    <table width="100%" style="margin-top: 20px;">
+                        <tr>
+                            <td width="33%" class="text-left" style="text-align: left;">
+                                <h5>Authorized Signatory</h5>
+                                <p t-field="o.company_id.name"/>
+                            </td>
+                            <td width="34%"></td>
+                            <td width="33%" class="text-center" style="text-align: center;">
+                                <h5>Borrower's Signature</h5>
+                                <img t-att-src="image_data_uri(o.agreement_signature)" style="max-height: 8rem; max-width: 10rem;"/>
+                                <p t-field="o.agreement_signed_by"/>
+                            </td>
+                        </tr>
+                    </table>
+                </t>
+                
+
+            </div>
+        </t>
+    </template>
+
+    <template id="loan_agreement_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="dev_loan_management.loan_agreement_template_main" />
+            </t>
+        </t>
+    </template>
+
+</odoo>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
+
+For Module Support : devintelle@gmail.com  or Skype : devintelle
+  -->
+<odoo>
+    <!-- Action for Project Dashboard-->
+    <record id="action_open_loan_dashboard" model="ir.actions.client">
+        <field name="name">Loan Dashboard</field>
+        <field name="tag">open_loan_dashboard</field>
+    </record>
+    <!-- Dashboard menu item -->
+    <menuitem id="loan_menu_open_dashboard"
+              action="action_open_loan_dashboard"
+              name="Loan Dashboard"
+              parent="dev_loan_management.menu_dev_loan_main"
+              groups="dev_loan_management.group_allow_acess_loan_dashboard"
+              sequence="-2"/>
+</odoo>

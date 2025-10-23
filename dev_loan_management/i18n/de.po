@@ -1,0 +1,3927 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* dev_loan_management
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-11-28 05:25+0000\n"
+"PO-Revision-Date: 2024-11-28 05:25+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: dev_loan_management
+#: model:mail.template,body_html:dev_loan_management.dev_loan_loan_request_reject
+msgid ""
+"\n"
+"            \t<p><b>To <t t-out=\"object.client_id.name\"></t></b>,</p>\n"
+"            \t\n"
+"            \t\n"
+"            \t<p> Your loan request <b><t t-out=\"object.name\"></b> has been Rejected</p>\n"
+"            \t<p><b>Reject Reason</b> : <t t-out=\"object.reject_reason\"> </p>\n"
+"            \t<p>You can access Loan From Bellow URL</p>\n"
+"            \t<br/>\n"
+"            \t<p><a t-attf-href=\"{{object._make_url()}}\" style=\"background-color: #0DAC9E; padding: 8px; text-decoration: none; color: #fff; border-radius: 5px; font-size: 16px;\" class=\"o_default_snippet_text\">View Loan</a><p>\n"
+"            \t<br/><br/>\n"
+"            \t<b>Regards,</b><br/>\n"
+"        \t\t<t t-out=\"object.user_id.name\">\n"
+"                "
+msgstr ""
+"\n"
+"            \t<p><b>To <t t-out=\"object.client_id.name\"></t></b>,</p>\n"
+"            \t\n"
+"            \t\n"
+"            \t<p> Ihre Kreditanfrage <b><t t-out=\"object.name\"></b> has been Rejected</p>\n"
+"            \t<p><b>Reject Reason</b> : <t t-out=\"object.reject_reason\"> </p>\n"
+"            \t<p>Sie können über die folgende URL auf „Kredit“ zugreifen</p>\n"
+"            \t<br/>\n"
+"            \t<p><a t-attf-href=\"{{object._make_url()}}\" style=\"background-color: #0DAC9E; padding: 8px; text-decoration: none; color: #fff; border-radius: 5px; font-size: 16px;\" class=\"o_default_snippet_text\">Darlehen anzeigen</a><p>\n"
+"            \t<br/><br/>\n"
+"            \t<b>Regards,</b><br/>\n"
+"        \t\t<t t-out=\"object.user_id.name\">\n"
+"                "
+
+#. module: dev_loan_management
+#: model:mail.template,body_html:dev_loan_management.dev_loan_loan_request
+msgid ""
+"\n"
+"            \t<p><b>To Manager</b>,</p>\n"
+"            \t<p></p>\n"
+"            \t<p> Loan request from <b><i><t t-out=\"object.client_id.name\"></t> </i></b></p>  \n"
+"\t\t\t\t<table class=\"table-bordered\"  width=100% style='margin-top: 10px;'>\n"
+"\t\t\t        <tr>\n"
+"\t\t\t         \t<th width=20% style='text-align:center;background:#e0e1e2;padding:5px'>Loan Type</th>\n"
+"\t\t\t\t\t \t<th width=20% style='text-align:center;background:#e0e1e2;padding:5px'>Request Date</th>\n"
+"\t\t\t\t\t \t<th width=20% style='text-align:right;background:#e0e1e2;padding:5px'>Loan Amount</th>\n"
+"\t\t\t\t\t \t<th width=20% style='text-align:right;background:#e0e1e2;padding:5px'>Loan Term</th>\n"
+"\t\t\t        </tr>    \n"
+"\t\t  \t\t\t<tr>\n"
+"\t\t\t         \t<td style='text-align:center;'><t t-out=\"object.loan_type_id.name\"></t></td>\n"
+"\t\t\t\t\t \t<td style='text-align:center;'><t t-out=\"object.request_date\"></t></td>\n"
+"\t\t\t\t\t \t<td style='text-align:right;'><t t-out=\"object.loan_amount\"></t></td>\n"
+"\t\t\t\t\t \t<td style='text-align:right;'><t t-out=\"object.loan_term\"></t></td>\n"
+"\t            \t</tr>    \n"
+"\t\t   \n"
+"\t\t</table>        \t\n"
+"\n"
+"            \t<p>You can access Loan From Bellow URL</p>\n"
+"            \t<br/><br/>\n"
+"            \t<p><a t-attf-href=\"{{object._make_url()}}\" style=\"background-color: #0DAC9E; padding: 8px; text-decoration: none; color: #fff; border-radius: 5px; font-size: 16px;\" class=\"o_default_snippet_text\">View Loan</a><p>\n"
+"            \t<br/><br/>\n"
+"            \t<b>Regards,</b><br/>\n"
+"        \t\t<t t-out=\"object.user_id.name\">\n"
+"                "
+msgstr ""
+"\n"
+"            \t<p><b>An den Manager</b>,</p>\n"
+"            \t<p></p>\n"
+"            \t<p> Kreditanfrage von <b><i><t t-out=\"object.client_id.name\"></t> </i></b></p>  \n"
+"\t\t\t\t<table class=\"table-bordered\"  width=100% style='margin-top: 10px;'>\n"
+"\t\t\t        <tr>\n"
+"\t\t\t         \t<th width=20% style='text-align:center;background:#e0e1e2;padding:5px'>Loan Type</th>\n"
+"\t\t\t\t\t \t<th width=20% style='text-align:center;background:#e0e1e2;padding:5px'>Request Date</th>\n"
+"\t\t\t\t\t \t<th width=20% style='text-align:right;background:#e0e1e2;padding:5px'>Loan Amount</th>\n"
+"\t\t\t\t\t \t<th width=20% style='text-align:right;background:#e0e1e2;padding:5px'>Loan Term</th>\n"
+"\t\t\t        </tr>    \n"
+"\t\t  \t\t\t<tr>\n"
+"\t\t\t         \t<td style='text-align:center;'><t t-out=\"object.loan_type_id.name\"></t></td>\n"
+"\t\t\t\t\t \t<td style='text-align:center;'><t t-out=\"object.request_date\"></t></td>\n"
+"\t\t\t\t\t \t<td style='text-align:right;'><t t-out=\"object.loan_amount\"></t></td>\n"
+"\t\t\t\t\t \t<td style='text-align:right;'><t t-out=\"object.loan_term\"></t></td>\n"
+"\t            \t</tr>    \n"
+"\t\t   \n"
+"\t\t</table>        \t\n"
+"\n"
+"            \t<p>Sie können über die folgende URL auf Kredit zugreifen</p>\n"
+"            \t<br/><br/>\n"
+"            \t<p><a t-attf-href=\"{{object._make_url()}}\" style=\"background-color: #0DAC9E; padding: 8px; text-decoration: none; color: #fff; border-radius: 5px; font-size: 16px;\" class=\"o_default_snippet_text\">View Loan</a><p>\n"
+"            \t<br/><br/>\n"
+"            \t<b>Grüße,</b><br/>\n"
+"        \t\t<t t-out=\"object.user_id.name\">\n"
+"                "
+
+#. module: dev_loan_management
+#: model:mail.template,body_html:dev_loan_management.installment_reminder_email_template
+msgid ""
+"\n"
+"            \n"
+"                <p>Dear <strong><t t-out=\"object.client_id.name\"/></strong>,</p>\n"
+"\n"
+"                <p>We would like to remind you of the upcoming installment for your loan\n"
+"                <strong><t t-out=\"object.loan_id.name\"/></strong>. Below are the details:</p>\n"
+"\n"
+"                <ul>\n"
+"                    <li><strong>Installment Number:</strong> <t t-out=\"object.name\"/></li>\n"
+"                    <li><strong>Due Date:</strong> <t t-out=\"object.date\"/></li>\n"
+"                    <li><strong>Amount Due:</strong> <t t-out=\"object.total_amount\"/>\n"
+"                    <t t-out=\"object.currency_id.symbol\"/></li>\n"
+"                </ul>\n"
+"\n"
+"                <p>Please make the payment promptly. If you have already paid, kindly ignore this message.</p>\n"
+"\n"
+"                <p>Thank you for your cooperation.</p>\n"
+"\n"
+"                <p><strong>Regards,</strong><br/>\n"
+"                <strong><t t-out=\"object.company_id.name\"/></strong></p>\n"
+"            \n"
+"            "
+msgstr ""
+"\n"
+"            \n"
+"                <p>Liebling <strong><t t-out=\"object.client_id.name\"/></strong>,</p>\n"
+"\n"
+"                <p>Wir möchten Sie gerne an die bevorstehende Rate Ihres Kredits erinnern\n"
+"                <strong><t t-out=\"object.loan_id.name\"/></strong>. Nachfolgend finden Sie die Details:</p>\n"
+"\n"
+"                <ul>\n"
+"                    <li><strong>Ratennummer:</strong> <t t-out=\"object.name\"/></li>\n"
+"                    <li><strong>Fälligkeitsdatum:</strong> <t t-out=\"object.date\"/></li>\n"
+"                    <li><strong>Fälliger Betrag:</strong> <t t-out=\"object.total_amount\"/>\n"
+"                    <t t-out=\"object.currency_id.symbol\"/></li>\n"
+"                </ul>\n"
+"\n"
+"                <p>Bitte leisten Sie die Zahlung umgehend. Wenn Sie bereits bezahlt haben, ignorieren Sie diese Nachricht bitte.</p>\n"
+"\n"
+"                <p>Vielen Dank für Ihre Mitarbeit.</p>\n"
+"\n"
+"                <p><strong>Grüße,</strong><br/>\n"
+"                <strong><t t-out=\"object.company_id.name\"/></strong></p>\n"
+"            \n"
+"            "
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_type_form
+msgid "#FFFFFF"
+msgstr "#FFFFFF"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "% per annum"
+msgstr "% pro Jahr"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_agreement_borrower_portal
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_template
+msgid "&amp;times;"
+msgstr "&amp;times;"
+
+#. module: dev_loan_management
+#: model:ir.actions.report,print_report_name:dev_loan_management.action_report_agreement
+msgid "'%s - Agreement detail' % (object.name)"
+msgstr "'%s - Einzelheiten zur Vereinbarung' % (object.name)"
+
+#. module: dev_loan_management
+#: model:ir.actions.report,print_report_name:dev_loan_management.action_report_notice
+msgid "'%s - Notice detail' % (object.name)"
+msgstr "'%s -Hinweisdetails' % (object.name)"
+
+#. module: dev_loan_management
+#: model:mail.template,subject:dev_loan_management.template_agreement_send_by_mail
+msgid "({{object.name}}) Agreement Details"
+msgstr "({{object.name}}) Vertragsdetails"
+
+#. module: dev_loan_management
+#: model:mail.template,subject:dev_loan_management.template_overdue_installment_send_by_mail
+msgid "({{object.name}}) Installment Details"
+msgstr "({{object.name}}) Details zur Ratenzahlung"
+
+#. module: dev_loan_management
+#: model:mail.template,subject:dev_loan_management.template_notice_send_by_mail
+msgid "({{object.name}}) Notice Details"
+msgstr "({{object.name}}) Hinweisdetails"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.main_tmpl_loan_ltr
+msgid ""
+",\n"
+"                <br/><br/>\n"
+"                I hope this letter finds you well. This correspondence is to provide an update regarding the loan\n"
+"                with reference to"
+msgstr ""
+",\n"
+"                <br/><br/>\n"
+"                Ich hoffe, dass dieser Brief Dich gut trifft. Diese Korrespondenz dient dazu, über den aktuellen Stand des Darlehens zu informieren\n"
+"                mit Bezug auf"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+msgid "- Months"
+msgstr "- Monate"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.main_tmpl_loan_ltr
+msgid ""
+".\n"
+"                <br/><br/>\n"
+"                Loan Type :"
+msgstr ""
+".\n"
+"                <br/><br/>\n"
+"                Darlehenstyp :"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.main_tmpl_loan_ltr
+msgid ""
+".\n"
+"                <br/><br/>\n"
+"                Should you have any questions or require further details regarding your loan, please do not hesitate\n"
+"                to reach out to our customer service team.\n"
+"                <br/><br/>\n"
+"                Thank you for your prompt attention to this matter.\n"
+"                <br/><br/>\n"
+"                Best Regards."
+msgstr ""
+".\n"
+"                <br/><br/>\n"
+"                Sollten Sie Fragen haben oder weitere Informationen zu Ihrem Kredit benötigen, zögern Sie bitte nicht\n"
+"                um unser Kundendienstteam zu kontaktieren.\n"
+"                <br/><br/>\n"
+"                Vielen Dank für Ihre prompte Aufmerksamkeit in dieser Angelegenheit.\n"
+"                <br/><br/>\n"
+"                Beste grüße."
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.main_tmpl_loan_ltr
+msgid ""
+".\n"
+"                This remaining sum represents the amount left to be repaid, following a total loan amount\n"
+"                of"
+msgstr ""
+".\n"
+"                Dieser Restbetrag stellt den Betrag dar, der nach einer Gesamtdarlehenssumme noch zurückzuzahlen ist\n"
+"                von"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+msgid ""
+".\n"
+"The breakup of this amount into principal and interest is as follows:-"
+msgstr "Die Aufteilung dieses Betrags in Kapital und Zinsen ist wie folgt:"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_home_menu_agreement_details
+msgid "/ Agreement-"
+msgstr "/ Vereinbarung-"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+msgid "<b> Interest Certificate </b>"
+msgstr "<b> Zinsbescheinigung </b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.installment_summary_template_main
+msgid "<b> Loan Installment </b>"
+msgstr "<b> Kreditrate </b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+msgid "<b> Pricipal Amount</b> :"
+msgstr "<b> Hauptbetrag</b> :"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_agreement_kanban
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_notice_kanban
+msgid "<b>Agreement Type:</b>"
+msgstr "<b>Vereinbarungstyp:</b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_kanban
+msgid "<b>Approve Date: </b>"
+msgstr "<b>Genehmigungsdatum: </b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.print_dev_loan_template
+msgid "<b>Borrower Detail</b>"
+msgstr "<b>Details zum Kreditnehmer</b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_agreement_kanban
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_notice_kanban
+msgid "<b>Borrower:</b>"
+msgstr "<b>Kreditnehmer:</b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_notice_portal_content
+msgid "<b>Borrower</b>"
+msgstr "<b>Kreditnehmer</b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_kanban
+msgid "<b>Disbursement Date: </b>"
+msgstr "<b>Auszahlungsdatum:</b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.print_dev_loan_template
+msgid "<b>Disbursement Date</b>"
+msgstr "<b>Auszahlungsdatum</b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.print_dev_loan_template
+msgid "<b>Interest Amount</b>"
+msgstr "<b>Zinsbetrag</b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.print_dev_loan_template
+msgid "<b>Interest Mode</b>"
+msgstr "<b>Zinsmodus</b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.print_dev_loan_template
+msgid "<b>Interest Rate</b>"
+msgstr "<b>Zinssatz</b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_notice_portal_content
+msgid "<b>Loan </b>"
+msgstr "<b>Darlehen </b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_kanban
+msgid "<b>Loan Amount : </b>"
+msgstr "<b>Kreditbetrag: </b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.print_dev_loan_template
+msgid "<b>Loan Amount</b>"
+msgstr "<b>Darlehensbetrag</b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_kanban
+msgid "<b>Loan Term : </b>"
+msgstr "<b>Kreditlaufzeit: </b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.print_dev_loan_template
+msgid "<b>Loan Term</b>"
+msgstr "<b>Kreditlaufzeit</b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_kanban
+msgid "<b>Loan Type : </b>"
+msgstr "<b>Darlehensart: </b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.print_dev_loan_template
+msgid "<b>Loan Type</b>"
+msgstr "<b>Darlehensart</b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+msgid "<b>Loan</b>"
+msgstr "<b>Darlehen</b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_kanban
+msgid "<b>Next Installment Date: </b>"
+msgstr "<b>Datum der nächsten Rate:</b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_notice_portal_content
+msgid "<b>Notice Type</b>"
+msgstr "<b>Hinweistyp</b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_kanban
+msgid "<b>Request Date: </b>"
+msgstr "<b>Anfragedatum: </b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.print_dev_loan_template
+msgid "<b>Request Date</b>"
+msgstr "<b>Anfragedatum</b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.installment_summary_template_main
+msgid "<b>SUB TOTAL</b>"
+msgstr "<b>ZWISCHENSUMME</b>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+msgid ""
+"<br/>\n"
+"\t\t\t            \n"
+"\t\t\t            <b>Interest Amount</b> :"
+msgstr ""
+"<br/>\n"
+"\t\t\t            \n"
+"\t\t\t            <b>Zinsbetrag</b> :"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.main_tmpl_loan_ltr
+msgid ""
+"<br/>\n"
+"                Paid Amount :"
+msgstr ""
+"<br/>\n"
+"                Bezahlter Betrag:"
+
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.main_tmpl_loan_ltr
+msgid ""
+"<br/>\n"
+"                Remaining Amount Due :"
+msgstr ""
+"<br/>\n"
+"               Verbleibender fälliger Betrag:"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.main_tmpl_loan_ltr
+msgid ""
+"<br/>\n"
+"                Total Loan Amount :"
+msgstr ""
+"<br/>\n"
+"               Gesamtkreditbetrag:"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.main_tmpl_loan_ltr
+msgid ""
+"<br/><br/>\n"
+"                Please note that the outstanding balance on your loan stands at"
+msgstr ""
+"<br/><br/>\n"
+"               Bitte beachten Sie, dass der Restbetrag Ihres Darlehens bei liegt"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_agreement_details
+msgid "<em class=\"font-weight-normal text-muted\">Agreement Type:</em>"
+msgstr "<em class=\"font-weight-normal text-muted\">Vereinbarungstyp:</em>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan_notice
+msgid "<em class=\"font-weight-normal text-muted\">Loan Notice Type:</em>"
+msgstr "<em class=\"font-weight-normal text-muted\">Art der Kreditmitteilung:</em>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan
+msgid "<em class=\"font-weight-normal text-muted\">Loan Type:</em>"
+msgstr "<em class=\"font-weight-normal text-muted\">Darlehensart:</em>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_agreement_details
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan_notice
+msgid "<em class=\"font-weight-normal text-muted\">Loan:</em>"
+msgstr "<em class=\"font-weight-normal text-muted\">Darlehen:</em>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan
+msgid "<em class=\"font-weight-normal text-muted\">State:</em>"
+msgstr "<em class=\"font-weight-normal text-muted\">Zustand:</em>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_agreement_borrower_portal
+msgid ""
+"<i class=\"fa fa-check\"/>\n"
+"                    Sign &amp; Accept"
+msgstr ""
+"<i class=\"fa fa-check\"/>\n"
+"                    Unterschreiben &amp; Akzeptieren"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_template
+msgid "<i class=\"fa fa-check\"/> Confirm"
+msgstr ""
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_agreement_detail_form
+msgid "<i class=\"fa fa-comment\"/> Send message"
+msgstr "<i class=\"fa fa-comment\"/> Nachricht senden"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_notice_portal_template
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_template
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_agreement_detail_form
+msgid "<i class=\"fa fa-download\"/> Download"
+msgstr "<i class=\"fa fa-download\"/> Herunterladen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_template
+msgid "<i class=\"fa fa-download\"/> Download Outstanding Letter"
+msgstr "<i class=\"fa fa-download\"/> Laden Sie den ausstehenden Brief herunter"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_notice_portal_template
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_template
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_agreement_detail_form
+msgid "<i class=\"fa fa-print\"/> Print"
+msgstr "<i class=\"fa fa-print\"/> Drucken"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_template
+msgid "<i class=\"fa fa-times\"/> Cancel"
+msgstr "<i class=\"fa fa-times\"/> Stornieren"
+
+#. module: dev_loan_management
+#: model:mail.template,body_html:dev_loan_management.template_overdue_installment_send_by_mail
+msgid ""
+"<p>\n"
+"                Dear\n"
+"                <t t-out=\"object.client_id.name\"></t>,\n"
+"                </p>\n"
+"\n"
+"            <p>We hope this message finds you well. We would like to bring to your attention that your loan installment due on <strong><t t-out=\"object.date\"></t></strong> remains unpaid. Below are the details of the overdue installment:</p>\n"
+"\n"
+"            <table style=\"width:100%; border: 1px solid #ddd; border-collapse: collapse;\">\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Loan Number</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.loan_id.name\"></t></td>\n"
+"                </tr>\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Loan Type</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.loan_id.loan_type_id.name\"></t></td>\n"
+"                </tr>\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Installment Number</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.name\"></t></td>\n"
+"                </tr>\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">EMI</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.currency_id.symbol\"></t> <t t-out=\"object.total_amount\"></t></td>\n"
+"                </tr>\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Date</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.date\"></t></td>\n"
+"                </tr>\n"
+"            </table>\n"
+"\n"
+"            <p>We kindly request you to make the payment at the earliest to avoid additional penalties or disruption to your loan agreement.</p>\n"
+"\n"
+"            <p>If you have already made the payment, please ignore this message. If you have any questions or need assistance, feel free to contact us at <strong><t t-out=\"object.company_id.email\"></t></strong> or call us at <strong><t t-out=\"object.company_id.phone\"></t></strong>.</p>\n"
+"\n"
+"            <p>Thank you for your prompt attention to this matter.</p>\n"
+"\n"
+"            <p>Best regards,<br>\n"
+"            The <t t-out=\"object.company_id.name\"></t> Team</p>\n"
+"        "
+msgstr ""
+"<p>\n"
+"                Liebling\n"
+"                <t t-out=\"object.client_id.name\"></t>,\n"
+"                </p>\n"
+"\n"
+"            <p>Wir hoffen, dass es Ihnen mit dieser Nachricht gut geht. Wir möchten Sie darauf aufmerksam machen, dass Ihre am <strong><t t-out=\"object.date\"></t></strong> fällige Kreditrate noch nicht bezahlt ist. Nachfolgend finden Sie die Details der überfälligen Rate:</p>\n"
+"\n"
+"            <table style=\"width:100%; border: 1px solid #ddd; border-collapse: collapse;\">\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Kreditnummer</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.loan_id.name\"></t></td>\n"
+"                </tr>\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Darlehenstyp</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.loan_id.loan_type_id.name\"></t></td>\n"
+"                </tr>\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Ratennummer</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.name\"></t></td>\n"
+"                </tr>\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">EMI</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.currency_id.symbol\"></t> <t t-out=\"object.total_amount\"></t></td>\n"
+"                </tr>\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Datum</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.date\"></t></td>\n"
+"                </tr>\n"
+"            </table>\n"
+"\n"
+"            <p>Wir bitten Sie, die Zahlung so früh wie möglich zu leisten, um zusätzliche Strafen oder eine Unterbrechung Ihres Kreditvertrags zu vermeiden.</p>\n"
+"\n"
+"            <p>Wenn Sie die Zahlung bereits getätigt haben, ignorieren Sie diese Nachricht bitte. Wenn Sie Fragen haben oder Hilfe benötigen, kontaktieren Sie uns bitte unter <strong><t t-out=\"object.company_id.email\"></t></strong> oder rufen Sie uns an unter <strong>< t t-out=\"object.company_id.phone\"></t></strong>.</p>\n"
+"\n"
+"            <p>Vielen Dank für Ihre prompte Aufmerksamkeit in dieser Angelegenheit.</p>\n"
+"\n"
+"            <p>Beste grüße,<br>\n"
+"            Der<t t-out=\"object.company_id.name\"></t> Team</p>\n"
+"        "
+
+#. module: dev_loan_management
+#: model:mail.template,body_html:dev_loan_management.template_notice_send_by_mail
+msgid ""
+"<p>Dear <t t-out=\"object.partner_id.name\"></t>\n"
+",</p>\n"
+"\n"
+"            <p>We are pleased to inform you that the loan notice associated with your request has been generated. Please find the details below:</p>\n"
+"\n"
+"            <table style=\"width:100%; border: 1px solid #ddd; border-collapse: collapse;\">\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Loan Number</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\">\n"
+"                        <t t-out=\"object.loan_id.name\"></t>\n"
+"                    </td>\n"
+"                </tr>\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Loan Type</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\">\n"
+"                        <t t-out=\"object.loan_id.loan_type_id.name\"></t>\n"
+"                    </td>\n"
+"                </tr>\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Loan Amount</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\">\n"
+"                        <t t-out=\"object.currency_id.symbol\"></t>\n"
+"                        <t t-out=\"object.loan_id.loan_amount\"></t>\n"
+"                    </td>\n"
+"                </tr>\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Interest Rate</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\">\n"
+"                        <t t-out=\"object.loan_id.total_interest\"></t>\n"
+"                    </td>\n"
+"                </tr>\n"
+"\n"
+"            </table>\n"
+"\n"
+"            <p>If you have any questions or require further assistance, feel free to contact us at <t t-out=\"object.company_id.email\"></t>\n"
+".</p>\n"
+"\n"
+"            <p>Thank you for choosing <t t-out=\"object.company_id.name\"></t>\n"
+"!</p>\n"
+"\n"
+"            <p>Best regards,<br>\n"
+"The <t t-out=\"object.company_id.name\"></t>\n"
+" Team</p>\n"
+"\n"
+"\n"
+"    "
+msgstr ""
+"<p>Liebling <t t-out=\"object.partner_id.name\"></t>\n"
+",</p>\n"
+"\n"
+"            <p>Wir freuen uns, Ihnen mitteilen zu können, dass die zu Ihrer Anfrage gehörende Kreditmitteilung erstellt wurde. Nachfolgend finden Sie die Details:</p>\n"
+"\n"
+"            <table style=\"width:100%; border: 1px solid #ddd; border-collapse: collapse;\">\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Kreditnummer</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\">\n"
+"                        <t t-out=\"object.loan_id.name\"></t>\n"
+"                    </td>\n"
+"                </tr>\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Darlehenstyp</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\">\n"
+"                        <t t-out=\"object.loan_id.loan_type_id.name\"></t>\n"
+"                    </td>\n"
+"                </tr>\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Darlehensbetrag</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\">\n"
+"                        <t t-out=\"object.currency_id.symbol\"></t>\n"
+"                        <t t-out=\"object.loan_id.loan_amount\"></t>\n"
+"                    </td>\n"
+"                </tr>\n"
+"                <tr>\n"
+"                    <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Zinssatz</th>\n"
+"                    <td style=\"border: 1px solid #ddd; padding: 8px;\">\n"
+"                        <t t-out=\"object.loan_id.total_interest\"></t>\n"
+"                    </td>\n"
+"                </tr>\n"
+"\n"
+"            </table>\n"
+"\n"
+"            <p>Wenn Sie Fragen haben oder weitere Hilfe benötigen, können Sie uns gerne unter kontaktieren <t t-out=\"object.company_id.email\"></t>\n"
+".</p>\n"
+"\n"
+"            <p>Vielen Dank, dass Sie sich entschieden haben <t t-out=\"object.company_id.name\"></t>\n"
+"!</p>\n"
+"\n"
+"            <p>Beste grüße,<br>\n"
+"The <t t-out=\"object.company_id.name\"></t>\n"
+" Team</p>\n"
+"\n"
+"\n"
+"    "
+
+#. module: dev_loan_management
+#: model:mail.template,body_html:dev_loan_management.template_agreement_send_by_mail
+msgid ""
+"<p>Dear <t t-out=\"object.partner_id.name\"></t>,</p>\n"
+"\n"
+"<p>We are pleased to inform you that the loan agreement associated with your request has been generated. Please find the details below:</p>\n"
+"\n"
+"<table style=\"width:100%; border: 1px solid #ddd; border-collapse: collapse;\">\n"
+"    <tr>\n"
+"        <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Loan Number</th>\n"
+"        <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.loan_id.name\"></t></td>\n"
+"    </tr>\n"
+"    <tr>\n"
+"        <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Loan Type</th>\n"
+"        <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.loan_id.loan_type_id.name\"></t></td>\n"
+"    </tr>\n"
+"    <tr>\n"
+"        <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Loan Amount</th>\n"
+"        <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.currency_id.symbol\"></t> <t t-out=\"object.loan_id.loan_amount\"></t></td>\n"
+"    </tr>\n"
+"    <tr>\n"
+"        <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Interest Rate</th>\n"
+"        <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.loan_id.total_interest\"></t></td>\n"
+"    </tr>\n"
+"    \n"
+"</table>\n"
+"\n"
+"<p>If you have any questions or require further assistance, feel free to contact us at <t t-out=\"object.company_id.email\"></t>.</p>\n"
+"\n"
+"<p>Thank you for choosing <t t-out=\"object.company_id.name\"></t>!</p>\n"
+"\n"
+"<p>Best regards,<br>\n"
+"The <t t-out=\"object.company_id.name\"></t> Team</p>\n"
+"\n"
+"          \n"
+"        "
+msgstr ""
+"<p>Liebling <t t-out=\"object.partner_id.name\"></t>,</p>\n"
+"\n"
+"<p>Wir freuen uns, Ihnen mitteilen zu können, dass der zu Ihrer Anfrage gehörende Kreditvertrag erstellt wurde. Nachfolgend finden Sie die Details:</p>\n"
+"\n"
+"<table style=\"width:100%; border: 1px solid #ddd; border-collapse: collapse;\">\n"
+"    <tr>\n"
+"        <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Kreditnummer</th>\n"
+"        <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.loan_id.name\"></t></td>\n"
+"    </tr>\n"
+"    <tr>\n"
+"        <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Darlehenstyp</th>\n"
+"        <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.loan_id.loan_type_id.name\"></t></td>\n"
+"    </tr>\n"
+"    <tr>\n"
+"        <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Darlehensbetrag</th>\n"
+"        <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.currency_id.symbol\"></t> <t t-out=\"object.loan_id.loan_amount\"></t></td>\n"
+"    </tr>\n"
+"    <tr>\n"
+"        <th style=\"text-align: left; border: 1px solid #ddd; padding: 8px;\">Zinssatz</th>\n"
+"        <td style=\"border: 1px solid #ddd; padding: 8px;\"><t t-out=\"object.loan_id.total_interest\"></t></td>\n"
+"    </tr>\n"
+"    \n"
+"</table>\n"
+"\n"
+"<p>Wenn Sie Fragen haben oder weitere Hilfe benötigen, können Sie uns gerne unter kontaktieren <t t-out=\"object.company_id.email\"></t>.</p>\n"
+"\n"
+"<p>Vielen Dank, dass Sie sich entschieden haben <t t-out=\"object.company_id.name\"></t>!</p>\n"
+"\n"
+"<p>Beste grüße,<br>\n"
+"Der <t t-out=\"object.company_id.name\"></t> Team</p>\n"
+"\n"
+"          \n"
+"        "
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_notice_portal_template
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_template
+msgid "<small class=\"text-muted\">Your contact</small>"
+msgstr "<small class=\"text-muted\">Ihr Ansprechpartner</small>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_thank_you
+msgid ""
+"<span class=\"fa fa-check-circle\"/>\n"
+"\t\t\t\t\t\t\t\t<span>Your Request has been created <b>successfully</b>\n"
+"\t\t\t\t\t\t\t\t\t<br/>\n"
+"\t\t\t\t\t\t\t</span>"
+msgstr ""
+"<span class=\"fa fa-check-circle\"/>\n"
+"\t\t\t\t\t\t\t\t<span>Ihre Anfrage wurde erstellt <b>erfolgreich</b>\n"
+"\t\t\t\t\t\t\t\t\t<br/>\n"
+"\t\t\t\t\t\t\t</span>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_kanban
+msgid "<span class=\"fa fa-user me-2\" aria-label=\"Partner\" title=\"Client\"/>"
+msgstr ""
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+msgid "<strong class=\"d-block mb-1\">Borrower</strong>"
+msgstr "<strong class=\"d-block mb-1\">Kreditnehmer</strong>"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_agreement_detail_form
+msgid "<strong class=\"text-muted\">Your Contact</strong>"
+msgstr "<strong class=\"text-muted\">Ihr Kontakt</strong>"
+
+#. module: dev_loan_management
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_account_summary__customer_select__all
+msgid "ALL"
+msgstr "ALLE"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__access_warning
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__access_warning
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__access_warning
+msgid "Access warning"
+msgstr "Zugriffswarnung"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_installment_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_type_form
+msgid "Accounting"
+msgstr "Buchhaltung"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__message_needaction
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__message_needaction
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__message_needaction
+msgid "Action Needed"
+msgstr "Handlungsbedarf"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__website
+msgid "Active"
+msgstr "Aktiv"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_loan_partner_form
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_borrower
+msgid "Active Borrowers"
+msgstr "Aktive Kreditnehmer"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__activity_ids
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__activity_ids
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__activity_ids
+msgid "Activities"
+msgstr "Aktivitäten"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_activity
+msgid "Activity"
+msgstr "Aktivität"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__activity_exception_decoration
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__activity_exception_decoration
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "Aktivitäts-Ausnahmedekoration"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__activity_state
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__activity_state
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__activity_state
+msgid "Activity State"
+msgstr "Aktivitätsstatus"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__activity_type_icon
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__activity_type_icon
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Aktivitätstyp-Symbol"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_add_payment_line
+#: model:ir.actions.act_window,name:dev_loan_management.action_add_payment_line_2
+#: model:ir.model,name:dev_loan_management.model_dev_add_advance_payment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_add_advance_payment_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_add_advance_payment_form_2
+msgid "Add Advance Payment"
+msgstr "Vorauszahlung hinzufügen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_add_advance_payment_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_add_advance_payment_form_2
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Add Payment"
+msgstr "Zahlung hinzufügen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower__address
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_witness__address
+msgid "Address"
+msgstr "Adresse"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_dev_advance_payment
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__adv_payment_lines
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_advance_payment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.print_dev_loan_template
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Advance Payment"
+msgstr "Vorauszahlung"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+msgid "Advance Payment Details"
+msgstr "Details zur Vorauszahlung"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_advance_payment.py:0
+#, python-format
+msgid "Advance Payment Process for Open Loan !!!"
+msgstr "Vorauszahlungsprozess für offenes Darlehen !!!"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Agreement"
+msgstr "Vereinbarung"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__loan_agreement
+msgid "Agreement "
+msgstr "Vereinbarung"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.agreement_detail_portal_content
+msgid "Agreement Detail #"
+msgstr "Vereinbarungsdetail #"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_agreement_details
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_home_menu_agreement_details
+msgid "Agreement Details"
+msgstr "Vertragsdetails"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_agreement_template
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__agreement_template_id
+msgid "Agreement Template"
+msgstr "Vereinbarungsvorlage"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/loan_agreement_portal.py:0
+#: model:ir.actions.act_window,name:dev_loan_management.action_ln_agreement_type
+#: model:ir.model.fields,field_description:dev_loan_management.field_generate_agreement_wizard__agreement_type_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__agreement_type_id
+#: model:ir.ui.menu,name:dev_loan_management.menu_ln_agreement_type
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.agreement_detail_portal_content
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_agreement_details
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_agreement_filter
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_ln_agreement_type_tree
+#, python-format
+msgid "Agreement Type"
+msgstr "Vereinbarungstyp"
+
+#. module: dev_loan_management
+#: model:ir.actions.report,name:dev_loan_management.action_report_agreement
+msgid "Agreement report"
+msgstr "Vereinbarungsbericht"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/loan_agreement_portal.py:0
+#, python-format
+msgid "Agreement viewed by customer"
+msgstr "Vereinbarung vom Kunden eingesehen"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_loan_agreement
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_agreement
+msgid "Agreements"
+msgstr "Vereinbarungen"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/loan_agreement_portal.py:0
+#: code:addons/dev_loan_management/controller/notice_portal.py:0
+#: code:addons/dev_loan_management/controller/portal.py:0
+#: code:addons/dev_loan_management/controller/portal.py:0
+#, python-format
+msgid "All"
+msgstr "Alle"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_res_partner__is_allow_loan
+#: model:ir.model.fields,field_description:dev_loan_management.field_res_users__is_allow_loan
+msgid "Allow Loan"
+msgstr "Darlehen zulassen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_add_advance_payment__amount
+msgid "Amount"
+msgstr "Menge"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_collection_template_main
+msgid "Amount To Be Collect"
+msgstr "Zu sammelnder Betrag"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__is_interest_apply
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__is_interest_apply
+msgid "Apply Interest"
+msgstr "Zinsen anwenden"
+
+#. module: dev_loan_management
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_account_summary__loan_status__approve
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_loan__state__approve
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Approve"
+msgstr "Genehmigen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__approve_date
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_loan
+msgid "Approve Date"
+msgstr "Datum genehmigen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_template
+msgid "Are You Sure You want to Cancel Loan Request."
+msgstr "Sind Sie sicher, dass Sie die Kreditanfrage stornieren möchten?"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_template
+msgid "Are You Sure You want to Confirm Loan Request."
+msgstr "Sind Sie sicher, dass Sie die Kreditanfrage bestätigen möchten?"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_create_loan_task__user_id
+msgid "Assigned to"
+msgstr "Zugewiesen an"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_ir_attachment
+msgid "Attachment"
+msgstr "Anhang"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__message_attachment_count
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__message_attachment_count
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__message_attachment_count
+msgid "Attachment Count"
+msgstr "Anzahl der Anhänge"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_agreement_template_main
+msgid "Authorized Signatory"
+msgstr "Zeichnungsberechtigter"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__domain_loan_type_ids
+msgid "Available Loan Types"
+msgstr "Verfügbare Kreditarten"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_create_loan_task__partner_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__client_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_interest_certificate__client_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__client_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__client_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__partner_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__partner_id
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_installment_summary__group_by__borrower
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_borrower_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.agreement_detail_portal_content
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_installment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_loan
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_overdue_installment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.installment_summary_template_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_agreement_filter
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_notice_filter
+msgid "Borrower"
+msgstr "Kreditnehmer"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_borrower_category
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__borrower_category_ids
+#: model:ir.model.fields,field_description:dev_loan_management.field_res_partner__borrower_category_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_res_users__borrower_category_id
+msgid "Borrower Category"
+msgstr "Kategorie des Kreditnehmers"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_borrower_category
+#: model:ir.ui.menu,name:dev_loan_management.menu_borrower_category
+msgid "Borrower category"
+msgstr "Kategorie des Kreditnehmers"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_borrower_category_tree
+msgid "Borrower category tree"
+msgstr "Baum der Kreditnehmerkategorie"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_agreement_template_main
+msgid "Borrower's Signature"
+msgstr "Unterschrift des Kreditnehmers"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Calculate Installment"
+msgstr "Rate berechnen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_account_summary__loan_status__cancel
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_loan__state__cancel
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.dev_create_loan_task_view
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_add_advance_payment_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_add_advance_payment_form_2
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_installment_summary_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_interest_certificate_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_reject_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_paid_installment_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_update_rate_form
+msgid "Cancel"
+msgstr "Stornieren"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_template
+msgid "Cancel loan request"
+msgstr "Kreditanfrage stornieren"
+
+#. module: dev_loan_management
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__checklist_line__state__cancel
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__ln_base_documents__state__cancel
+msgid "Cancelled"
+msgstr "Abgesagt"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_home_loan
+msgid "Check Your Loan Information"
+msgstr "Überprüfen Sie Ihre Kreditinformationen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_home_loan_notice
+msgid "Check Your Loan Notice Information"
+msgstr "Überprüfen Sie Ihre Kreditbenachrichtigungsinformationen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__loan_checklist_template_id
+msgid "Checklist"
+msgstr "Checkliste"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__checklist_line_ids
+msgid "Checklist Line"
+msgstr "Checklistenzeile"
+
+#. module: dev_loan_management
+#: model_terms:ir.actions.act_window,help:dev_loan_management.action_dev_loan_partner_form
+#: model_terms:ir.actions.act_window,help:dev_loan_management.action_past_borrowers
+msgid "Click to add a Borrower in your address book."
+msgstr "Klicken Sie hier, um einen Kreditnehmer zu Ihrem Adressbuch hinzuzufügen."
+
+#. module: dev_loan_management
+#: model_terms:ir.actions.act_window,help:dev_loan_management.action_dev_loan_loan
+#: model_terms:ir.actions.act_window,help:dev_loan_management.action_dev_loan_loan_approve
+msgid "Click to add a Loan Request."
+msgstr "Klicken Sie hier, um eine Kreditanfrage hinzuzufügen."
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_agreement_details
+msgid "Client"
+msgstr "Kunde"
+
+#. module: dev_loan_management
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_account_summary__loan_status__close
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_loan__state__close
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_agreement_borrower_portal
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_template
+msgid "Close"
+msgstr "Schließen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_generate_agreement_wizard_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_generate_notice_wizard_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_loan_account_summary_wizard_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_loan_collection_wizard_form
+msgid "Close Window"
+msgstr "Fenster schließen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__closing_balance
+msgid "Closing"
+msgstr "Schließen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_paid_installment__closing_amount
+msgid "Closing Amount"
+msgstr "Schlussbetrag"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__co_borrower
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__co_borrower_ids
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Co-Borrower"
+msgstr "Mitkreditnehmer"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__co_borrower_document_ids
+msgid "Co-Borrower Document"
+msgstr "Mitkreditnehmerdokument"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Co-Borrower Documents"
+msgstr "Dokumente des Mitkreditnehmers"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_co_bo_relation
+#: model:ir.ui.menu,name:dev_loan_management.menu_co_bo_relation
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_ln_co_bo_relation_tree
+msgid "Co-Borrower Relation"
+msgstr "Mitkreditnehmerverhältnis"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__color
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__color
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__color
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__color
+msgid "Color"
+msgstr "Farbe"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_notice_portal_template
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_template
+msgid "Communication"
+msgstr "Kommunikation"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_agreement_detail_form
+msgid "Communication history"
+msgstr "Kommunikationsgeschichte"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__company_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_account_summary__company_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__company_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__company_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__company_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__company_id
+msgid "Company"
+msgstr "Unternehmen"
+
+#. module: dev_loan_management
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_configration
+msgid "Configuration"
+msgstr "Konfiguration"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#, python-format
+msgid "Configure Processing Fees Product into the Loan Type !"
+msgstr "Konfigurieren Sie das Produkt Bearbeitungsgebühren in der Kreditart!"
+
+#. module: dev_loan_management
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_account_summary__loan_status__confirm
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_loan__state__confirm
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Confirm"
+msgstr "Bestätigen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_agreement_borrower_portal
+msgid "Confirm Authentication"
+msgstr "Bestätigen Sie die Authentifizierung"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_template
+msgid "Confirm loan request"
+msgstr "Kreditanfrage bestätigen"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_res_partner
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower__contact_no
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_witness__contact_no
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_notice_portal_template
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_template
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_agreement_detail_form
+msgid "Contact"
+msgstr "Kontakt"
+
+#. module: dev_loan_management
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_contacts_main
+msgid "Contacts"
+msgstr "Kontakte"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__count_installment
+msgid "Count Installment"
+msgstr "Rate zählen"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_create_loan_task
+msgid "Creat Loan Task Wizard"
+msgstr "Assistent zum Erstellen einer Kreditaufgabe"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.dev_create_loan_task_view
+msgid "Create"
+msgstr "Erstellen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.form_inherit_loan_lead
+msgid "Create Loan Request"
+msgstr "Kreditantrag erstellen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Create Processing Fees Invoice"
+msgstr "Erstellen Sie eine Rechnung über Bearbeitungsgebühren"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_create_loan_task
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Create Task"
+msgstr "Aufgabe erstellen"
+
+#. module: dev_loan_management
+#: model_terms:ir.actions.act_window,help:dev_loan_management.action_dev_loan_lead
+msgid "Create a Lead"
+msgstr "Erstellen Sie einen Lead"
+
+#. module: dev_loan_management
+#: model_terms:ir.actions.act_window,help:dev_loan_management.action_dev_lead_pipeline
+msgid "Create a Pipeline"
+msgstr "Erstellen Sie eine Pipeline"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_agreement_template__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_borrower_category__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_checklist_line__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_create_loan_task__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_add_advance_payment__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_installment_summary__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_interest_certificate__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_account_summary__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_eligibility__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_proof__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_reject__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_paid_installment__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_update_rate__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_generate_agreement_wizard__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_generate_notice_wizard__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement_type__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_base_documents__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower_relation__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_document_type__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice_type__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_witness__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_loan_checklist_template__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_loan_collection_wizard__create_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_reminder_days__create_uid
+msgid "Created by"
+msgstr "Erstellt von"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_agreement_template__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_borrower_category__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_checklist_line__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_create_loan_task__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_add_advance_payment__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_installment_summary__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_interest_certificate__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_account_summary__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_eligibility__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_proof__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_reject__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_paid_installment__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_update_rate__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_generate_agreement_wizard__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_generate_notice_wizard__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement_type__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_base_documents__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower_relation__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_document_type__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice_type__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_witness__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_loan_checklist_template__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_loan_collection_wizard__create_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_reminder_days__create_date
+msgid "Created on"
+msgstr "Erstellt am"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__currency_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__currency_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__currency_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__currency_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__currency_id
+msgid "Currency"
+msgstr "Währung"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_loan_collection_wizard__current_month
+msgid "Current Month Collection"
+msgstr "Sammlung des aktuellen Monats"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,help:dev_loan_management.field_dev_loan_loan__access_url
+#: model:ir.model.fields,help:dev_loan_management.field_ln_agreement__access_url
+#: model:ir.model.fields,help:dev_loan_management.field_ln_notice__access_url
+msgid "Customer Portal URL"
+msgstr "URL des Kundenportals"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_account_summary__customer_select
+msgid "Customer Select"
+msgstr "Kundenauswahl"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_add_advance_payment__date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__date
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_installment_summary__group_by__date
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_installment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_overdue_installment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.installment_summary_template_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_collection_template_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.print_dev_loan_template
+msgid "Date"
+msgstr "Datum"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_reminder_days__days_before_due
+msgid "Days Before Due"
+msgstr "Tage vor Fälligkeit"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_create_loan_task__date_deadline
+msgid "Deadline"
+msgstr "Frist"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.main_tmpl_loan_ltr
+msgid "Dear"
+msgstr "Liebling"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_agreement_kanban
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_kanban
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_notice_kanban
+msgid "Delete"
+msgstr "Löschen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_agreement_template__description
+#: model:ir.model.fields,field_description:dev_loan_management.field_checklist_line__description
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__description
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_base_documents__description
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__description
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.form_ln_document_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.form_loan_agreement_template_view
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_agreement_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_notice_form
+msgid "Description"
+msgstr "Beschreibung"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.form_loan_agreement_template_view
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_agreement_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_notice_form
+msgid "Description.."
+msgstr "Beschreibung.."
+
+#. module: dev_loan_management
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_account_summary__loan_status__disburse
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_loan__state__disburse
+msgid "Disburse"
+msgstr "Auszahlen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__loan_account_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__loan_account_id
+msgid "Disburse Account"
+msgstr "Konto auszahlen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__disburse_journal_entry_id
+msgid "Disburse Account Entry"
+msgstr "Kontoeintrag auszahlen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__disburse_journal_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__disburse_journal_id
+msgid "Disburse Journal"
+msgstr "Auszahlungsjournal"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Disburse Loan"
+msgstr "Darlehen auszahlen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__disbursement_date
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_loan
+msgid "Disbursement Date"
+msgstr "Auszahlungsdatum"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_agreement_template__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_borrower_category__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_checklist_line__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_create_loan_task__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_add_advance_payment__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_installment_summary__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_interest_certificate__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_account_summary__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_eligibility__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_proof__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_reject__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_paid_installment__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_update_rate__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_generate_agreement_wizard__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_generate_notice_wizard__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement_type__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_base_documents__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower_relation__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_document_type__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice_type__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_witness__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_loan_checklist_template__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_loan_collection_wizard__display_name
+#: model:ir.model.fields,field_description:dev_loan_management.field_reminder_days__display_name
+msgid "Display Name"
+msgstr "Anzeigename"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_type_form
+msgid "Document"
+msgstr "Dokumentieren"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_loan_checklist_template
+#: model:ir.ui.menu,name:dev_loan_management.menu_loan_checklist_template
+msgid "Document Checklist Template"
+msgstr "Vorlage für Dokumentencheckliste"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_ln_document_type
+#: model:ir.model.fields,field_description:dev_loan_management.field_checklist_line__document_type_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_base_documents__document_type_id
+#: model:ir.ui.menu,name:dev_loan_management.menu_ln_document_type
+msgid "Document Type"
+msgstr "Dokumenttyp"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Documents"
+msgstr "Unterlagen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Documents:"
+msgstr "Unterlagen:"
+
+#. module: dev_loan_management
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__checklist_line__state__done
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__ln_base_documents__state__done
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Done"
+msgstr "Erledigt"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_notice_portal_template
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_template
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_agreement_detail_form
+msgid "Download"
+msgstr "Herunterladen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__checklist_line__state__draft
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_account_summary__loan_status__draft
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_loan__state__draft
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__ln_base_documents__state__draft
+msgid "Draft"
+msgstr "Entwurf"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__total_amount
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_paid_installment__emi_amount
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+msgid "EMI"
+msgstr "EMI"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "EMI (Installment)"
+msgstr "EMI (Ratenzahlung)"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.print_dev_loan_template
+msgid "EMI(Installment)"
+msgstr "EMI (Ratenzahlung)"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_agreement_kanban
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_kanban
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_notice_kanban
+msgid "Edit"
+msgstr "Bearbeiten"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__eligibility_ids
+msgid "Eligibility"
+msgstr "Teilnahmeberechtigung"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_eligibility__name
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_eligibility
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_eligibility_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_type_form
+msgid "Eligibility Criteria"
+msgstr "Zulassungskriterien"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Eligibility Criteria:"
+msgstr "Zulassungskriterien:"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__email
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Email"
+msgstr "E-Mail"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+msgid "Emi"
+msgstr "Emi"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_installment_summary__end_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_interest_certificate__end_date
+msgid "End Date"
+msgstr "Enddatum"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Enquire Loan Request"
+msgstr "Kreditanfrage anfragen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Enter Your Name"
+msgstr "Geben Sie Ihren Namen ein"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Enter you Email"
+msgstr "Geben Sie Ihre E-Mail-Adresse ein"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Enter your Mo.number"
+msgstr "Geben Sie Ihre Mo.-Nummer ein"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__emi_estimate
+msgid "Estimated Monthly Payment"
+msgstr "Geschätzte monatliche Zahlung"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_account_summary__excel_file
+msgid "Excel File"
+msgstr "Excel-Datei"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__fee_type
+msgid "Fees Type"
+msgstr "Gebührentyp"
+
+#. module: dev_loan_management
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_loan__fee_type__fixed
+msgid "Fixed"
+msgstr "Behoben"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__processing_fixed_amount
+msgid "Fixed Amount"
+msgstr "Fester Betrag"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#, python-format
+msgid ""
+"Fixed Amount of Processing Fees is Zero or Less Then Zero, Invoice can't be "
+"generated !"
+msgstr ""
+"Der feste Betrag der Bearbeitungsgebühren beträgt Null oder weniger als Null, die Rechnung kann nicht sein "
+"generiert !"
+
+#. module: dev_loan_management
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_type__interest_mode__flat
+msgid "Flat"
+msgstr "Wohnung"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_home_loan_agreement
+msgid "Follow, view or print your agreements"
+msgstr "Befolgen Sie Ihre Vereinbarungen, sehen Sie sie an oder drucken Sie sie aus"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__message_follower_ids
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__message_follower_ids
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__message_follower_ids
+msgid "Followers"
+msgstr "Anhänger"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__message_partner_ids
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__message_partner_ids
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Follower (Partner)"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,help:dev_loan_management.field_dev_loan_loan__activity_type_icon
+#: model:ir.model.fields,help:dev_loan_management.field_ln_agreement__activity_type_icon
+#: model:ir.model.fields,help:dev_loan_management.field_ln_notice__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "Fantastisches Schriftartensymbol, z. B. Fett-Aufgaben"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "From 3 to"
+msgstr "Von 3 bis"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_generate_agreement
+#: model:ir.model,name:dev_loan_management.model_generate_agreement_wizard
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_generate_agreement_wizard_form
+msgid "Generate Agreement"
+msgstr "Vereinbarung generieren"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_generate_notice
+#: model:ir.model,name:dev_loan_management.model_generate_notice_wizard
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_generate_notice_wizard_form
+msgid "Generate Notice"
+msgstr "Benachrichtigung generieren"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#, python-format
+msgid "Go to the Loan Type page"
+msgstr "Gehen Sie zur Seite „Darlehenstyp“."
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_installment_summary__group_by
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_installment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_loan
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_overdue_installment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_agreement_filter
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_notice_filter
+msgid "Group By"
+msgstr "Gruppieren nach"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__has_message
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__has_message
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__has_message
+msgid "Has Message"
+msgstr "Hat Nachricht"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__header
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__header
+msgid "Header"
+msgstr "Kopfzeile"
+
+#. module: dev_loan_management
+#: model:ir.module.category,description:dev_loan_management.category_dev_loan
+msgid "Helps you handle your Loan Access."
+msgstr "Hilft Ihnen bei der Verwaltung Ihres Kreditzugangs."
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_agreement_template__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_borrower_category__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_checklist_line__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_create_loan_task__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_add_advance_payment__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_installment_summary__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_interest_certificate__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_account_summary__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_eligibility__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_proof__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_reject__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_paid_installment__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_update_rate__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_generate_agreement_wizard__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_generate_notice_wizard__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement_type__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_base_documents__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower_relation__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_document_type__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice_type__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_witness__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_loan_checklist_template__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_loan_collection_wizard__id
+#: model:ir.model.fields,field_description:dev_loan_management.field_reminder_days__id
+msgid "ID"
+msgstr "AUSWEIS"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__activity_exception_icon
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__activity_exception_icon
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__activity_exception_icon
+msgid "Icon"
+msgstr "Symbol"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,help:dev_loan_management.field_dev_loan_loan__activity_exception_icon
+#: model:ir.model.fields,help:dev_loan_management.field_ln_agreement__activity_exception_icon
+#: model:ir.model.fields,help:dev_loan_management.field_ln_notice__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "Symbol zur Anzeige einer Ausnahmeaktivität."
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_witness__witness_identification
+msgid "Identification"
+msgstr "Identifikation"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,help:dev_loan_management.field_dev_loan_loan__message_needaction
+#: model:ir.model.fields,help:dev_loan_management.field_ln_agreement__message_needaction
+#: model:ir.model.fields,help:dev_loan_management.field_ln_notice__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Wenn diese Option aktiviert ist, erfordern neue Nachrichten Ihre Aufmerksamkeit."
+
+#. module: dev_loan_management
+#: model:ir.model.fields,help:dev_loan_management.field_dev_loan_loan__message_has_error
+#: model:ir.model.fields,help:dev_loan_management.field_dev_loan_loan__message_has_sms_error
+#: model:ir.model.fields,help:dev_loan_management.field_ln_agreement__message_has_error
+#: model:ir.model.fields,help:dev_loan_management.field_ln_agreement__message_has_sms_error
+#: model:ir.model.fields,help:dev_loan_management.field_ln_notice__message_has_error
+#: model:ir.model.fields,help:dev_loan_management.field_ln_notice__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Wenn diese Option aktiviert ist, liegt bei einigen Nachrichten ein Zustellungsfehler vor."
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__image
+msgid "Image"
+msgstr "Bild"
+
+#. module: dev_loan_management
+#: model:ir.ui.menu,name:dev_loan_management.sub_menu_lead_loan_management
+msgid "Inquiry"
+msgstr "Anfrage"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_dev_loan_installment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.installment_summary_template_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+msgid "Installment"
+msgstr "Rate"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__installment_account_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__installment_account_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__installment_account_id
+msgid "Installment Account"
+msgstr "Ratenzahlungskonto"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+msgid "Installment Details"
+msgstr "Details zur Ratenzahlung"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_loan_reminder_days
+#: model:ir.model,name:dev_loan_management.model_reminder_days
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_reminder_days
+msgid "Installment Reminder Days"
+msgstr "Tage der Ratenerinnerung"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_installment_summary
+#: model:ir.actions.report,name:dev_loan_management.print_installment_summary
+#: model:ir.model,name:dev_loan_management.model_dev_installment_summary
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_installment_summary
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_installment_summary_form
+msgid "Installment Summary"
+msgstr "Zusammenfassung der Ratenzahlung"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_installment.py:0
+#, python-format
+msgid "Installment pay after loan Open !!!"
+msgstr "Ratenzahlung nach Kreditaufnahme Geöffnet!!!"
+
+#. module: dev_loan_management
+#: model:mail.template,subject:dev_loan_management.installment_reminder_email_template
+msgid "Installment {{object.name}} is Due on {{object.date}}"
+msgstr "Die Rate {{object.name}} ist am {{object.date}} fällig"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__installment_ids
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.print_dev_loan_template
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Installments"
+msgstr "Ratenzahlungen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.installment_summary_template_main
+msgid "Int. Amount"
+msgstr "Int. Menge"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_add_advance_payment__interest
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__interest
+msgid "Interest"
+msgstr "Interesse"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__interest_account_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__interest_account_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__interest_account_id
+msgid "Interest Account"
+msgstr "Zinskonto"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__interest
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__total_interest
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_paid_installment__interest_amount
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.print_dev_loan_template
+msgid "Interest Amount"
+msgstr "Zinsbetrag"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_interest_certificate
+#: model:ir.actions.report,name:dev_loan_management.print_interest_certificate
+#: model:ir.model,name:dev_loan_management.model_dev_interest_certificate
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_interest_certificate
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_interest_certificate_form
+msgid "Interest Certificate"
+msgstr "Zinsbescheinigung"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__interest_mode
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__interest_mode
+msgid "Interest Mode"
+msgstr "Zinsmodus"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_Loan_details
+msgid "Interest Mode:"
+msgstr "Interessenmodus:"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__interest_rate
+msgid "Interest Rate"
+msgstr "Zinssatz"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_Loan_details
+msgid "Interest Rate:"
+msgstr "Zinssatz:"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Interest rate is"
+msgstr "Zinssatz ist"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Interest:"
+msgstr "Interesse:"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/loan_agreement_portal.py:0
+#, python-format
+msgid "Invalid Agreement."
+msgstr "Ungültige Vereinbarung."
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Invoice"
+msgstr "Rechnung"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__invoice_count
+msgid "Invoice Count"
+msgstr "Rechnungsanzahl"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_res_partner__is_active_borrower
+#: model:ir.model.fields,field_description:dev_loan_management.field_res_users__is_active_borrower
+msgid "Is Active Borrower"
+msgstr "Ist aktiver Kreditnehmer"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__message_is_follower
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__message_is_follower
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__message_is_follower
+msgid "Is Follower"
+msgstr "Ist Follower"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_res_partner__is_past_borrower
+#: model:ir.model.fields,field_description:dev_loan_management.field_res_users__is_past_borrower
+msgid "Is Past Borrower"
+msgstr "Ist früherer Kreditnehmer"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_account_move
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__journal_entry_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__journal_entry_id
+msgid "Journal Entry"
+msgstr "Tagebucheintrag"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/portal.py:0
+#, python-format
+msgid "Last 30 Days"
+msgstr "Letzte 30 Tage"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/portal.py:0
+#, python-format
+msgid "Last 7 Days"
+msgstr "Letzte 7 Tage"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__is_last_line
+msgid "Last Line"
+msgstr "Letzte Zeile"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_agreement_template__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_borrower_category__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_checklist_line__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_create_loan_task__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_add_advance_payment__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_installment_summary__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_interest_certificate__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_account_summary__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_eligibility__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_proof__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_reject__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_paid_installment__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_update_rate__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_generate_agreement_wizard__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_generate_notice_wizard__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement_type__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_base_documents__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower_relation__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_document_type__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice_type__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_witness__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_loan_checklist_template__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_loan_collection_wizard__write_uid
+#: model:ir.model.fields,field_description:dev_loan_management.field_reminder_days__write_uid
+msgid "Last Updated by"
+msgstr "Zuletzt aktualisiert von"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_agreement_template__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_borrower_category__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_checklist_line__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_create_loan_task__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_add_advance_payment__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_installment_summary__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_interest_certificate__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_account_summary__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_eligibility__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_proof__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_reject__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_paid_installment__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_update_rate__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_generate_agreement_wizard__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_generate_notice_wizard__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement_type__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_base_documents__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower_relation__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_document_type__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice_type__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_witness__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_loan_checklist_template__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_loan_collection_wizard__write_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_reminder_days__write_date
+msgid "Last Updated on"
+msgstr "Zuletzt aktualisiert am"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/portal.py:0
+#, python-format
+msgid "Last Week"
+msgstr "Letzte Woche"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__lead_id
+#: model:ir.ui.menu,name:dev_loan_management.menu_lead_loan_management
+msgid "Lead"
+msgstr "Führen"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_crm_lead
+msgid "Lead/Opportunity"
+msgstr "Lead/Chance"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_loan_lead
+msgid "Leads"
+msgstr "Führt"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/loan_agreement_portal.py:0
+#: code:addons/dev_loan_management/controller/notice_portal.py:0
+#: code:addons/dev_loan_management/controller/notice_portal.py:0
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#: code:addons/dev_loan_management/models/loan_notice.py:0
+#: model:ir.actions.report,name:dev_loan_management.action_print_loan_report
+#: model:ir.model,name:dev_loan_management.model_dev_loan_loan
+#: model:ir.model.fields,field_description:dev_loan_management.field_account_bank_statement_line__loan_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_account_move__loan_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_account_payment__loan_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_create_loan_task__loan_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_crm_lead__loan_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_add_advance_payment__loan_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__loan_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_interest_certificate__loan_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__loan_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ir_attachment__co_borrower_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ir_attachment__loan_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__loan_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower__loan_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__loan_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_witness__loan_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_product_document__co_borrower_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_product_document__loan_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_project_task__loan_id
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_installment_summary__group_by__loan
+#: model:ir.module.category,name:dev_loan_management.category_dev_loan
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_request_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.agreement_detail_portal_content
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_installment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_loan
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_overdue_installment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_agreement_details
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_home_loan
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_home_menu_loan
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan_notice
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_agreement_filter
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_installment_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_notice_filter
+#, python-format
+msgid "Loan"
+msgstr "Darlehen"
+
+#. module: dev_loan_management
+#: model:mail.template,name:dev_loan_management.installment_reminder_email_template
+msgid "Loan  Installment Reminder"
+msgstr "Erinnerung an die Kreditrate"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_loan_account_summary
+#: model:ir.model,name:dev_loan_management.model_dev_loan_account_summary
+#: model:ir.ui.menu,name:dev_loan_management.loan_account_summary_menu
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_loan_account_summary_wizard_form
+msgid "Loan Account Summary"
+msgstr "Zusammenfassung des Kreditkontos"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/loan_agreement.py:0
+#: model:ir.model,name:dev_loan_management.model_ln_agreement
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_home_loan_agreement
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_agreement_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_agreement_tree
+#, python-format
+msgid "Loan Agreement"
+msgstr "Darlehensvertrag"
+
+#. module: dev_loan_management
+#: model:mail.template,name:dev_loan_management.template_agreement_send_by_mail
+msgid "Loan Agreement Details"
+msgstr "Details zum Kreditvertrag"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_report_dev_loan_management_loan_agreement_template
+msgid "Loan Agreement Report"
+msgstr "Kreditvertragsbericht"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_ln_agreement_type
+msgid "Loan Agreement Type"
+msgstr "Darlehensvertragstyp"
+
+#. module: dev_loan_management
+#: model_terms:ir.actions.act_window,help:dev_loan_management.action_dev_loan_agreement
+msgid "Loan Agreements."
+msgstr "Darlehensverträge."
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_crm_lead__loan_amount
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__loan_amount
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Loan Amount"
+msgstr "Darlehensbetrag"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__loan_amount
+msgid "Loan Amount Limit"
+msgstr "Kreditbetragsgrenze"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#, python-format
+msgid "Loan Amount Must be Positive !!!"
+msgstr "Kreditbetrag muss positiv sein!!!"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#, python-format
+msgid "Loan Amount Must be less then or equal %s Amount"
+msgstr "Kreditbetrag Muss kleiner oder gleich %s Betrag sein"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Loan Amount:"
+msgstr "Kreditbetrag:"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_ln_co_borrower_relation
+msgid "Loan Borrower Relation"
+msgstr "Kreditnehmerbeziehung"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_loan_checklist_template
+msgid "Loan Checklist Template"
+msgstr "Vorlage für eine Kredit-Checkliste"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.form_loan_checklist_template_view
+msgid "Loan Checklist Template Form"
+msgstr "Vorlageformular für eine Kredit-Checkliste"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_loan_checklist_template_tree
+msgid "Loan Checklist Template Tree"
+msgstr "Kredit-Checklisten-Vorlagenbaum"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_ln_co_borrower
+msgid "Loan Co Borrower"
+msgstr "Kreditnehmer"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_loan_collection
+#: model:ir.model,name:dev_loan_management.model_loan_collection_wizard
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_collection
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_loan_collection_wizard_form
+msgid "Loan Collection"
+msgstr "Krediteinzug"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_collection_template_main
+msgid "Loan Collection Report"
+msgstr "Krediteinzugsbericht"
+
+#. module: dev_loan_management
+#: model:ir.actions.report,name:dev_loan_management.action_report_loan_collection
+msgid "Loan Collection report"
+msgstr "Krediteinzugsbericht"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_base_documents__loan_id
+msgid "Loan Detail"
+msgstr "Kreditdetails"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.form_inherit_loan_lead
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_home_menu_loan_details
+msgid "Loan Details"
+msgstr "Kreditdetails"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_ln_base_documents
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__loan_document_ids
+msgid "Loan Document"
+msgstr "Darlehensdokument"
+
+#. module: dev_loan_management
+#: model:ir.ui.menu,name:dev_loan_management.main_menu_dev_loan_document_checklist
+msgid "Loan Document Checklist"
+msgstr "Checkliste für Kreditdokumente"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_ln_document_type
+msgid "Loan Document Type"
+msgstr "Art des Darlehensdokuments"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.form_ln_document_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_ln_document_tree
+msgid "Loan Documents"
+msgstr "Kreditunterlagen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_ln_document_type_tree
+msgid "Loan Documents Type"
+msgstr "Art der Darlehensdokumente"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_loan_eligibility
+#: model:ir.model,name:dev_loan_management.model_dev_loan_eligibility
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_eligibility_tree
+msgid "Loan Eligibility Criteria"
+msgstr "Kriterien für die Kreditwürdigkeit"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_type_form
+msgid "Loan Information"
+msgstr "Kreditinformationen"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_loan_installment
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_installment
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_installment_account
+msgid "Loan Installment"
+msgstr "Kreditrate"
+
+#. module: dev_loan_management
+#: model:ir.actions.server,name:dev_loan_management.ir_cron_installment_reminder_action_ir_actions_server
+msgid "Loan Installment Reminder"
+msgstr "Erinnerung an die Kreditrate"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_installment_tree
+msgid "Loan Installments"
+msgstr "Kreditraten"
+
+#. module: dev_loan_management
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_main
+msgid "Loan Management"
+msgstr "Kreditverwaltung"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_ln_notice
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_home_loan_notice
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_home_menu_loan_notice
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan_notice
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_notice_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_notice_tree
+msgid "Loan Notice"
+msgstr "Kreditmitteilung"
+
+#. module: dev_loan_management
+#: model:mail.template,name:dev_loan_management.template_notice_send_by_mail
+msgid "Loan Notice Details"
+msgstr "Einzelheiten zur Kreditmitteilung"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_report_dev_loan_management_loan_notice_template
+msgid "Loan Notice Report"
+msgstr "Kreditbenachrichtigungsbericht"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_ln_notice_type
+msgid "Loan Notice Type"
+msgstr "Art der Kreditbenachrichtigung"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/notice_portal.py:0
+#, python-format
+msgid "Loan Notice viewed by customer"
+msgstr "Kreditmitteilung vom Kunden eingesehen"
+
+#. module: dev_loan_management
+#: model_terms:ir.actions.act_window,help:dev_loan_management.action_dev_loan_notice
+msgid "Loan Notice."
+msgstr "Kreditmitteilung."
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_checklist_line__loan_id
+msgid "Loan Order"
+msgstr "Darlehensauftrag"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_over_due_installment_tree
+msgid "Loan Over Due Installments"
+msgstr "Darlehen überfällige Raten"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_loan_proof
+#: model:ir.model,name:dev_loan_management.model_dev_loan_proof
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__proof_ids
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__proof_ids
+msgid "Loan Proof"
+msgstr "Kreditnachweis"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Loan Proof Documents"
+msgstr "Kreditnachweisdokumente"
+
+#. module: dev_loan_management
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_proof
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_proof_tree
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_type_tree
+msgid "Loan Proofs"
+msgstr "Kreditnachweise"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_dev_loan_reject
+msgid "Loan Reject"
+msgstr "Kreditablehnung"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_loan_reject_form
+msgid "Loan Reject Reason"
+msgstr "Grund für die Ablehnung des Darlehens"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_reminder_days
+msgid "Loan Reminder Days"
+msgstr "Krediterinnerungstage"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_report_dev_loan_management_report_print_loan_template
+msgid "Loan Report"
+msgstr "Kreditbericht"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_loan_loan
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_loan_loan_approve
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_loan_loan_closed
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_loan_loan_rejected
+#: model:ir.model.fields,field_description:dev_loan_management.field_crm_lead__loan_count
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_account_loan
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_request
+#: model:website.menu,name:dev_loan_management.new_loan_request_menu
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.form_inherit_loan_lead
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_tree
+msgid "Loan Request"
+msgstr "Kreditanfrage"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_calendar
+msgid "Loan Request Calendar"
+msgstr "Kreditantragskalender"
+
+#. module: dev_loan_management
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_request_closed
+msgid "Loan Request Closed"
+msgstr "Kreditanfrage geschlossen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_graph
+msgid "Loan Request Graph"
+msgstr "Diagramm zur Kreditanfrage"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_res_partner__loan_request
+#: model:ir.model.fields,field_description:dev_loan_management.field_res_users__loan_request
+msgid "Loan Request Per Year"
+msgstr "Kreditanfrage pro Jahr"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/res_partner.py:0
+#, python-format
+msgid "Loan Request Per Year Must be Positive !!!"
+msgstr "Kreditantrag pro Jahr muss positiv sein!!!"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_pivot
+msgid "Loan Request Pivot"
+msgstr "Kreditanfrage-Pivot"
+
+#. module: dev_loan_management
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_request_rejected
+msgid "Loan Request Rejected"
+msgstr "Kreditantrag abgelehnt"
+
+#. module: dev_loan_management
+#: model:mail.template,name:dev_loan_management.dev_loan_loan_request_reject
+msgid "Loan Request Rejected Manager"
+msgstr "Kreditantrag abgelehnt, Manager"
+
+#. module: dev_loan_management
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_request_approve
+msgid "Loan Request to Approve"
+msgstr "Kreditantrag zur Genehmigung"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__loan_state
+msgid "Loan State"
+msgstr "Darlehensstaat"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_crm_lead__loan_term
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__loan_term
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Loan Term"
+msgstr "Kreditlaufzeit"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__loan_term_by_month
+msgid "Loan Term By Month"
+msgstr "Kreditlaufzeit nach Monat"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#, python-format
+msgid "Loan Term Must be Positive !!!"
+msgstr "Kreditlaufzeit muss positiv sein!!!"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#, python-format
+msgid "Loan Term Must be less then or equal %s Month"
+msgstr "Die Kreditlaufzeit muss kleiner oder gleich %s Monat sein"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/notice_portal.py:0
+#: code:addons/dev_loan_management/controller/portal.py:0
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_loan_type
+#: model:ir.model,name:dev_loan_management.model_dev_loan_type
+#: model:ir.model.fields,field_description:dev_loan_management.field_crm_lead__loan_type_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__loan_type_id
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_type
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_loan
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_type_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+#, python-format
+msgid "Loan Type"
+msgstr "Darlehenstyp"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__loan_type_color
+msgid "Loan Type Color"
+msgstr "Farbe des Kredittyps"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_type_form
+msgid "Loan Type Name"
+msgstr "Name des Kredittyps"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_ln_witness
+msgid "Loan Witness"
+msgstr "Kreditzeuge"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#, python-format
+msgid "Loan delete on Draft and cancel state only !!!."
+msgstr "Ausleihe nur im Entwurfs- und Stornierungsstatus löschen!!!."
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/portal.py:0
+#, python-format
+msgid "Loan viewed by customer"
+msgstr "Kredit vom Kunden angesehen"
+
+#. module: dev_loan_management
+#: model:mail.template,subject:dev_loan_management.dev_loan_loan_request
+msgid "Loan {{object.name}} Request form {{object.client_id.name}}"
+msgstr "Darlehen {{object.name}} Antragsformular {{object.client_id.name}}"
+
+#. module: dev_loan_management
+#: model:mail.template,subject:dev_loan_management.dev_loan_loan_request_reject
+msgid "Loan {{object.name}} has been Rejected"
+msgstr "Das Darlehen {{object.name}} wurde abgelehnt"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_res_partner__loan_ids
+#: model:ir.model.fields,field_description:dev_loan_management.field_res_users__loan_ids
+#: model:ir.ui.menu,name:dev_loan_management.menu_account_loan_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_res_partner_allow_loan_form
+msgid "Loans"
+msgstr "Kredite"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.dev_external_layout_boxed_loan
+msgid "Logo"
+msgstr "Logo"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.dev_external_layout_boxed_loan
+msgid "Mail:"
+msgstr "E-Mail:"
+
+#. module: dev_loan_management
+#: model:res.groups,name:dev_loan_management.group_loan_manager
+msgid "Manager"
+msgstr "Manager"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Maximum Up to ₹"
+msgstr "Maximal bis zu ₹"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__message_has_error
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__message_has_error
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__message_has_error
+msgid "Message Delivery error"
+msgstr "Fehler bei der Nachrichtenzustellung"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__message_ids
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__message_ids
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__message_ids
+msgid "Messages"
+msgstr "Nachrichten"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__mobile
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Mobile"
+msgstr "Mobile"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/__init__.py:0
+#, python-format
+msgid "Module support Odoo version 17.0"
+msgstr "Modulunterstützung Odoo Version 17.0"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_Loan_details
+msgid "Money Icon"
+msgstr "Geld-Symbol"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_Loan_details
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Months"
+msgstr "Monate"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__my_activity_date_deadline
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__my_activity_date_deadline
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Meine Aktivitätsfrist"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/notice_portal.py:0
+#: code:addons/dev_loan_management/controller/portal.py:0
+#: model:ir.model.fields,field_description:dev_loan_management.field_agreement_template__name
+#: model:ir.model.fields,field_description:dev_loan_management.field_borrower_category__name
+#: model:ir.model.fields,field_description:dev_loan_management.field_checklist_line__document_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_create_loan_task__name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_proof__name
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement_type__name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_base_documents__name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower__name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower_relation__name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_document_type__name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice_type__name
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_witness__name
+#: model:ir.model.fields,field_description:dev_loan_management.field_loan_checklist_template__name
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.installment_summary_template_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_collection_template_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan_notice
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.print_dev_loan_template
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_agreement_filter
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_notice_filter
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+#, python-format
+msgid "Name"
+msgstr "Name"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__activity_calendar_event_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__activity_calendar_event_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__activity_calendar_event_id
+msgid "Next Activity Calendar Event"
+msgstr "Nächstes Aktivitätskalenderereignis"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__activity_date_deadline
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__activity_date_deadline
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Frist für die nächste Aktivität"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__activity_summary
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__activity_summary
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__activity_summary
+msgid "Next Activity Summary"
+msgstr "Zusammenfassung der nächsten Aktivität"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__activity_type_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__activity_type_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__activity_type_id
+msgid "Next Activity Type"
+msgstr "Nächster Aktivitätstyp"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__next_installment_date
+msgid "Next Installment Date"
+msgstr "Datum der nächsten Rate"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_loan_collection_wizard__next_month
+msgid "Next Month's Collection"
+msgstr "Sammlung des nächsten Monats"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_collection_template_main
+msgid "No installments found."
+msgstr "Keine Raten gefunden."
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__none_interest
+msgid "None Interest"
+msgstr "Kein Interesse"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__none_interest_month
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__none_interest_month
+msgid "None Interest Month"
+msgstr "Kein Zinsmonat"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__notes
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Notes"
+msgstr "Notizen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__loan_notice
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Notice"
+msgstr "Beachten"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__notice_template_id
+msgid "Notice Template"
+msgstr "Hinweisvorlage"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/notice_portal.py:0
+#: model:ir.actions.act_window,name:dev_loan_management.action_ln_notice_type
+#: model:ir.model.fields,field_description:dev_loan_management.field_generate_notice_wizard__notice_type_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__notice_type_id
+#: model:ir.ui.menu,name:dev_loan_management.menu_ln_notice_type
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan_notice
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_notice_filter
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_ln_notice_type_tree
+#, python-format
+msgid "Notice Type"
+msgstr "Hinweistyp"
+
+#. module: dev_loan_management
+#: model:ir.actions.report,name:dev_loan_management.action_report_notice
+msgid "Notice report"
+msgstr "Hinweisbericht"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_loan_notice
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_notices
+msgid "Notices"
+msgstr "Hinweise"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/loan_agreement_portal.py:0
+#, python-format
+msgid "Number"
+msgstr "Nummer"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_agreement_details
+msgid "Number #"
+msgstr "Nummer #"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__message_needaction_counter
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__message_needaction_counter
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Anzahl der Aktionen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__attachment_number
+msgid "Number of Attachments"
+msgstr "Anzahl der Anhänge"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__reminder_count
+msgid "Number of Reminders"
+msgstr "Anzahl der Erinnerungen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__message_has_error_counter
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__message_has_error_counter
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__message_has_error_counter
+msgid "Number of errors"
+msgstr "Anzahl der Fehler"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,help:dev_loan_management.field_dev_loan_loan__message_needaction_counter
+#: model:ir.model.fields,help:dev_loan_management.field_ln_agreement__message_needaction_counter
+#: model:ir.model.fields,help:dev_loan_management.field_ln_notice__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Anzahl der Nachrichten, die Maßnahmen erfordern"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,help:dev_loan_management.field_dev_loan_loan__message_has_error_counter
+#: model:ir.model.fields,help:dev_loan_management.field_ln_agreement__message_has_error_counter
+#: model:ir.model.fields,help:dev_loan_management.field_ln_notice__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Anzahl der Nachrichten mit Zustellungsfehlern"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_installment_summary_form
+msgid "On Screen"
+msgstr "Auf dem Bildschirm"
+
+#. module: dev_loan_management
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_account_summary__loan_status__open
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_loan__state__open
+msgid "Open"
+msgstr "Offen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Open Loan"
+msgstr "Offenes Darlehen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__opening_balance
+msgid "Opening"
+msgstr "Öffnung"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_paid_installment__opening_balance
+msgid "Opening Balance"
+msgstr "Eröffnungsbilanz"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_type_form
+msgid "Other Details"
+msgstr "Weitere Details"
+
+#. module: dev_loan_management
+#: model:ir.actions.report,name:dev_loan_management.action_tmpl_customer_loan_letter
+msgid "Outstanding Letter"
+msgstr "Hervorragender Brief"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_collection_template_main
+msgid "Outstanding Loan Amount"
+msgstr "Ausstehender Kreditbetrag"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_loan_over_due_installment
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_over_due_installment
+#: model:mail.template,name:dev_loan_management.template_overdue_installment_send_by_mail
+msgid "Over Due Installment"
+msgstr "Überfällige Rate"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_over_due_installment_calendar
+msgid "Overdue Installments"
+msgstr "Überfällige Raten"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_loan_collection_wizard__overdue_month
+msgid "Overdue Month Collection"
+msgstr "Sammlung überfälliger Monate"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.dev_external_layout_boxed_loan
+msgid "Page: <span class=\"page\"/> / <span class=\"topage\"/>"
+msgstr ""
+
+#. module: dev_loan_management
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_advance_payment__state__paid
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_installment_summary__state__paid
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_installment__state__paid
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_installment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_collection_template_main
+msgid "Paid"
+msgstr "Bezahlt"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_add_advance_payment__paid_amount
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__paid_amount
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__paid_amount
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_paid_installment__paid_amount
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.print_dev_loan_template
+msgid "Paid Amount"
+msgstr "Bezahlter Betrag"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/wizard/add_advance_payment_line.py:0
+#, python-format
+msgid "Paid Amount Must be Positive"
+msgstr "Der gezahlte Betrag muss positiv sein"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/wizard/dev_paid_installment.py:0
+#, python-format
+msgid "Paid Amount Must be greater then Interest Amount"
+msgstr "Der gezahlte Betrag muss größer sein als der Zinsbetrag"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_dev_paid_installment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_paid_installment_form
+msgid "Paid Installment"
+msgstr "Bezahlte Rate"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_paid_installment
+msgid "Paid Intallment"
+msgstr "Bezahlte Rate"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__paid_interest
+msgid "Paid Interest"
+msgstr "Bezahlte Zinsen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_installment
+msgid "Paid Loan"
+msgstr "Bezahltes Darlehen"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_past_borrowers
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_past_borrower
+msgid "Past Borrowers"
+msgstr "Frühere Kreditnehmer"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_installment_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_paid_installment_form
+msgid "Pay"
+msgstr "Zahlen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__payment_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__payment_date
+msgid "Payment Date"
+msgstr "Zahlungsdatum"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__loan_payment_journal_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__loan_payment_journal_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__loan_payment_journal_id
+msgid "Payment Journal"
+msgstr "Zahlungsjournal"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__percentage
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__processing_percentage
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_loan__fee_type__percentage
+msgid "Percentage"
+msgstr "Prozentsatz"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#, python-format
+msgid ""
+"Percentage of Processing Fees is Zero or Less Then Zero, Invoice can't be "
+"generated !"
+msgstr ""
+"Der Prozentsatz der Bearbeitungsgebühren beträgt Null oder weniger als Null, die Rechnung kann es nicht sein"
+"generiert !"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_dev_lead_pipeline
+#: model:ir.ui.menu,name:dev_loan_management.menu_pipeline_loan_management
+msgid "Pipeline"
+msgstr "Pipeline"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_installment.py:0
+#, python-format
+msgid "Please Pay First Before this month installment !!!"
+msgstr "Bitte zahlen Sie zuerst die Monatsrate vor diesem Monat!!!"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_advance_payment.py:0
+#: code:addons/dev_loan_management/models/dev_loan_installment.py:0
+#, python-format
+msgid "Please Select Installment Account !!!"
+msgstr "Bitte Ratenzahlungskonto auswählen!!!"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_advance_payment.py:0
+#: code:addons/dev_loan_management/models/dev_loan_installment.py:0
+#, python-format
+msgid "Please Select Interest Account !!!"
+msgstr "Bitte Zinskonto auswählen!!!"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_advance_payment.py:0
+#: code:addons/dev_loan_management/models/dev_loan_installment.py:0
+#, python-format
+msgid "Please Select Payment Journal !!!"
+msgstr "Bitte Zahlungsjournal auswählen!!!"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#, python-format
+msgid "Please Select the Loan Type !!!"
+msgstr "Bitte wählen Sie die Kreditart aus!!!"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__access_url
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__access_url
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__access_url
+msgid "Portal Access URL"
+msgstr "Portalzugriffs-URL"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.installment_summary_template_main
+msgid "Pri. Amount"
+msgstr "Pri. Menge"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__amount
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__amount
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_paid_installment__principal_amount
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.print_dev_loan_template
+msgid "Principal Amount"
+msgstr "Hauptbetrag"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_collection_template_main
+msgid "Principle interest"
+msgstr "Hauptinteresse"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_notice_portal_template
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_template
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_agreement_detail_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_interest_certificate_form
+msgid "Print"
+msgstr "Drucken"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_installment_summary_form
+msgid "Print PDF"
+msgstr "PDF drucken"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__processing_fees_product_id
+msgid "Processing Fee"
+msgstr "Bearbeitungsgebühr"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Processing Fee:"
+msgstr "Bearbeitungsgebühr:"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__processing_fee
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__processing_fee
+msgid "Processing Fees"
+msgstr "Bearbeitungsgebühren"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_create_loan_task__project_id
+msgid "Project"
+msgstr "Projekt"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_proof_form
+msgid "Proofs"
+msgstr "Beweise"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Property"
+msgstr "Eigentum"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__rate
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_update_rate__rate
+msgid "Rate"
+msgstr "Rate"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/wizard/dev_update_rate.py:0
+#, python-format
+msgid "Rate must be positive"
+msgstr "Der Zinssatz muss positiv sein"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__rating_ids
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__rating_ids
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__rating_ids
+msgid "Ratings"
+msgstr "Bewertungen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+msgid "Reaming Amount"
+msgstr "Reibbetrag"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_reject__reason
+msgid "Reason"
+msgstr "Grund"
+
+#. module: dev_loan_management
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_type__interest_mode__reducing
+msgid "Reducing"
+msgstr "Reduzieren"
+
+#. module: dev_loan_management
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_account_summary__loan_status__reject
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_loan__state__reject
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Reject"
+msgstr "Ablehnen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__reject_user_id
+msgid "Reject By"
+msgstr "Ablehnen durch"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_reject_form
+msgid "Reject Loan"
+msgstr "Darlehen ablehnen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__reject_reason
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Reject Reason"
+msgstr "Grund ablehnen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_co_borrower__relation_id
+msgid "Relation"
+msgstr "Beziehung"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__remaing_amount
+msgid "Remaining Amount"
+msgstr "Restbetrag"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__reminder_days
+msgid "Reminder Before Days"
+msgstr "Erinnerung vor Tagen"
+
+#. module: dev_loan_management
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_installment_report
+msgid "Reporting"
+msgstr "Berichterstattung"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/portal.py:0
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__request_date
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_loan
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan
+#, python-format
+msgid "Request Date"
+msgstr "Anfragedatum"
+
+#. module: dev_loan_management
+#: model:mail.template,name:dev_loan_management.dev_loan_loan_request
+msgid "Request to Loan Manager"
+msgstr "Anfrage an den Kreditverwalter"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_proof__is_required
+msgid "Required"
+msgstr "Erforderlich"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_ln_document
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_type__is_required_documents
+#: model:ir.model.fields,field_description:dev_loan_management.field_loan_checklist_template__checklist_ids
+#: model:ir.ui.menu,name:dev_loan_management.menu_ln_document
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.form_loan_checklist_template_view
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Required Documents"
+msgstr "Erforderliche Dokumente"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__activity_user_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__activity_user_id
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__activity_user_id
+msgid "Responsible User"
+msgstr "Verantwortlicher Benutzer"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_collection_template_main
+msgid "S. No."
+msgstr "S. Nr."
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__message_has_sms_error
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__message_has_sms_error
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Fehler bei der SMS-Zustellung"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_loan
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_agreement_filter
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_notice_filter
+msgid "Search Loan"
+msgstr "Darlehen suchen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_installment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_overdue_installment
+msgid "Search Loan Installment"
+msgstr "Kreditrate suchen"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/loan_agreement_portal.py:0
+#, python-format
+msgid "Search in Agreement Type"
+msgstr "Suchen Sie im Vereinbarungstyp"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/loan_agreement_portal.py:0
+#: code:addons/dev_loan_management/controller/notice_portal.py:0
+#: code:addons/dev_loan_management/controller/portal.py:0
+#, python-format
+msgid "Search in All"
+msgstr "In Alle suchen"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/portal.py:0
+#, python-format
+msgid "Search in Company"
+msgstr "Suche im Unternehmen"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/loan_agreement_portal.py:0
+#, python-format
+msgid "Search in Loan"
+msgstr "Suchen Sie im Darlehen"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/notice_portal.py:0
+#, python-format
+msgid "Search in Loan Number"
+msgstr "Suchen Sie in der Kreditnummer"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/notice_portal.py:0
+#: code:addons/dev_loan_management/controller/portal.py:0
+#, python-format
+msgid "Search in Loan Type"
+msgstr "Suchen Sie im Kredittyp"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/loan_agreement_portal.py:0
+#: code:addons/dev_loan_management/controller/notice_portal.py:0
+#: code:addons/dev_loan_management/controller/portal.py:0
+#, python-format
+msgid "Search in Number"
+msgstr "Suche in Nummer"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/portal.py:0
+#, python-format
+msgid "Search in State"
+msgstr "Suche im Bundesstaat"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__access_token
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__access_token
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__access_token
+msgid "Security Token"
+msgstr "Sicherheitstoken"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_advance_payment.py:0
+#: code:addons/dev_loan_management/models/dev_loan_installment.py:0
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#, python-format
+msgid "Select Client Receivable Account !!!"
+msgstr "Debitorenkonto auswählen!!!"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_account_summary__customer_ids
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_loan_account_summary_wizard_form
+msgid "Select Customer"
+msgstr "Wählen Sie Kunde aus"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#, python-format
+msgid "Select Disburse Account !!!"
+msgstr "Auszahlungskonto auswählen!!!"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#, python-format
+msgid "Select Disburse Journal !!!"
+msgstr "Auszahlungsjournal auswählen !!!"
+
+#. module: dev_loan_management
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_account_summary__customer_select__selected_customer
+msgid "Selected Customer"
+msgstr "Ausgewählter Kunde"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_over_due_installment_tree
+msgid "Send Email"
+msgstr "E-Mail senden"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_agreement_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_notice_form
+msgid "Send mail"
+msgstr "Mail senden"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_notice_portal_template
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_template
+msgid "Send message"
+msgstr "Nachricht senden"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Set to Draft"
+msgstr "Auf Entwurf einstellen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__agreement_signature
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.dev_portal_loan_agreement_content
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_agreement_form
+msgid "Signature"
+msgstr "Unterschrift"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/loan_agreement_portal.py:0
+#, python-format
+msgid "Signature is missing."
+msgstr "Signatur fehlt."
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__agreement_signed_by
+msgid "Signed By"
+msgstr "Signiert von"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__agreement_signed_on
+msgid "Signed On"
+msgstr "Angemeldet"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,help:dev_loan_management.field_dev_loan_loan__loan_type_color
+#: model:ir.model.fields,help:dev_loan_management.field_dev_loan_type__color
+msgid ""
+"Specify a color in hex format (e.g., #FF5733),This color will add as a "
+"background color when loan request created"
+msgstr ""
+"Geben Sie eine Farbe im Hexadezimalformat an (z. B. #FF5733). Diese Farbe wird als hinzugefügt "
+"Hintergrundfarbe bei Erstellung der Kreditanfrage"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/portal.py:0
+#, python-format
+msgid "Stage"
+msgstr "Bühne"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_installment_summary__start_date
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_interest_certificate__start_date
+msgid "Start Date"
+msgstr "Startdatum"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/portal.py:0
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_advance_payment__state
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_installment_summary__state
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_portal_content
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan
+#, python-format
+msgid "State"
+msgstr "Zustand"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_checklist_line__state
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_account_summary__loan_status
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_installment__state
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__state
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_base_documents__state
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_installment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_loan
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_overdue_installment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_collection_template_main
+msgid "Status"
+msgstr "Status"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,help:dev_loan_management.field_dev_loan_loan__activity_state
+#: model:ir.model.fields,help:dev_loan_management.field_ln_agreement__activity_state
+#: model:ir.model.fields,help:dev_loan_management.field_ln_notice__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+"Status basierend auf Aktivitäten\n"
+"Überfällig: Fälligkeitsdatum ist bereits überschritten\n"
+"Heute: Aktivitätsdatum ist heute\n"
+"Geplant: Zukünftige Aktivitäten."
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_reject_form
+msgid "Stock Inventory"
+msgstr "Lagerbestand"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Submit Request"
+msgstr "Anfrage senden"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_create_loan_task__tag_ids
+msgid "Tag"
+msgstr "Etikett"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_project_task
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Task"
+msgstr "Aufgabe"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__task_count
+msgid "Task Count"
+msgstr "Aufgabenanzahl"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.dev_external_layout_boxed_loan
+msgid "Tel:"
+msgstr "Tel.:"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_Loan_details
+msgid "Tenure up to"
+msgstr "Amtszeit bis"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "Tenure:"
+msgstr "Amtszeit:"
+
+#. module: dev_loan_management
+#: model:ir.ui.menu,name:dev_loan_management.main_menu_loan_agreement_config
+#: model:ir.ui.menu,name:dev_loan_management.menu_dev_loan_agreements_main
+msgid "Terms & Notices"
+msgstr "Bedingungen und Hinweise"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_agreement_template
+#: model:ir.ui.menu,name:dev_loan_management.menu_loan_agreement_template
+msgid "Terms & Notices Template"
+msgstr "Vorlage für Geschäftsbedingungen und Hinweise"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.form_loan_agreement_template_view
+msgid "Terms & Notices Template Form"
+msgstr "Vorlagenformular für Nutzungsbedingungen und Hinweise"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_loan_agreement_template_tree
+msgid "Terms & Notices Template Tree"
+msgstr "Vorlagenbaum für Geschäftsbedingungen und Hinweise"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_thank_you
+msgid "Thank You!"
+msgstr "Danke schön!"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+msgid "The total amount of EMIs payable from"
+msgstr "Der Gesamtbetrag der EMIs, die ab zu zahlen sind"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_agreement_details
+msgid "There are currently no Agreement for your account."
+msgstr "Für Ihr Konto besteht derzeit keine Vereinbarung."
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan_notice
+msgid "There are currently no Loan Notice for your account."
+msgstr "Für Ihr Konto liegt derzeit keine Kreditbenachrichtigung vor."
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_loan
+msgid "There are currently no Loan for your account."
+msgstr "Für Ihr Konto ist derzeit kein Kredit vorhanden."
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#, python-format
+msgid "There is no income account defined for the product '%s' "
+msgstr "Für das Produkt '%s' ist kein Einkommenskonto definiert "
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#, python-format
+msgid "This Borrower allow only %s Loan Request in Year !!!"
+msgstr "Dieser Kreditnehmer erlaubt nur %s Kreditanfragen im Jahr !!!"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/portal.py:0
+#, python-format
+msgid "This Month"
+msgstr "Diesen Monat"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_collection_template_main
+msgid "This Month's Collectables"
+msgstr "Die Sammlerstücke dieses Monats"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_collection_template_main
+msgid "This Next's Collectables"
+msgstr "Die Sammlerstücke von This Next"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_collection_template_main
+msgid "This Overdue's Collectables"
+msgstr "Diese überfälligen Sammlerstücke"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/portal.py:0
+#, python-format
+msgid "This Week"
+msgstr "Diese Woche"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/portal.py:0
+#, python-format
+msgid "This Year"
+msgstr "Dieses Jahr"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/portal.py:0
+#, python-format
+msgid "Today"
+msgstr "Heute"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_collection_template_main
+msgid "Total"
+msgstr "Gesamt"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__total_estimated_paid_amount
+msgid "Total Estimated Amount To Pay"
+msgstr "Geschätzter Gesamtbetrag, der zu zahlen ist"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,help:dev_loan_management.field_dev_loan_loan__activity_exception_decoration
+#: model:ir.model.fields,help:dev_loan_management.field_ln_agreement__activity_exception_decoration
+#: model:ir.model.fields,help:dev_loan_management.field_ln_notice__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr "Typ der erfassten Ausnahmeaktivität."
+
+#. module: dev_loan_management
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_advance_payment__state__unpaid
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_installment_summary__state__unpaid
+#: model:ir.model.fields.selection,name:dev_loan_management.selection__dev_loan_installment__state__unpaid
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_installment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_overdue_installment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.loan_collection_template_main
+msgid "Unpaid"
+msgstr "Unbezahlt"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_installment
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.filter_dev_loan_overdue_installment
+msgid "Unpaid Loan"
+msgstr "Unbezahlter Kredit"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.portal_my_Loan_details
+msgid "Up to ₹"
+msgstr "Bis zu ₹"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_update_rate_form
+msgid "Update"
+msgstr "Aktualisieren"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_dev_update_rate
+msgid "Update Interest Rate"
+msgstr "Zinssatz aktualisieren"
+
+#. module: dev_loan_management
+#: model:ir.actions.act_window,name:dev_loan_management.action_update_rate
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_update_rate_form
+msgid "Update Rate"
+msgstr "Aktualisierungsrate"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__user_id
+#: model:res.groups,name:dev_loan_management.group_loan_user
+msgid "User"
+msgstr "Benutzer"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_over_due_installment_tree
+msgid "View"
+msgstr "Sicht"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "View Entries"
+msgstr "Einträge anzeigen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_res_partner_allow_loan_form
+msgid "View Installment"
+msgstr "Ratenzahlung ansehen"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_res_partner__count_loan
+#: model:ir.model.fields,field_description:dev_loan_management.field_res_users__count_loan
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_res_partner_allow_loan_form
+msgid "View Loan"
+msgstr "Darlehen anzeigen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_thank_you
+msgid "We will get back to you shortly."
+msgstr "Wir werden uns in Kürze bei Ihnen melden."
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.dev_external_layout_boxed_loan
+msgid "Web:"
+msgstr "Web:"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_type_form
+msgid "Website"
+msgstr "Webseite"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__website_message_ids
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_agreement__website_message_ids
+#: model:ir.model.fields,field_description:dev_loan_management.field_ln_notice__website_message_ids
+msgid "Website Messages"
+msgstr "Website-Nachrichten"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,help:dev_loan_management.field_dev_loan_loan__website_message_ids
+#: model:ir.model.fields,help:dev_loan_management.field_ln_agreement__website_message_ids
+#: model:ir.model.fields,help:dev_loan_management.field_ln_notice__website_message_ids
+msgid "Website communication history"
+msgstr "Kommunikationsverlauf der Website"
+
+#. module: dev_loan_management
+#: model:ir.model.fields,field_description:dev_loan_management.field_dev_loan_loan__witness_ids
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "Witness"
+msgstr "Zeuge"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.dev_create_loan_task_view
+msgid "Wizard"
+msgstr "Zauberer"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/controller/portal.py:0
+#, python-format
+msgid "Yesterday"
+msgstr "Gestern"
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_installment.py:0
+#, python-format
+msgid "You can not delete Loan Installment."
+msgstr "Sie können die Kreditrate nicht löschen."
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "amount"
+msgstr "Menge"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_checklist_line
+msgid "checklist line"
+msgstr "Checklistenzeile"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid "for a tenure ranging from"
+msgstr "für eine Amtszeit von"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "interest"
+msgstr "Interesse"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+msgid "is"
+msgstr "Ist"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_tree
+msgid "loan_amount"
+msgstr "Darlehensbetrag"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid ""
+"months. All you need is your PAN card, only one ID as Address Proof and your"
+" Salary Proof."
+msgstr ""
+"Monate. Sie benötigen lediglich Ihre PAN-Karte, nur einen Ausweis als Adressnachweis und Ihre"
+"Gehaltsnachweis."
+
+#. module: dev_loan_management
+#. odoo-python
+#: code:addons/dev_loan_management/models/dev_loan_loan.py:0
+#, python-format
+msgid "not submitted 100% Document so please submit "
+msgstr "Nicht zu 100 % eingereichtes Dokument, also bitte einreichen"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.website_loan_requests
+msgid ""
+"option for salaried folks, where you can avail amounts ranging from ₹10,000 "
+"to ₹"
+msgstr ""
+"Option für Angestellte, bei der Sie Beträge ab 10.000 ₹ in Anspruch nehmen können "
+"bis ₹"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_add_advance_payment_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_add_advance_payment_form_2
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_installment_summary_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_interest_certificate_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_reject_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_paid_installment_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_update_rate_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_generate_agreement_wizard_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_generate_notice_wizard_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_loan_account_summary_wizard_form
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_loan_collection_wizard_form
+msgid "or"
+msgstr "oder"
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_report_dev_loan_management_hotel_booking_history_tmpl
+msgid "report.dev_loan_management.hotel_booking_history_tmpl"
+msgstr ""
+
+#. module: dev_loan_management
+#: model:ir.model,name:dev_loan_management.model_report_dev_loan_management_loan_collection_template
+msgid "report.dev_loan_management.loan_collection_template"
+msgstr ""
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.interest_certificate_template_main
+msgid "to"
+msgstr "Zu"
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "total_amount"
+msgstr ""
+
+#. module: dev_loan_management
+#: model_terms:ir.ui.view,arch_db:dev_loan_management.view_dev_loan_loan_form
+msgid "update"
+msgstr "aktualisieren"
+
+#. module: dev_loan_management
+#: model:res.groups,comment:dev_loan_management.group_loan_manager
+msgid "user will access all loan Details."
+msgstr "Der Benutzer hat Zugriff auf alle Kreditdetails."
+
+#. module: dev_loan_management
+#: model:res.groups,comment:dev_loan_management.group_loan_user
+msgid "user will have access own Loan Details."
+msgstr "Der Benutzer hat Zugriff auf eigene Kreditdetails."

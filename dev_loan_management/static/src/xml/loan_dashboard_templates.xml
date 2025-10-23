@@ -1,0 +1,595 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
+
+For Module Support : devintelle@gmail.com  or Skype : devintelle
+  -->
+<templates id="LoanDashboard" xml:space="preserve">
+    <t t-name="LoanDashboard">
+        <div style=" max-height: -webkit-fill-available; height: 2000px; overflow-y: scroll; background-color:#fbf8fa">
+            <div class="mx-5">
+                <div class="row gx-0 mt-3">
+                    <div class="col-12 d-flex justify-content-end">
+                        <button id="downloadBtn" t-on-click="(e) => this.downloadReport(e)" class="btn btn-primary p-2">
+                            <i class="fa fa-file-pdf-o p-1" aria-hidden="true"/>
+                            Print
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="mx-5 " id="dashboard">
+                <t t-call="loan_filters"/>
+                <t t-call="loan_counters"/>
+                <t t-call="loan_charts"/>
+                 <t t-call="loan_tables" />
+            </div>
+        </div>
+    </t>
+    <t t-name="loan_filters">
+        <div class="card mt-4 filters">
+            <div class="row p-2 m-2 gx-0 gy-2" >
+                <div class="col-lg-1 d-flex my-auto justify-content-center">
+                    <img t-att-src="'data:image/png;base64,' + this.state.user_img" class="css-shadow"/>
+                </div>
+                <div class="col-lg-4 pl-1 my-auto">
+                    <h2><b> <t t-esc="greetings"/>, <t t-esc="this.state.user_name"/>.</b></h2>
+                    <h4>Welcome to your Loan Dashboard.</h4>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="row gy-2">
+                        <div class="col-lg-3 m-0">
+                            <label for="user_selection" class="form-label fw-bolder">Users</label>
+                            <select class="form-select" id="user_selection"
+                                    t-on-change="(ev) => this._onchangeLoanFilter(ev)">
+                                <option value="all"> All Users</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-3 m-0">
+                            <label for="borrowers_selection" class="form-label fw-bolder">Borrowers</label>
+                            <select class="form-select" id="borrowers_selection"
+                                    t-on-change="(ev) => this._onchangeLoanFilter(ev)">
+                                <option value="all"> All Borrowers</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-3 m-0">
+                            <label for="loan_type_selection" class="form-label fw-bolder">Loan Type</label>
+                            <select class="form-select" id="loan_type_selection"
+                                    t-on-change="(ev) => this._onchangeLoanFilter(ev)">
+                                <option value="all"> All Loan Type</option>
+                            </select>
+                        </div>
+
+                        <div class="col-lg-3 m-0">
+                            <label for="loan_duration_selection" class="form-label fw-bolder">Date Range</label>
+                            <select class="form-select" id="loan_duration_selection" t-on-change="(ev) => this._onchangeLoanFilter(ev)">
+                                <option value="7">Last 7 Days</option>
+                                <option value="0">Today</option>
+                                <option value="28">Last 28 Days</option>
+                                <option value="90">Last 90 Days</option>
+                                <option value="365">Last 365 Days</option>
+                                <option value="all">Lifetime</option>
+                                 <option value="custom_range">Custom Range</option>
+                            </select>
+                        </div>
+                         <div class="col-lg-3 m-0"> </div>
+                        <div class="col-lg-3 m-0"> </div>
+                         <div class="col-lg-6 m-0" id="date-block" style="display:None;">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label for="start_date" class="form-label fw-bolder">Start Date</label>
+                                    <input type="date" class="form-control" id="start_date"
+                                    name="start_date" t-on-change="(ev) => this._onchangeLoanFilter(ev)"/>
+                                </div>
+                                <div class="col-6">
+                                    <label for="end_date" class="form-label fw-bolder">End Date</label>
+                                    <input type="date" class="form-control" id="end_date"
+                                    name="end_date" t-on-change="(ev) => this._onchangeLoanFilter(ev)"/>
+
+                                </div>
+                            </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="loan_counters">
+        <div class="mt-5 mb-5">
+            <div class="row text-center gy-2">
+                <div class="col-lg-3">
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="card box" t-on-click="(e) => this.action_approve_loan_lst(e)">
+                                <div class="card-body box-body">
+                                    <h1 id="total_aprv_amount">
+                                        <t t-esc="this.state.total_aprv_amt"/>
+                                    </h1>
+                                    <h5 style="position: relative; display: inline-block;">
+                                    Approved Amount
+                                    <sup>
+                                        <span style="margin-left: 5px; cursor: pointer;" title="Total Loan amount of approve state">
+                                            ?
+                                        </span>
+                                    </sup>
+                                </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="card box" t-on-click="(e) => this.action_disburse_loan_lst(e)">
+                                <div class="card-body box-body">
+                                    <h1 id="disburse_amt">
+                                        <t t-esc="this.state.total_disburse_amt"/>
+                                    </h1>
+                                    <h5 style="position: relative; display: inline-block;">
+                                   Disbursed Amount
+                                    <sup>
+                                        <span style="margin-left: 5px; cursor: pointer;" title="Total Loan amount of Disburse state">
+                                            ?
+                                        </span>
+                                    </sup>
+                                </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="card box" t-on-click="(e) => this.action_loan_repayments(e)">
+                                <div class="card-body box-body">
+                                    <h1 id="repayments_amt">
+                                        <t t-esc="this.state.repayments_amt"/>
+                                    </h1>
+                                    <h5 style="position: relative; display: inline-block;">
+                                   Repayments
+                                    <sup>
+                                        <span style="margin-left: 5px; cursor: pointer;" title="Total Paid Installment Amount">
+                                            ?
+                                        </span>
+                                    </sup>
+                                </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="card box" t-on-click="(e) => this.action_loan_repayments(e)">
+                                <div class="card-body box-body">
+                                    <h1 id="interest_amt">
+                                        <t t-esc="this.state.total_interest_lst"/>
+                                    </h1>
+                                    <h5 style="position: relative; display: inline-block;">
+                                   Interest Amount
+                                    <sup>
+                                        <span style="margin-left: 5px; cursor: pointer;" title="Total Paid Loan installment interest Amount">
+                                            ?
+                                        </span>
+                                    </sup>
+                                </h5>
+<!--                                    <h5>Interest Amount</h5>-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row text-center gy-2">
+                <div class="col-lg-3">
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="card box" t-on-click="(e) => this.action_loan_lead(e)">
+                                <div class="card-body box-body">
+                                    <h1 id="loan_lead">
+                                        <t t-esc="this.state.all_loan_lead.length"/>
+                                    </h1>
+<!--                                    <h5>Lead</h5>-->
+                                    <h5 style="position: relative; display: inline-block;">
+                                   Lead
+                                    <sup>
+                                        <span style="margin-left: 5px; cursor: pointer;" title="Loan Lead">
+                                            ?
+                                        </span>
+                                    </sup>
+                                </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="card box" t-on-click="(e) => this.action_invoice_lst(e)">
+                                <div class="card-body box-body">
+                                    <h1 id="invoice_lst">
+                                        <t t-esc="this.state.invoice_process_fees"/>
+                                    </h1>
+<!--                                    <h5>Processing Fees </h5>-->
+                                    <h5 style="position: relative; display: inline-block;">
+                                   Processing Fees
+                                    <sup>
+                                        <span style="margin-left: 5px; cursor: pointer;" title="Total amount of posted invoice">
+                                            ?
+                                        </span>
+                                    </sup>
+                                </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="card box" t-on-click="(e) => this.action_close_loan(e)">
+                                <div class="card-body box-body">
+                                    <h1 id="close_loan">
+                                        <t t-esc="this.state.close_loan_lst.length"/>
+                                        / <t t-esc="this.state.open_close_loan_lst.length"/>
+                                    </h1>
+                                      <h5 style="position: relative; display: inline-block;">
+                                   Closed Loan
+                                    <sup>
+                                        <span style="margin-left: 5px; cursor: pointer;" title="Closed Loan in Total Loan">
+                                            ?
+                                        </span>
+                                    </sup>
+                                </h5>
+<!--                                    <h5>Closed Loan</h5>-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="card box" t-on-click="(e) => this.action_all_lst(e)">
+                                <div class="card-body box-body">
+                                    <h1 id="average_int_rate">
+                                        <t t-esc="this.state.total_interest_rate"/>%
+                                    </h1>
+                                    <h5 style="position: relative; display: inline-block;">
+                                  Average Interest rate
+                                    <sup>
+                                        <span style="margin-left: 5px; cursor: pointer;" title="Average Loan Interest [(loan_interest/loan_amount)*100]">
+                                            ?
+                                        </span>
+                                    </sup>
+                                </h5>
+<!--                                    <h5>Average Interest rate</h5>-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </t>
+
+    <t t-name="loan_charts">
+        <div class="mt-5" >
+            <div class="row gy-2 d-flex align-items-stretch" >
+                <div class="col-lg-5 col-md-5 col-5">
+                    <div class="card table-card h-100" style="overflow-x:clip;">
+                        <div class="card-title text-center p-3" style="font-weight:600; font-size:20px;">
+                            <div class="row">
+                                <div class="col-2"> </div>
+                                <div class="col-8">
+                               Loan Request 3 Month Trends
+                                    <sup>
+                                        <span style="margin-left: 5px; cursor: pointer;" title="Last 3 month Loan Request data">
+                                            ?
+                                        </span>
+                                    </sup>
+                                </div>
+                                <div class="col-2"><i class="fa fa-download" id = "loan_req_chart_data_btn" style="cursor: pointer;" aria-hidden="true" t-on-click="(e) => this._downloadChart(e)"/></div>
+                            </div>
+                        </div>
+                        <div class="card-body text-center">
+                            <canvas id="loan_req_chart_data" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-3 col-3">
+                    <div class="card table-card h-100" style="overflow-x:clip;">
+                        <div class="card-title text-center p-3" style="font-weight:600; font-size:20px;">
+                            <div class="row">
+                                <div class="col-12">Principal vs. Interest</div>
+                            </div>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="row mt-2">
+                                <div class="col-12" style="font-size:13px; font-weight:500;">Total EMI Amount</div>
+                            </div>
+                             <div class="row">
+                                <div class="col-12">
+                                    <h2><t t-esc="this.state.total_int_n_pri_amt"/></h2>
+                             </div>
+                            </div>
+                            <div class="progress mt-1" style="height:50px;">
+                              <div class="progress-bar" id="intetestAmt" role="progressbar" style="background-color:#c99a5c" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                              <div class="progress-bar" id="principaltAmt"  style="background-color:#bf784b" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+
+                            <div class="mt-3 d-flex flex-column align-items-start gap-4">
+                                <!-- Red box with value -->
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="color-box red-box"></div>
+                                    <span>Interest Amount</span>
+                                    <span><t t-esc="this.state.total_interest_amt"/></span>
+                                </div>
+
+                                <!-- Blue box with value -->
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="color-box blue-box"></div>
+                                    <span>Principle Amount</span>
+                                    <span><t t-esc="this.state.total_principle_amt"/></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 col-4">
+                    <div class="card table-card h-100" style="overflow-x:clip;">
+                        <div class="card-title text-center p-3" style="font-weight:600; font-size:20px;">
+                            <div class="row">
+                                <div class="col-2"> </div>
+                                <div class="col-8"> Paid vs. Unpaid Installments
+                                    <sup>
+                                        <span style="margin-left: 5px; cursor: pointer;" title="Loan Paid Installment and Unpaid Installment">
+                                            ?
+                                        </span>
+                                    </sup>
+                                </div>
+                                <div class="col-2"><i class="fa fa-download" id = "collection_state_chart_data_btn" style="cursor: pointer;" aria-hidden="true" t-on-click="(e) => this._downloadChart(e)"/></div>
+                            </div>
+                        </div>
+                        <div class="card-body text-center">
+                            <canvas id="collection_state_chart_data" />
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="mt-5" >
+            <div class="row gy-2 d-flex align-items-stretch" >
+
+
+<!--                <div class="col-lg-6 col-md-6 col-12">-->
+<!--                    <div class="card table-card h-100" style="overflow-x:clip;">-->
+<!--                        <div class="card-title text-center p-3" style="font-weight:600; font-size:23px;">-->
+<!--                            <div class="row">-->
+<!--                                <div class="col-2"> </div>-->
+<!--                                <div class="col-8">EMI Amount Chart </div>-->
+<!--                                <div class="col-2"><i class="fa fa-download" id = "emi_amount_chart_data_btn" style="cursor: pointer;" aria-hidden="true" t-on-click="(e) => this._downloadChart(e)"/></div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="card-body text-center">-->
+<!--                            <canvas id="emi_amount_chart_data" />-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+                <div class="col-lg-6 col-md-6 col-6">
+                    <div class="card table-card h-100" style="overflow-x:clip;">
+                        <div class="card-title text-center p-3" style="font-weight:600; font-size:20px;">
+                            <div class="row">
+                                <div class="col-2"> </div>
+                                <div class="col-8">Stage-Wise Loan Status Overview
+                                    <sup>
+                                        <span style="margin-left: 5px; cursor: pointer;" title="All Stage wise Loan chart">
+                                            ?
+                                        </span>
+                                    </sup>
+                                </div>
+                                <div class="col-2"><i class="fa fa-download" id = "loan_state_chart_data_btn" style="cursor: pointer;" aria-hidden="true" t-on-click="(e) => this._downloadChart(e)"/></div>
+                            </div>
+                        </div>
+                        <div class="card-body text-center">
+                            <canvas id="loan_state_chart_data" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-12">
+                    <div class="card table-card h-100" style="overflow-x:clip;">
+                        <div class="card-title text-center p-3" style="font-weight:600; font-size:20px;">
+                            <div class="row">
+                                <div class="col-2"> </div>
+                                <div class="col-8">Loan Volume by Loan Type
+                                    <sup>
+                                        <span style="margin-left: 5px; cursor: pointer;" title="Type wise Loan">
+                                            ?
+                                        </span>
+                                    </sup>
+                                </div>
+                                <div class="col-2"><i class="fa fa-download" id = "loan_type_chart_data_btn" style="cursor: pointer;" aria-hidden="true" t-on-click="(e) => this._downloadChart(e)"/></div>
+                            </div>
+                        </div>
+                        <div class="card-body text-center">
+                            <canvas id="loan_type_chart_data" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-5" >
+            <div class="row gy-2 d-flex align-items-stretch" >
+
+                <div class="col-lg-6 col-md-6 col-12">
+                    <div class="card table-card h-100" style="overflow-x:clip;">
+                        <div class="card-header">
+                            <div class="row">
+
+                                <div class="col-6 ">
+                                    <label for="top_partner_loan_count"
+                                              class="form-label fw-bolder">Top Partner</label>
+                                    <select id="top_partner_loan_count" class="form-select form-control pull-left"
+                                                t-on-change="(ev) => this.partner_loan_amount_chart_data(ev)">
+                                         <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="15">15</option>
+                                        <option value="20">20</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="card-title text-center p-3" style="font-weight:600; font-size:20px;">
+                            <div class="row">
+                                <div class="col-2"></div>
+                                <div class="col-8">Top Partners: Loan Amount
+                                     <sup>
+                                       <span style="margin-left: 5px; cursor: pointer;" title="Top partner which has loan amount high">
+                                            ?
+                                        </span>
+                                    </sup>
+                                </div>
+                                <div class="col-2"><i class="fa fa-download" id = "partner_loan_amount_chart_data_btn" style="cursor: pointer;" aria-hidden="true" t-on-click="(e) => this._downloadChart(e)"/></div>
+                            </div>
+                        </div>
+                        <div class="card-body text-center">
+                            <canvas id="partner_loan_amount_chart_data" style="height:350px;"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 col-md-6 col-12">
+                    <div class="card table-card h-100" style="overflow-x:clip;">
+                         <div class="card-header">
+                            <div class="row">
+
+                                <div class="col-6 ">
+                                    <label for="top_partner_installment_count"
+                                              class="form-label fw-bolder">Top Installment</label>
+                                    <select id="top_partner_installment_count" class="form-select form-control pull-left"
+                                                t-on-change="(ev) => this.loan_installment_chart_data(ev)">
+                                         <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="15">15</option>
+                                        <option value="20">20</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-title text-center p-3" style="font-weight:600; font-size:20px;">
+                            <div class="row">
+                                <div class="col-2"> </div>
+                                <div class="col-8">Top Partners: Loan Installments Status
+                                <sup>
+                                       <span style="margin-left: 5px; cursor: pointer;" title="Partner wise paid and unpaid installment">
+                                            ?
+                                        </span>
+                                    </sup>
+                                </div>
+                                <div class="col-2"><i class="fa fa-download" id = "loan_installment_btn" style="cursor: pointer;" aria-hidden="true" t-on-click="(e) => this._downloadChart(e)"/></div>
+                            </div>
+                        </div>
+                        <div class="card-body text-center">
+                            <canvas id="loan_installment" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </t>
+
+    <t t-name="loan_tables">
+        <div class="row mt-4 gy-2 md-5">
+<div class="col-lg-6">
+    <div class="card table-card table-responsive">
+        <div class="card-header table-header row-12">
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <span class="fw-bold ms-3">Upcoming Installment</span>
+
+                <div class="d-flex align-items-center me-3">
+                    <label for="loan_upcoming_selection" class="me-2 fw-bold">Duration:</label>
+                    <select class="form-select" id="loan_upcoming_selection" t-on-change="(ev) => this.render_upcoming_installment_list(this.state.rowsPerPage, this.state.currentUpcInsLst_page)">
+                        <option value="0">Today</option>
+                        <option value="28">Next 28 Days</option>
+                        <option value="90">Next 90 Days</option>
+                        <option value="365">Next 365 Days</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <table id="all_upcoming_installment_list" class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Loan Id</th>
+                    <th>Client</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody> </tbody>
+        </table>
+
+        <t t-if="this.state.all_upcoming_ins_list_length">
+            <div class="d-flex align-items-center justify-content-center text-primary m-2">
+                <i class="fa fa-arrow-circle-left fa-2x" aria-hidden="true" id='upcoming_prev_button' t-on-click="(e) => this.upcomingPrevPage(e)"> </i>
+                <span style="font-weight:600; font-size:15px; margin:0px 5px 0px 5px"> Page <t t-esc="this.state.currentUpcInsLst_page"/> of <t t-esc="Math.ceil(this.state.all_upcoming_ins_list_length/this.state.rowsPerPage)"/> </span>
+                <i class="fa fa-arrow-circle-right fa-2x" id ='upcoming_next_button' aria-hidden="true" t-on-click="(e) => this.upcomingNextPage(e)"> </i>
+            </div>
+        </t>
+    </div>
+</div>
+
+            <div class='col-lg-6'>
+                <div class="card table-card table-responsive ">
+                    <div class="card-header table-header">
+                        <span>
+                            Overdue Installment
+                        </span>
+                    </div>
+                    <table id="all_overdue_installment_list" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Loan Id</th>
+                                <th>Client</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody> </tbody>
+                    </table>
+                    <t t-if="this.state.all_overdue_ins_list_length">
+                        <div class="d-flex align-items-center justify-content-center text-primary m-2">
+                            <i class="fa fa-arrow-circle-left fa-2x" aria-hidden="true" id='overdue_prev_button' t-on-click="(e) => this.overduePrevPage(e)"> </i>
+                            <span style="font-weight:600; font-size:15px; margin:0px 5px 0px 5px"> Page <t t-esc="this.state.currentOverInsLst_page"/> of <t t-esc="Math.ceil(this.state.all_overdue_ins_list_length/this.state.rowsPerPage)"/> </span>
+                            <i class="fa fa-arrow-circle-right fa-2x" id ='overdue_next_button' aria-hidden="true" t-on-click="(e) => this.overdueNextPage(e)"> </i>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12" style="margin:20px;"> </div>
+        </div>
+        </t>
+</templates>

@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<odoo>
+        <!--Email template -->
+        <record id="dev_loan_loan_request" model="mail.template">
+            <field name="name">Request to Loan Manager</field>
+
+			<field name="email_from">{{(object.user_id.email and '%s &lt;%s&gt;' % (object.user_id.company_id.name, object.user_id.email))}}</field>
+
+
+            <field name="subject">Loan {{object.name}} Request form {{object.client_id.name}}</field>
+            <field name="partner_to"></field>
+            <field name="model_id" ref="dev_loan_management.model_dev_loan_loan"/>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html"><![CDATA[
+            	<p><b>To Manager</b>,</p>
+            	<p></p>
+            	<p> Loan request from <b><i><t t-out="object.client_id.name"></t> </i></b></p>  
+				<table class="table-bordered"  width=100% style='margin-top: 10px;'>
+			        <tr>
+			         	<th width=20% style='text-align:center;background:#e0e1e2;padding:5px'>Loan Type</th>
+					 	<th width=20% style='text-align:center;background:#e0e1e2;padding:5px'>Disbursement Date</th>
+					 	<th width=20% style='text-align:right;background:#e0e1e2;padding:5px'>Loan Amount</th>
+					 	<th width=20% style='text-align:right;background:#e0e1e2;padding:5px'>Loan Term</th>
+			        </tr>    
+		  			<tr>
+			         	<td style='text-align:center;'><t t-out="object.loan_type_id.name"></t></td>
+					 	<td style='text-align:center;'><t t-out="object.disbursement_date"></t></td>
+					 	<td style='text-align:right;'><t t-out="object.loan_amount"></t></td>
+					 	<td style='text-align:right;'><t t-out="object.loan_term"></t></td>
+	            	</tr>    
+		   
+		</table>        	
+
+            	<p>You can access Loan From Bellow URL</p>
+            	<br/><br/>
+            	<p><a t-attf-href="{{object._make_url}}" style="background-color: #0DAC9E; padding: 8px; text-decoration: none; color: #fff; border-radius: 5px; font-size: 16px;" class="o_default_snippet_text">View Loan</a><p>
+            	<br/><br/>
+            	<b>Regards,</b><br/>
+        		<t t-out="object.user_id.name">
+                ]]></field>
+         </record>
+         
+         <record id="dev_loan_loan_request_reject" model="mail.template">
+            <field name="name">Loan Request Rejected Manager</field>
+            <field name="email_from">{{(object.user_id.email and '%s &lt;%s&gt;' % (object.user_id.company_id.name, object.user_id.email))}}</field>
+            <field name="subject">Loan {{object.name}} has been Rejected</field>
+            <field name="partner_to">{{object.user_id.partner_id.id}}</field>
+            <field name="model_id" ref="dev_loan_management.model_dev_loan_loan"/>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html"><![CDATA[
+            	<p><b>To <t t-out="object.client_id.name"></t></b>,</p>
+            	
+            	
+            	<p> Your loan request <b><t t-out="object.name"></b> has been Rejected</p>
+            	<p><b>Reject Reason</b> : <t t-out="object.reject_reason"> </p>
+            	<p>You can access Loan From Bellow URL</p>
+            	<br/>
+            	<p><a t-attf-href="{{object._make_url}}" style="background-color: #0DAC9E; padding: 8px; text-decoration: none; color: #fff; border-radius: 5px; font-size: 16px;" class="o_default_snippet_text">View Loan</a><p>
+            	<br/><br/>
+            	<b>Regards,</b><br/>
+        		<t t-out="object.user_id.name">
+                ]]></field>
+         </record>
+         
+         
+         <record id="installment_reminder_email_template" model="mail.template">
+            <field name="name">Loan  Installment Reminder</field>
+            <field name="email_from">{{(object.loan_id.company_id.email and '%s &lt;%s&gt;' % (object.loan_id.company_id.name, object.loan_id.company_id.email))}}</field>
+            <field name="subject">Installment {{object.name}} is Due on {{object.date}}</field>
+            <field name="email_to">{{object.client_id.email}}</field>
+            <field name="model_id" ref="dev_loan_management.model_dev_loan_installment"/>
+            <field name="auto_delete" eval="True"/>
+
+            <field name="body_html">
+            <![CDATA[
+                <p>Dear <strong><t t-out="object.client_id.name"/></strong>,</p>
+
+                <p>We would like to remind you of the upcoming installment for your loan
+                <strong><t t-out="object.loan_id.name"/></strong>. Below are the details:</p>
+
+                <ul>
+                    <li><strong>Installment Number:</strong> <t t-out="object.name"/></li>
+                    <li><strong>Due Date:</strong> <t t-out="object.date"/></li>
+                    <li><strong>Amount Due:</strong> <t t-out="object.total_amount"/>
+                    <t t-out="object.currency_id.symbol"/></li>
+                </ul>
+
+                <p>Please make the payment promptly. If you have already paid, kindly ignore this message.</p>
+
+                <p>Thank you for your cooperation.</p>
+
+                <p><strong>Regards,</strong><br/>
+                <strong><t t-out="object.company_id.name"/></strong></p>
+            ]]>
+            </field>
+         </record>
+
+</odoo>
+        
+        
+        
+      
+        
+        
+    

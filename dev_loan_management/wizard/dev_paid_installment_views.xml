@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
+
+For Module Support : devintelle@gmail.com  or Skype : devintelle 
+ -->
+<odoo>
+    
+    <record id="view_dev_paid_installment_form" model="ir.ui.view">
+         <field name="name">view.dev.paid.installment.form</field>
+         <field name="model">dev.paid.installment</field>
+         <field name="arch" type="xml">
+            <form string="Paid Installment">
+                <group>
+                    <group>
+                        <field name="opening_balance" readonly="1"/>
+                        <field name="closing_amount" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="principal_amount" readonly="1"/>
+                        <field name="interest_amount" readonly="1"/>
+                        <field name="emi_amount" readonly="1"/>
+                        <field name="paid_amount"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="paid_installment" string="Pay" type="object" class="btn-primary"/>
+                    or
+                    <button string="Cancel" class="btn-default" special="cancel"/>
+                </footer>
+            </form>
+         </field>
+    </record>
+    
+    <record id="action_dev_paid_installment" model="ir.actions.act_window">
+        <field name="name">Paid Intallment</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">dev.paid.installment</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

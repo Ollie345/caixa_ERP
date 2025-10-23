@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="template_notice_send_by_mail" model="mail.template">
+        <field name="name">Loan Notice Details</field>
+        <field name="subject">({{object.name}}) Notice Details</field>
+        <field name="email_from">{{ user.partner_id and user.partner_id.email or '' }}</field>
+        <field name="partner_to">{{ object.partner_id and object.partner_id.id or False }}</field>
+        <field name="model_id" ref="dev_loan_management.model_ln_notice"/>
+        <field name="report_template_ids" eval="[(4, ref('dev_loan_management.action_report_notice'))]"/>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+            <p>Dear <t t-out="object.partner_id.name"/>
+,</p>
+
+            <p>We are pleased to inform you that the loan notice associated with your request has been generated. Please find the details below:</p>
+
+            <table style="width:100%; border: 1px solid #ddd; border-collapse: collapse;">
+                <tr>
+                    <th style="text-align: left; border: 1px solid #ddd; padding: 8px;">Loan Number</th>
+                    <td style="border: 1px solid #ddd; padding: 8px;">
+                        <t t-out="object.loan_id.name"/>
+                    </td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; border: 1px solid #ddd; padding: 8px;">Loan Type</th>
+                    <td style="border: 1px solid #ddd; padding: 8px;">
+                        <t t-out="object.loan_id.loan_type_id.name"/>
+                    </td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; border: 1px solid #ddd; padding: 8px;">Loan Amount</th>
+                    <td style="border: 1px solid #ddd; padding: 8px;">
+                        <t t-out="object.currency_id.symbol"/>
+                        <t t-out="object.loan_id.loan_amount"/>
+                    </td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; border: 1px solid #ddd; padding: 8px;">Interest Rate</th>
+                    <td style="border: 1px solid #ddd; padding: 8px;">
+                        <t t-out="object.loan_id.total_interest"/>
+                    </td>
+                </tr>
+
+            </table>
+
+            <p>If you have any questions or require further assistance, feel free to contact us at <t t-out="object.company_id.email"/>
+.</p>
+
+            <p>Thank you for choosing <t t-out="object.company_id.name"/>
+!</p>
+
+            <p>Best regards,<br/>
+The <t t-out="object.company_id.name"/>
+ Team</p>
+
+
+    </field>
+
+
+</record>
+
+</odoo>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
+
+For Module Support : devintelle@gmail.com  or Skype : devintelle 
+ -->
+<odoo>
+    
+    <record id="view_dev_update_rate_form" model="ir.ui.view">
+         <field name="name">view.dev.update.rate.form</field>
+         <field name="model">dev.update.rate</field>
+         <field name="arch" type="xml">
+            <form string="Update Rate">
+                <group>
+                    <group>
+                        <field name="rate"/>
+                    </group>
+                    <group>
+                    </group>
+                </group>
+                <footer>
+                    <button name="update_rate" string="Update" type="object" class="btn-primary"/>
+                    or
+                    <button string="Cancel" class="btn-default" special="cancel"/>
+                </footer>
+            </form>
+         </field>
+    </record>
+    
+    <record id="action_update_rate" model="ir.actions.act_window">
+        <field name="name">Update Rate</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">dev.update.rate</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

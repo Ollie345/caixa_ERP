@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_dev_loan_restructure" model="ir.sequence">
+            <field name="name">Loan Restructure</field>
+            <field name="code">dev.loan.restructure</field>
+            <field name="prefix">RSTR/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

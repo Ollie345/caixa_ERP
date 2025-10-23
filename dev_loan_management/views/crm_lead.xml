@@ -1,0 +1,171 @@
+<!--
+Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
+
+For Module Support : devintelle@gmail.com  or Skype : devintelle
+  -->
+<odoo>
+    <!--    lead form-->
+    <record id="form_inherit_loan_lead" model="ir.ui.view">
+        <field name="name">form.inherit.loan.lead</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='lead_partner']" position="replace">
+                <group name="lead_partner" string="Applicant Bio">
+                    <!-- your new content here -->
+                    <field name="partner_id" required="1"/>-->
+                    <field name="email_from" required="1"/>
+                    <field name="phone" required="1"/>
+                    <field name="bvn" required="1"/>
+                    <field name="nin" required="1"/>
+                    <field name="bank_name"/>
+                    <field name="account_number"/>
+                    <field name="marital_status"/>
+                </group>
+            </xpath>
+            <xpath expr="//group[@name='lead_info']" position="replace">
+                <group name="lead_info" string="Next of Kin Information">
+                    <!-- your new content here -->
+                    <field name="nok_name"/>
+                    <field name="nok_phone"/>
+                    <field name="nok_address"/>
+                    <field name="nok_relationship"/>
+                    <field name="nok_occupation"/>
+                    <field name="nok_email"/>
+                </group>
+            </xpath>
+            <xpath expr="//group[@name='lead_info']" position="after">
+                <group string="Employment Information">
+                    <field name="company_name"/>
+                    <field name="company_address"/>
+                    <field name="company_email"/>
+                    <field name="salary"/>
+                    <field name="service_length"/>
+                    <field name="designation"/>
+                </group>
+                <group string="Guarantor Information">
+                    <field name="guarantor_name"/>
+                    <field name="guarantor_phone"/>
+                    <field name="guarantor_email"/>
+                    <field name="guarantor_relationship"/>
+                </group>
+            </xpath>
+
+            <!--            <xpath expr="//group" position="after">-->
+            <!--                <group>-->
+            <!--                    <group string="Applicant Bio">-->
+            <!--                        <field name="partner_id" required="1"/>-->
+            <!--                        <field name="email_from" required="1"/>-->
+            <!--                        <field name="phone" required="1"/>-->
+            <!--                        <field name="bvn" required="1"/>-->
+            <!--                        <field name="nin" required="1"/>-->
+            <!--                        <field name="bank_name" required="1"/>-->
+            <!--                        <field name="account_number" required="1"/>-->
+            <!--                        <field name="marital_status" required="1"/>-->
+            <!--                    </group>-->
+            <!--                    <group string="Next of Kin Information">-->
+            <!--                        <field name="nok_name"/>-->
+            <!--                        <field name="nok_phone"/>-->
+            <!--                        <field name="nok_address"/>-->
+            <!--                        <field name="nok_relationship"/>-->
+            <!--                        <field name="nok_occupation"/>-->
+            <!--                        <field name="nok_email"/>-->
+            <!--                    </group>-->
+            <!--                </group>-->
+
+            <!--            </xpath>-->
+            <xpath expr="//button[@name='action_set_won_rainbowman']" position="after">
+                <button name="create_loan_request"
+                        type="object" string="Create Loan Request"
+                        class="oe_highlight"
+                        invisible="type != 'opportunity'"
+                />
+            </xpath>
+
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button type="object"
+                        invisible="loan_count == 0"
+                        name="action_view_loan"
+                        class="oe_stat_button"
+                        icon="fa-external-link">
+                    <field name="loan_count" widget="statinfo" string="Loan Request"/>
+                </button>
+            </xpath>
+
+            <xpath expr="//page[@name='internal_notes']" position="before">
+                <page string="Loan Details">
+                    <group>
+                        <group>
+                            <field name="loan_type_id" required="1"/>
+                            <field name="loan_amount" required="1"/>
+                            <field name="loan_term" required="1"/>
+                            <field name="loan_purpose"/>
+                            <field name="collateral"/>
+                            <field name="source_of_repayment"/>
+                        </group>
+                        <group>
+                        </group>
+                    </group>
+                </page>
+                <page string="Attachments">
+                    <group>
+                        <group>
+                            <field name="attachment_ids" 
+                                   widget="many2many_binary"
+                                   string="Attachments"
+                                   options="{'no_open': True, 'image': true}"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!--    lead action-->
+    <record id="action_dev_loan_lead" model="ir.actions.act_window">
+        <field name="name">Leads</field>
+        <field name="context">{'default_type':'lead','search_default_type': 'lead','search_default_to_process':1,}
+        </field>
+        <field name="domain">['&amp;', '|', ('type', '=', 'lead'), ('type', '=', False), ('loan_type_id', '!=',
+            False)]
+        </field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">list,form,kanban,graph,pivot,calendar,activity</field>
+        <field name="help" type="html">
+            <p>
+                Create a Lead
+            </p>
+        </field>
+    </record>
+
+    <!--    pipeline action-->
+    <record id="action_dev_lead_pipeline" model="ir.actions.act_window">
+        <field name="name">Pipeline</field>
+        <field name="context">{'default_type':'opportunity','search_default_assigned_to_me':1,}</field>
+        <field name="domain">[('type','=','opportunity'),('loan_type_id', '!=', False)]</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">list,form,kanban,graph,pivot,calendar,activity</field>
+        <field name="help" type="html">
+            <p>
+                Create a Pipeline
+            </p>
+        </field>
+    </record>
+
+    <menuitem name="Inquiry"
+              id="sub_menu_lead_loan_management"
+              parent="menu_dev_loan_main"
+              sequence="-1"/>
+    <menuitem name="Lead"
+              id="menu_lead_loan_management"
+              parent="sub_menu_lead_loan_management"
+              action="action_dev_loan_lead"
+              sequence="1"/>
+    <menuitem name="Pipeline"
+              id="menu_pipeline_loan_management"
+              parent="sub_menu_lead_loan_management"
+              action="action_dev_lead_pipeline"
+              sequence="2"/>
+</odoo>

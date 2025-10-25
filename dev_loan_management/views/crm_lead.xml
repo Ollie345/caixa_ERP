@@ -11,7 +11,8 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
         <field name="inherit_id" ref="crm.crm_lead_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//group[@name='lead_partner']" position="replace">
-                <group name="lead_partner" string="Applicant Bio">
+                <group name="lead_partner" string="Applicant Bio" invisible="customer_type == 'company'">
+                    <field name="customer_type"/>
                     <!-- your new content here -->
                     <field name="partner_id" required="1"/>
                     <field name="email_from" required="1"/>
@@ -24,7 +25,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                 </group>
             </xpath>
             <xpath expr="//group[@name='lead_info']" position="replace">
-                <group name="lead_info" string="Next of Kin Information">
+                <group name="lead_info" string="Next of Kin Information" invisible="customer_type == 'company'">
                     <!-- your new content here -->
                     <field name="nok_name"/>
                     <field name="nok_phone"/>
@@ -35,7 +36,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                 </group>
             </xpath>
             <xpath expr="//group[@name='lead_info']" position="after">
-                <group string="Employment Information">
+                <group string="Employment Information" invisible="customer_type == 'company'">
                     <field name="company_name"/>
                     <field name="company_address"/>
                     <field name="company_email"/>
@@ -43,11 +44,34 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                     <field name="service_length"/>
                     <field name="designation"/>
                 </group>
-                <group string="Guarantor Information">
+                <group string="Guarantor Information" invisible="customer_type == 'company'">
                     <field name="guarantor_name"/>
                     <field name="guarantor_phone"/>
                     <field name="guarantor_email"/>
                     <field name="guarantor_relationship"/>
+                </group>
+                <group string="Company Information" invisible="customer_type != 'company'">
+                    <field name="company_name"/>
+                    <field name="company_email"/>
+                    <field name="company_phone"/>
+                    <field name="company_address"/>
+                    <field name="company_rc_number"/>
+                    <field name="date_of_incorporation"/>
+                    <field name="annual_turnover"/>
+                    <field name="company_bank_name"/>
+                    <field name="company_bank_account_number"/>
+                    <field name="company_bank_account_name"/>
+                </group>
+                <group string="Director Information" invisible="customer_type != 'company'">
+                    <field name="director_name"/>
+                    <field name="director_phone"/>
+                    <field name="director_email"/>
+                    <field name="director_nin"/>
+                    <field name="director_bvn"/>
+                    <field name="director_date_of_birth"/>
+                    <field name="director_address"/>
+                    <field name="director_marital_status"/>
+                    <field name="director_designation"/>
                 </group>
             </xpath>
 
@@ -107,13 +131,19 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                         </group>
                     </group>
                 </page>
-                <page string="Attachments">
+                <page string="Document Links">
                     <group>
-                        <group>
-                            <field name="attachment_ids" 
-                                   widget="many2many_binary"
-                                   string="Attachments"
-                                   options="{'no_open': True, 'image': true}"/>
+                        <group string="Loan Documents">
+                            <field name="loan_document_url" widget="url" placeholder="https://..."/>
+                        </group>
+                        <group string="KYC Documents">
+                            <field name="passport_url" widget="url" placeholder="https://..."/>
+                            <field name="govt_issued_id_url" widget="url" placeholder="https://..."/>
+                            <field name="staff_id_url" widget="url" placeholder="https://..."/>
+                            <field name="pay_slip_url" widget="url" placeholder="https://..."/>
+                            <field name="bank_statement_url" widget="url" placeholder="https://..."/>
+                            <field name="utility_bill_url" widget="url" placeholder="https://..."/>
+                            <field name="certificate_of_incorporation_url" widget="url" placeholder="https://..." invisible="customer_type != 'company'"/>
                         </group>
                     </group>
                 </page>

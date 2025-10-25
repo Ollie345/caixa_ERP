@@ -136,50 +136,109 @@ class CustomAPI(http.Controller):
     def create_lead(self, **payload):
         payload = _payload(payload)
         env = _auth_required()
-        if "name" not in payload:
-            _bad("name is required")
+
+        def _first(lst):
+            return lst[0] if isinstance(lst, (list, tuple)) and lst else False
+
+        ctype = (payload.get("customer_type") or "").lower()  # consumer or corporate
+        app = payload.get("applicant") or {}
+        emp = app.get("employment") or {}
+        kin = app.get("next_of_kin") or {}
+        dirc = app.get("director") or {}
+        guar = payload.get("guarantor") or {}
+        docs = payload.get("documents") or {}
+        kyc = docs.get("kyc_documents") or {}
+
+        # Common loan fields
         vals = {
-            "name": payload.get("name"),
-            "email_from": payload.get("email"),
-            "phone": payload.get("phone"),
-            "user_id": payload.get("user_id"),
-            "partner_id": payload.get("partner_id"),
             "type": "lead",
+            "user_id": payload.get("user_id"),
+            "loan_amount": float(payload.get("amount") or 0),
+            "loan_term": int(payload.get("tenor") or 0),
+            "loan_purpose": payload.get("purpose"),
+            "collateral": payload.get("collateral"),
+            "source_of_repayment": payload.get("source_of_repayment"),
+            "customer_type": ctype,  # normalized in model create()
+            # Document URL fields (first link per type)
+            "loan_document_url": _first(docs.get("loan_documents")),
+            "passport_url": _first(kyc.get("passport")),
+            "govt_issued_id_url": _first(kyc.get("govt_issued_id")),
+            "staff_id_url": _first(kyc.get("staff_id")),
+            "pay_slip_url": _first(kyc.get("pay_slip")),
+            "bank_statement_url": _first(kyc.get("bank_statement")),
+            "utility_bill_url": _first(kyc.get("utility_bill")),
+            "certificate_of_incorporation_url": _first(kyc.get("certificate_of_incorporation")),
         }
 
+        # Map optional known fields by whitelist as well
         for k in LOAN_LEAD_FIELDS:
             if k in payload and payload[k] is not None:
                 vals[k] = payload[k]
 
-        if payload.get("loan_type_xmlid") and not vals.get("loan_type_id"):
-            try:
-                vals["loan_type_id"] = env.ref(payload["loan_type_xmlid"]).id
-            except Exception:
-                _bad("Invalid loan_type_xmlid")
+        # Corporate vs Consumer mapping
+        if ctype == "corporate":
+            comp_name = app.get("company_name") or payload.get("reference") or payload.get("purpose") or "Company"
+            vals.update({
+                "name": comp_name,
+                "partner_name": comp_name,  # drive company creation
+                "company_name": app.get("company_name"),
+                "company_email": app.get("company_email"),
+                "company_phone": app.get("company_phone"),
+                "company_address": app.get("company_address"),
+                "company_rc_number": app.get("rc_number"),
+                "date_of_incorporation": app.get("date_of_incorporation"),
+                "annual_turnover": float(app.get("annual_turnover") or 0),
+                # Director
+                "director_name": " ".join(filter(None, [dirc.get("first_name"), dirc.get("middle_name"), dirc.get("surname")])) if dirc else False,
+                "director_phone": dirc.get("phone"),
+                "director_email": dirc.get("email"),
+                "director_nin": dirc.get("nin"),
+                "director_bvn": dirc.get("bvn"),
+                "director_date_of_birth": dirc.get("dob"),
+                "director_address": dirc.get("address"),
+                "director_marital_status": dirc.get("marital_status"),
+                "director_designation": dirc.get("designation"),
+            })
+        else:
+            full_name = " ".join(filter(None, [app.get("first_name"), app.get("middle_name"), app.get("surname")])) or payload.get("reference") or "Lead"
+            vals.update({
+                "name": full_name,
+                "contact_name": full_name,  # drive person creation
+                "email_from": app.get("email"),
+                "phone": app.get("phone"),
+                "nin": app.get("nin"),
+                "bvn": app.get("bvn"),
+                "marital_status": app.get("marital_status"),
+                # Next of Kin
+                "nok_name": kin.get("name"),
+                "nok_phone": kin.get("phone"),
+                # Employment
+                "company_name": emp.get("company_name"),
+                "company_email": emp.get("company_email"),
+                "company_address": emp.get("company_address"),
+                "salary": float(emp.get("salary") or 0),
+                "service_length": int("".join(ch for ch in (emp.get("length_of_service") or "") if ch.isdigit()) or 0),
+                "designation": emp.get("designation"),
+            })
 
-        def _to_int(value):
-            if isinstance(value, str) and value.isdigit():
-                return int(value)
-            return value
-
-        if "partner_id" in vals:
-            vals["partner_id"] = _to_int(vals["partner_id"])
-        if "loan_type_id" in vals:
-            vals["loan_type_id"] = _to_int(vals["loan_type_id"])
-
-        # partner_tin is now Char; no coercion needed
+        # Guarantor (optional)
+        vals.update({
+            "guarantor_name": guar.get("name"),
+            "guarantor_phone": guar.get("phone"),
+            "guarantor_email": guar.get("email"),
+            "guarantor_relationship": guar.get("relationship"),
+        })
 
         lead = env["crm.lead"].sudo().create(vals)
 
-        # Return data directly, not wrapped in make_json_response
+        # Create/link customer immediately
+        partner = lead._find_matching_partner() or lead._create_customer()
+        lead.sudo().write({"partner_id": partner.id})
+
         return {
             "id": lead.id,
-            "name": lead.name,
-            "email": lead.email_from or "",
-            "phone": lead.phone or "",
-            "user_id": lead.user_id.id if lead.user_id else None,
-            "create_date": lead.create_date.isoformat() if lead.create_date else None,
-            "active": lead.active,
+            "partner_id": partner.id,
+            "customer_type": lead.customer_type,
         }
 
     @http.route(f"{API_PREFIX}/leads/<int:lead_id>", methods=["PUT"], type="json", auth="none", csrf=False)

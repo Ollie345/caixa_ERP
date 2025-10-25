@@ -129,4 +129,38 @@ class LoanLead(models.Model):
     director_marital_status = fields.Char('Director\'s Marital Status')
     director_designation = fields.Char('Director\'s Designation')
     
+    # Document URLs (clickable links shown in the form)
+    loan_document_url = fields.Char('Loan Document URL')
+    passport_url = fields.Char('Passport URL')
+    govt_issued_id_url = fields.Char('Govt. ID URL')
+    staff_id_url = fields.Char('Staff ID URL')
+    pay_slip_url = fields.Char('Pay Slip URL')
+    bank_statement_url = fields.Char('Bank Statement URL')
+    utility_bill_url = fields.Char('Utility Bill URL')
+    certificate_of_incorporation_url = fields.Char('Certificate of Incorporation URL')
+    
+    @api.model_create_multi
+    def create(self, vals_list):
+        # Normalize external customer_type values to the internal selection keys
+        # consumer -> individual, corporate -> company
+        for vals in vals_list:
+            ct = vals.get('customer_type')
+            if ct is not None:
+                ct_lower = str(ct).lower()
+                if ct_lower == 'consumer':
+                    vals['customer_type'] = 'individual'
+                elif ct_lower == 'corporate':
+                    vals['customer_type'] = 'company'
+        return super().create(vals_list)
+
+    def _prepare_customer_values(self, partner_name, is_company=False, parent_id=False):
+        vals = super()._prepare_customer_values(partner_name, is_company=is_company, parent_id=parent_id)
+        # Align partner company_type with our lead customer_type
+        if self.customer_type == 'company':
+            vals['company_type'] = 'company'
+            vals['is_company'] = True
+        else:
+            vals['company_type'] = 'person'
+            vals['is_company'] = False
+        return vals
 

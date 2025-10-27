@@ -159,6 +159,10 @@ class CustomAPI(http.Controller):
             "collateral": payload.get("collateral"),
             "source_of_repayment": payload.get("source_of_repayment"),
             "customer_type": ctype,  # normalized in model create()
+            # External metadata
+            "external_reference": payload.get("reference"),
+            "external_status": payload.get("status"),
+            "external_kyc_id": str(payload.get("kyc_id")) if payload.get("kyc_id") is not None else False,
             # Document URL fields (first link per type)
             "loan_document_url": _first(docs.get("loan_documents")),
             "passport_url": _first(kyc.get("passport")),
@@ -168,12 +172,28 @@ class CustomAPI(http.Controller):
             "bank_statement_url": _first(kyc.get("bank_statement")),
             "utility_bill_url": _first(kyc.get("utility_bill")),
             "certificate_of_incorporation_url": _first(kyc.get("certificate_of_incorporation")),
+            # Preserve all URLs as JSON strings
+            "loan_document_urls": json.dumps(docs.get("loan_documents") or []),
+            "passport_urls": json.dumps(kyc.get("passport") or []),
+            "govt_issued_id_urls": json.dumps(kyc.get("govt_issued_id") or []),
+            "staff_id_urls": json.dumps(kyc.get("staff_id") or []),
+            "pay_slip_urls": json.dumps(kyc.get("pay_slip") or []),
+            "bank_statement_urls": json.dumps(kyc.get("bank_statement") or []),
+            "utility_bill_urls": json.dumps(kyc.get("utility_bill") or []),
+            "certificate_of_incorporation_urls": json.dumps(kyc.get("certificate_of_incorporation") or []),
         }
 
         # Map optional known fields by whitelist as well
         for k in LOAN_LEAD_FIELDS:
             if k in payload and payload[k] is not None:
                 vals[k] = payload[k]
+
+        # Support resolving loan_type from XMLID to ensure it shows in Loan Management Leads
+        if payload.get("loan_type_xmlid") and not vals.get("loan_type_id"):
+            try:
+                vals["loan_type_id"] = env.ref(payload["loan_type_xmlid"]).id
+            except Exception:
+                _bad("Invalid loan_type_xmlid")
 
         # Corporate vs Consumer mapping
         if ctype == "corporate":
@@ -189,6 +209,7 @@ class CustomAPI(http.Controller):
                 "date_of_incorporation": app.get("date_of_incorporation"),
                 "annual_turnover": float(app.get("annual_turnover") or 0),
                 # Director
+                "director_title": (dirc.get("title") if dirc else False),
                 "director_name": " ".join(filter(None, [dirc.get("first_name"), dirc.get("middle_name"), dirc.get("surname")])) if dirc else False,
                 "director_phone": dirc.get("phone"),
                 "director_email": dirc.get("email"),
@@ -209,6 +230,8 @@ class CustomAPI(http.Controller):
                 "nin": app.get("nin"),
                 "bvn": app.get("bvn"),
                 "marital_status": app.get("marital_status"),
+                "applicant_title": app.get("title"),
+                "applicant_address": app.get("address"),
                 # Next of Kin
                 "nok_name": kin.get("name"),
                 "nok_phone": kin.get("phone"),
@@ -227,6 +250,7 @@ class CustomAPI(http.Controller):
             "guarantor_phone": guar.get("phone"),
             "guarantor_email": guar.get("email"),
             "guarantor_relationship": guar.get("relationship"),
+            "guarantor_title": guar.get("title"),
         })
 
         lead = env["crm.lead"].sudo().create(vals)

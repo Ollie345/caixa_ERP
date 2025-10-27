@@ -128,6 +128,7 @@ class LoanLead(models.Model):
     director_address = fields.Char('Director\'s Address')
     director_marital_status = fields.Char('Director\'s Marital Status')
     director_designation = fields.Char('Director\'s Designation')
+    director_title = fields.Char("Director's Title")
     
     # Document URLs (clickable links shown in the form)
     loan_document_url = fields.Char('Loan Document URL')
@@ -138,6 +139,24 @@ class LoanLead(models.Model):
     bank_statement_url = fields.Char('Bank Statement URL')
     utility_bill_url = fields.Char('Utility Bill URL')
     certificate_of_incorporation_url = fields.Char('Certificate of Incorporation URL')
+
+    # Document URL lists (raw JSON strings to preserve all links)
+    loan_document_urls = fields.Text('Loan Document URLs')
+    passport_urls = fields.Text('Passport URLs')
+    govt_issued_id_urls = fields.Text('Govt. ID URLs')
+    staff_id_urls = fields.Text('Staff ID URLs')
+    pay_slip_urls = fields.Text('Pay Slip URLs')
+    bank_statement_urls = fields.Text('Bank Statement URLs')
+    utility_bill_urls = fields.Text('Utility Bill URLs')
+    certificate_of_incorporation_urls = fields.Text('Certificate of Incorporation URLs')
+
+    # External metadata and extra attributes
+    external_reference = fields.Char('External Reference')
+    external_status = fields.Char('External Status')
+    external_kyc_id = fields.Char('External KYC ID')
+    applicant_title = fields.Char('Applicant Title')
+    applicant_address = fields.Char('Applicant Address')
+    guarantor_title = fields.Char('Guarantor Title')
     
     @api.model_create_multi
     def create(self, vals_list):

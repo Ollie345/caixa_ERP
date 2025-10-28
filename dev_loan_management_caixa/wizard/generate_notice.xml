@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
+
+For Module Support : devintelle@gmail.com  or Skype : devintelle
+ -->
+<odoo>
+    <record id="view_generate_notice_wizard_form" model="ir.ui.view">
+        <field name="name">view.generate.notice.wizard.form</field>
+        <field name="model">generate.notice.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generate Notice">
+                <sheet>
+                    <group>
+		        <group>
+		         	<field name="notice_type_id" />
+		        </group> 
+		        <group>
+		        </group>	
+		    </group>    
+                <footer>
+                    <button string="Generate Notice" name="generate_notice" type="object" class="oe_highlight"/>&#160;&#160;or&#160;&#160;
+                    <button string="Close Window" class="oe_link" special="cancel" />
+                </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <record id="action_generate_notice" model="ir.actions.act_window">
+        <field name="name">Generate Notice</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">generate.notice.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_generate_notice_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

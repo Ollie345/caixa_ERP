@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
+
+For Module Support : devintelle@gmail.com  or Skype : devintelle 
+ -->
+<odoo>
+    <record id="view_dev_loan_agreement_form" model="ir.ui.view">
+        <field name="name">view.dev.loan.agreement.form</field>
+        <field name="model">ln.agreement</field>
+        <field name="arch" type="xml">
+            <form string="Loan Agreement">
+                <header>
+                    <button name="send_by_mail" type="object" string="Send mail" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <label for="name" class="oe_edit_only"/>
+                	<h1><field name="name" readonly="1"/></h1>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="agreement_type_id"/>
+                            <field name="agreement_template_id"/>
+                            <field name="header"/>
+                        </group>
+                        <group>
+                            <field name="loan_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                       <page string="Description">
+                          <field name="description" placeholder="Description.."/>
+                       </page>
+                        <page string="Signature">
+                            <group>
+                                <field name="agreement_signed_by" readonly="1"/>
+                                <field name="agreement_signed_on" readonly="1"/>
+                                <field name="agreement_signature" widget="image" readonly="1" style="height:200px;width:300px;"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <record model="ir.ui.view" id="view_dev_loan_agreement_kanban">
+            <field name="name">view.dev.loan.agreement.kanban</field>
+            <field name="model">ln.agreement</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_mobile" sample="1">
+                    <field name="name"/>
+                    <field name="color"/>
+                    <field name="partner_id"/>
+                    <field name="agreement_type_id"/>
+                    <templates>
+                         <t t-name="kanban-menu">
+		                <t t-if="widget.editable">
+		                    <a role="menuitem" type="edit" class="dropdown-item">Edit</a>
+		                </t>
+		                <t t-if="widget.deletable">
+		                    <a role="menuitem" type="delete" class="dropdown-item">Delete</a>
+		                </t>
+                        <ul class="oe_kanban_colorpicker" data-field="color"/>
+                        </t>
+                        <t t-name="kanban-box" >
+                            <div t-attf-class="#{!selection_mode ? kanban_color(record.color.raw_value) : ''} #{lost_ribbon ? 'oe_kanban_card_ribbon' : ''}  oe_kanban_global_click oe_kanban_card d-flex flex-column">
+                                <div class="o_kanban_record_top mb16" style="margin-bottom:-1px !important">
+                                    <div class="o_kanban_record_headings mt4">
+                                        <strong class="o_kanban_record_title"><span><b>
+                                            <h4>
+                                                <t t-esc="record.name.value"/>
+                                            </h4>
+                                            </b></span></strong>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left" t-if="record.agreement_type_id.value " t-att-title="record.agreement_type_id.value">
+                                        <b >Agreement Type:</b>
+                                        <span><t t-esc="record.agreement_type_id.value"/> </span>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left" t-if="record.partner_id.value " t-att-title="record.partner_id.value">
+                                         <b>Borrower:</b>
+                                        <span><t t-esc="record.partner_id.value"/> </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+    </record>
+    
+    <record id="view_dev_loan_agreement_tree" model="ir.ui.view">
+        <field name="name">view.dev.loan.agreement.tree</field>
+        <field name="model">ln.agreement</field>
+        <field name="arch" type="xml">
+            <list string="Loan Agreement" >
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="agreement_type_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_dev_loan_agreement_filter" model="ir.ui.view">
+        <field name="name">view.dev.loan.agreement.filter</field>
+        <field name="model">ln.agreement</field>
+        <field name="arch" type="xml">
+            <search string="Search Loan">
+            	<field name="partner_id" operator="child_of"/>
+                <field name="name" string="Name" filter_domain="[('name','ilike',self)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Borrower" name="partner_id" context="{'group_by':'partner_id'}"/>
+                    <filter string="Loan" name="loan_id" context="{'group_by':'loan_id'}"/>
+                    <filter string="Agreement Type" name="agreement_type_id" context="{'group_by':'agreement_type_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_dev_loan_agreement" model="ir.actions.act_window">
+        <field name="name">Agreements</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ln.agreement</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+             <p class="oe_view_nocontent_create"> Loan Agreements. </p>
+        </field>
+    </record>
+
+
+    <menuitem name="Agreements" id="menu_dev_loan_agreement" parent="menu_dev_loan_agreements_main" action="action_dev_loan_agreement" sequence="1"/>
+
+</odoo>

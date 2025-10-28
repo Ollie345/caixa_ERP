@@ -1,0 +1,185 @@
+# -*- coding: utf-8 -*-
+##############################################################################
+#
+#    OpenERP, Open Source Management Solution
+#    Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
+#
+#    For Module Support : devintelle@gmail.com  or Skype : devintelle
+#
+##############################################################################
+
+from odoo import fields, models, api
+
+class LoanLead(models.Model):
+    _inherit = 'crm.lead'
+    _description = "Loan Lead"
+    
+    
+    def create_loan_request(self):
+        vals = {
+            'client_id': self.partner_id.id if self.partner_id else False,
+            'loan_type_id': self.loan_type_id.id if self.loan_type_id else False,
+            'loan_amount': self.loan_amount,
+            'loan_term': self.loan_term,
+            'lead_id': self.id,
+            'collateral': self.collateral,
+            'source_of_repayment': self.source_of_repayment,
+            'loan_purpose': self.loan_purpose,
+        }
+        loan_request = self.env['dev.loan.loan'].create(vals)
+        loan_request.onchange_loan_type()
+        if loan_request and loan_request.client_id:
+            loan_request.client_id.is_allow_loan = True
+        return True
+        
+        
+    def _compute_loan_count(self):
+        for lead in self:
+            loan_ids = self.env['dev.loan.loan'].search([('lead_id','=',lead.id)])
+            lead.loan_count = len(loan_ids)
+            
+    def action_view_loan(self):
+        action = self.env.ref('dev_loan_management_caixa.action_dev_loan_loan').read()[0]
+        loan_ids = self.env['dev.loan.loan'].search([('lead_id','=',self.id)])
+        if len(loan_ids) > 1:
+            action['domain'] = [('id', 'in', loan_ids.ids)]
+        elif loan_ids:
+            action['views'] = [(self.env.ref('dev_loan_management_caixa.view_dev_loan_loan_form').id, 'form')]
+            action['res_id'] = loan_ids.id
+        return action
+            
+
+    #Loan Details
+    loan_type_id = fields.Many2one('dev.loan.type', string='Loan Type')
+    loan_amount = fields.Float('Requested Amount')
+    loan_term = fields.Integer('Loan Term')
+    loan_id = fields.Many2one('dev.loan.loan',string="Loan")
+    loan_count = fields.Integer(string='Loan Request', compute='_compute_loan_count')
+    collateral = fields.Char('Collateral')
+    source_of_repayment = fields.Char('Source of Repayment')
+    loan_purpose = fields.Char('Loan Purpose')
+
+    #Other Application Details
+    bvn = fields.Char('BVN')
+    nin = fields.Char('NIN')
+    partner_tin = fields.Char(string="TIN")
+    bank_name = fields.Char('Bank Name')
+    account_number = fields.Char('Account Number')
+    marital_status = fields.Char('Marital Status')
+
+    #Next of Kin Details
+    nok_name = fields.Char('Next Of Kin Name')
+    nok_phone = fields.Char('Next Of Kin Phone')
+    nok_address = fields.Char('Next Of Kin Address')
+    nok_relationship = fields.Char('Next Of Kin Relationship')
+    nok_occupation = fields.Char('Next Of Kin Occupation')
+    nok_email = fields.Char('Next Of Kin Email')
+
+    #Employment Details
+    company_name = fields.Char('Company Name')
+    company_address = fields.Char('Company Address')
+    company_email = fields.Char('Company Email')
+    salary = fields.Float('Salary')
+    service_length = fields.Integer('Length of Service')
+    designation = fields.Char('Designation')
+
+    #Guarantor Details
+    guarantor_name = fields.Char('Guarantor Name')
+    guarantor_phone = fields.Char('Guarantor Phone')
+    guarantor_email = fields.Char('Guarantor Email')
+    guarantor_relationship = fields.Char('Guarantor Relationship')
+
+    # Form Controls
+    customer_type = fields.Selection(
+        selection=[
+            ("individual", "Individual"),
+            ("company", "Company"),
+        ],
+        string='Customer Type',
+        required=False,
+        default="individual",
+    )
+
+    attachment_ids = fields.One2many(
+        'ir.attachment',
+        'res_id',
+        string='Attachments',
+        domain=[('res_model', '=', 'crm.lead')],
+    )
+
+    #CORPORATE LOAN DETAILS
+
+    #Company Information
+    company_phone = fields.Char('Phone Number')
+    date_of_incorporation = fields.Date('Date of Incorporation')
+    annual_turnover = fields.Float('Annual Turnover')
+    company_rc_number = fields.Char('RC Number')
+    company_bank_name = fields.Char('Bank Name')
+    company_bank_account_number = fields.Char('Bank Account Number')
+    company_bank_account_name = fields.Char('Bank Account Name')
+
+    #Director Information
+    director_name = fields.Char('Director\'s Name')
+    director_phone = fields.Char('Director\'s Phone')
+    director_email = fields.Char('Director\'s Email')
+    director_nin = fields.Char('Director\'s NIN')
+    director_date_of_birth = fields.Date('Director\'s Date of Birth')
+    director_bvn = fields.Char('Director\'s BVN')
+    director_address = fields.Char('Director\'s Address')
+    director_marital_status = fields.Char('Director\'s Marital Status')
+    director_designation = fields.Char('Director\'s Designation')
+    director_title = fields.Char("Director's Title")
+    
+    # Document URLs (clickable links shown in the form)
+    loan_document_url = fields.Char('Loan Document URL')
+    passport_url = fields.Char('Passport URL')
+    govt_issued_id_url = fields.Char('Govt. ID URL')
+    staff_id_url = fields.Char('Staff ID URL')
+    pay_slip_url = fields.Char('Pay Slip URL')
+    bank_statement_url = fields.Char('Bank Statement URL')
+    utility_bill_url = fields.Char('Utility Bill URL')
+    certificate_of_incorporation_url = fields.Char('Certificate of Incorporation URL')
+
+    # Document URL lists (raw JSON strings to preserve all links)
+    loan_document_urls = fields.Text('Loan Document URLs')
+    passport_urls = fields.Text('Passport URLs')
+    govt_issued_id_urls = fields.Text('Govt. ID URLs')
+    staff_id_urls = fields.Text('Staff ID URLs')
+    pay_slip_urls = fields.Text('Pay Slip URLs')
+    bank_statement_urls = fields.Text('Bank Statement URLs')
+    utility_bill_urls = fields.Text('Utility Bill URLs')
+    certificate_of_incorporation_urls = fields.Text('Certificate of Incorporation URLs')
+
+    # External metadata and extra attributes
+    external_reference = fields.Char('External Reference')
+    external_status = fields.Char('External Status')
+    external_kyc_id = fields.Char('External KYC ID')
+    applicant_title = fields.Char('Applicant Title')
+    applicant_address = fields.Char('Applicant Address')
+    guarantor_title = fields.Char('Guarantor Title')
+    
+    @api.model_create_multi
+    def create(self, vals_list):
+        # Normalize external customer_type values to the internal selection keys
+        # consumer -> individual, corporate -> company
+        for vals in vals_list:
+            ct = vals.get('customer_type')
+            if ct is not None:
+                ct_lower = str(ct).lower()
+                if ct_lower == 'consumer':
+                    vals['customer_type'] = 'individual'
+                elif ct_lower == 'corporate':
+                    vals['customer_type'] = 'company'
+        return super().create(vals_list)
+
+    def _prepare_customer_values(self, partner_name, is_company=False, parent_id=False):
+        vals = super()._prepare_customer_values(partner_name, is_company=is_company, parent_id=parent_id)
+        # Align partner company_type with our lead customer_type
+        if self.customer_type == 'company':
+            vals['company_type'] = 'company'
+            vals['is_company'] = True
+        else:
+            vals['company_type'] = 'person'
+            vals['is_company'] = False
+        return vals
+

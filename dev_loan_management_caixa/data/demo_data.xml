@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2015 DevIntelle Consulting Service Pvt.Ltd (<http://www.devintellecs.com>).
+
+For Module Support : devintelle@gmail.com  or Skype : devintelle
+ -->
+<odoo noupdate="1">
+<!--    Loan Proof-->
+       <record id="loan_proof" model="dev.loan.proof">
+		    <field name="name">Aadhar Card</field>
+       </record>
+       <record id="loan_proof1" model="dev.loan.proof">
+		    <field name="name">Pan Card</field>
+       </record>
+       <record id="loan_proof2" model="dev.loan.proof">
+		    <field name="name">Light Bill</field>
+       </record>
+       
+<!--       Borrower Category -->
+       <record id="borrower_category" model="borrower.category">
+		    <field name="name">Business</field>
+       </record>
+        <record id="borrower_category1" model="borrower.category">
+		    <field name="name">shopkeeper</field>
+       </record>
+       <record id="borrower_category2" model="borrower.category">
+		    <field name="name">Job</field>
+       </record>
+       
+       
+<!--       Loan Eligibility Criteria-->
+       <record id="loan_eligibility_criteria" model="dev.loan.eligibility">
+		    <field name="name">Age between 21-60 years</field>
+       </record>
+        <record id="loan_eligibility_criteria1" model="dev.loan.eligibility">
+		    <field name="name">Resident Of India</field>
+       </record>
+       <record id="loan_eligibility_criteria2" model="dev.loan.eligibility">
+		    <field name="name">minimum family income of 25,000</field>
+       </record>
+
+
+<!--      Co-Borrower Relation-->
+       <record id="co_borrower_relation" model="ln.co.borrower.relation">
+		    <field name="name">Friend</field>
+       </record>
+        <record id="co_borrower_relation1" model="ln.co.borrower.relation">
+		    <field name="name">Brother</field>
+       </record>
+       
+       
+<!--      Agreement Type-->
+       <record id="ln_agreement_type" model="ln.agreement.type">
+		    <field name="name">Agreement Type1</field>
+       </record>
+        <record id="ln_agreement_type1" model="ln.agreement.type">
+		    <field name="name">Agreement Type2</field>
+       </record>       
+
+
+<!--      Notice Type-->
+       <record id="ln_notice_type" model="ln.notice.type">
+		    <field name="name">Notice Type1</field>
+       </record>
+        <record id="ln_notice_type1" model="ln.notice.type">
+		    <field name="name">Notice Type2</field>
+       </record>  
+       
+       
+<!--      Terms & Notices Template-->
+       <record id="agreement_template" model="agreement.template">
+		    <field name="name">Loan  Agreement</field>
+       </record>
+        <record id="agreement_template1" model="agreement.template">
+		    <field name="name">Loan Notice</field>
+       </record>        
+       
+<!--      Document Type-->
+       <record id="ln_doc_type" model="ln.document.type">
+		    <field name="name">Aadharcard</field>
+       </record>
+        <record id="ln_doc_type1" model="ln.document.type">
+		    <field name="name">pancard</field>
+       </record>   
+       
+       
+<!--       Required Documents    -->
+       <record id="ln_req_doc" model="ln.base.documents">
+		    <field name="name">Personal Loan Document</field>
+		    <field name="document_type_id" ref="ln_doc_type"/>
+       </record>
+       <record id="ln_req_doc1" model="ln.base.documents">
+		    <field name="name">Personal Loan Document</field>
+		    <field name="document_type_id" ref="ln_doc_type1"/>
+       </record>  
+       
+       
+<!--       Document Checklist Template   -->
+       <record id="ln_doc_checklist" model="loan.checklist.template">
+		    <field name="name">Personal Loan Document</field>
+       </record>
+       
+       <!--      Installment Reminder Days  -->
+       <record id="ln_installment_1" model="reminder.days">
+		    <field name="days_before_due">2</field>
+       </record>
+        <record id="ln_installment_2" model="reminder.days">
+		    <field name="days_before_due">5</field>
+       </record>
+    
+</odoo>

@@ -11,14 +11,15 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
         <field name="inherit_id" ref="crm.crm_lead_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//group[@name='lead_partner']" position="replace">
+                <field name="customer_type"/>
                 <group name="lead_partner" string="Applicant Bio" invisible="customer_type == 'company'">
                     <field name="customer_type"/>
                     <!-- your new content here -->
                     <field name="partner_id" required="1"/>
                     <field name="email_from" required="1"/>
                     <field name="phone" required="1"/>
-                    <field name="bvn" required="1"/>
-                    <field name="nin" required="1"/>
+                    <field name="bvn" required="customer_type == 'individual'"/>
+                    <field name="nin" required="customer_type == 'individual'"/>
                     <field name="bank_name"/>
                     <field name="account_number"/>
                     <field name="marital_status"/>
@@ -66,8 +67,8 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                     <field name="director_name"/>
                     <field name="director_phone"/>
                     <field name="director_email"/>
-                    <field name="director_nin"/>
-                    <field name="director_bvn"/>
+                    <field name="director_nin" required="customer_type == 'company'"/>
+                    <field name="director_bvn" required="customer_type == 'company'"/>
                     <field name="director_date_of_birth"/>
                     <field name="director_address"/>
                     <field name="director_marital_status"/>

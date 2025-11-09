@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
-from werkzeug.exceptions import BadRequest, NotFound, Unauthorized
+from werkzeug.exceptions import BadRequest, Unauthorized
 from odoo import http
 from odoo.http import request
 
@@ -106,7 +106,10 @@ def _payload_http():
 
 
 def _payload(in_payload):
-    """Return the request body as dict for JSON routes."""
+    """Return the request body as dict for JSON routes.
+    Be forgiving: accept JSON-RPC, dict, or a raw string (even if multiple JSON
+    objects were concatenated, we try to parse the last one).
+    """
     if in_payload:
         return in_payload
 
@@ -118,7 +121,7 @@ def _payload(in_payload):
             body = request.get_json() if hasattr(request, 'get_json') else None
     except Exception as e:
         logging.getLogger(__name__).error(f"Error parsing JSON: {e}")
-        return {}
+        body = None
 
     if isinstance(body, dict):
         # Handle JSON-RPC format
@@ -126,6 +129,22 @@ def _payload(in_payload):
             return body.get("params", {})
         # Handle plain JSON
         return body
+
+    # Accept raw string bodies and attempt recovery if multiple JSON objs came in
+    if isinstance(body, str):
+        s = body.strip()
+        try:
+            return json.loads(s)
+        except Exception:
+            last_open = s.rfind('{')
+            last_close = s.rfind('}')
+            if last_open != -1 and last_close != -1 and last_close > last_open:
+                candidate = s[last_open:last_close + 1]
+                try:
+                    return json.loads(candidate)
+                except Exception:
+                    return {}
+            return {}
 
     return {}
 
@@ -137,152 +156,275 @@ class CustomAPI(http.Controller):
         payload = _payload(payload)
         env = _auth_required()
 
-        def _first(lst):
-            return lst[0] if isinstance(lst, (list, tuple)) and lst else False
+        # Helper to get value with fallback
+        def _get(key, default=None):
+            return payload.get(key, default)
 
-        ctype = (payload.get("customer_type") or "").lower()  # consumer or corporate
-        app = payload.get("applicant") or {}
-        emp = app.get("employment") or {}
-        kin = app.get("next_of_kin") or {}
-        dirc = app.get("director") or {}
-        guar = payload.get("guarantor") or {}
-        docs = payload.get("documents") or {}
-        kyc = docs.get("kyc_documents") or {}
+        # Helper to extract numeric value from string
+        def _float(val):
+            try:
+                return float(val) if val else 0.0
+            except (ValueError, TypeError):
+                return 0.0
 
-        # Common loan fields
-        vals = {
-            "type": "lead",
-            "user_id": payload.get("user_id"),
-            "loan_amount": float(payload.get("amount") or 0),
-            "loan_term": int(payload.get("tenor") or 0),
-            "loan_purpose": payload.get("purpose"),
-            "collateral": payload.get("collateral"),
-            "source_of_repayment": payload.get("source_of_repayment"),
-            "customer_type": ctype,  # normalized in model create()
-            # External metadata
-            "external_reference": payload.get("reference"),
-            "external_status": payload.get("status"),
-            "external_kyc_id": str(payload.get("kyc_id")) if payload.get("kyc_id") is not None else False,
-            # Document URL fields (first link per type)
-            "loan_document_url": _first(docs.get("loan_documents")),
-            "passport_url": _first(kyc.get("passport")),
-            "govt_issued_id_url": _first(kyc.get("govt_issued_id")),
-            "staff_id_url": _first(kyc.get("staff_id")),
-            "pay_slip_url": _first(kyc.get("pay_slip")),
-            "bank_statement_url": _first(kyc.get("bank_statement")),
-            "utility_bill_url": _first(kyc.get("utility_bill")),
-            "certificate_of_incorporation_url": _first(kyc.get("certificate_of_incorporation")),
-            # Preserve all URLs as JSON strings
-            "loan_document_urls": json.dumps(docs.get("loan_documents") or []),
-            "passport_urls": json.dumps(kyc.get("passport") or []),
-            "govt_issued_id_urls": json.dumps(kyc.get("govt_issued_id") or []),
-            "staff_id_urls": json.dumps(kyc.get("staff_id") or []),
-            "pay_slip_urls": json.dumps(kyc.get("pay_slip") or []),
-            "bank_statement_urls": json.dumps(kyc.get("bank_statement") or []),
-            "utility_bill_urls": json.dumps(kyc.get("utility_bill") or []),
-            "certificate_of_incorporation_urls": json.dumps(kyc.get("certificate_of_incorporation") or []),
+        def _int(val):
+            try:
+                if isinstance(val, str):
+                    # Extract digits from strings like "3 years"
+                    digits = "".join(ch for ch in val if ch.isdigit())
+                    return int(digits) if digits else 0
+                return int(val) if val else 0
+            except (ValueError, TypeError):
+                return 0
+
+        # Helper to filter out None and empty values
+        def _clean_vals(vals_dict):
+            """Remove None and empty string values from dict, but keep False for Many2one fields"""
+            cleaned = {}
+            for k, v in vals_dict.items():
+                # Keep False values (valid for Many2one fields)
+                if v is False:
+                    cleaned[k] = v
+                # Skip None and empty strings
+                elif v is not None and v != "":
+                    cleaned[k] = v
+            return cleaned
+
+        # Normalize customer_type
+        ctype_raw = (_get("customer_type") or "").lower().strip()
+        ctype_map = {
+            "consumer": "individual",
+            "corporate": "company",
+            "cooperate": "company",  # common typo
+            "individual": "individual",
+            "company": "company",
+        }
+        ctype = ctype_map.get(ctype_raw)
+
+        # Collect document URLs into arrays from flat payload
+        doc_urls = {
+            "loan_documents": [],
+            "passport": [],
+            "govt_issued_id": [],
+            "staff_id": [],
+            "pay_slip": [],
+            "bank_statement": [],
+            "utility_bill": [],
+            "certificate_of_incorporation": [],
         }
 
-        # Map optional known fields by whitelist as well
-        for k in LOAN_LEAD_FIELDS:
-            if k in payload and payload[k] is not None:
-                vals[k] = payload[k]
+        # Collect all document URLs from flat payload keys
+        for key, value in payload.items():
+            if value and isinstance(value, str):
+                if key.startswith("loan_documents_"):
+                    doc_urls["loan_documents"].append(value)
+                elif key == "kyc_documents_passport":
+                    doc_urls["passport"].append(value)
+                elif key == "kyc_documents_govt_issued_id":
+                    doc_urls["govt_issued_id"].append(value)
+                elif key == "kyc_documents_staff_id":
+                    doc_urls["staff_id"].append(value)
+                elif key == "kyc_documents_pay_slip":
+                    doc_urls["pay_slip"].append(value)
+                elif key == "kyc_documents_bank_statement":
+                    doc_urls["bank_statement"].append(value)
+                elif key == "kyc_documents_utility_bill":
+                    doc_urls["utility_bill"].append(value)
+                elif key == "kyc_documents_certificate_of_incorporation":
+                    doc_urls["certificate_of_incorporation"].append(value)
 
-        # Support resolving loan_type from XMLID to ensure it shows in Loan Management Leads
-        if payload.get("loan_type_xmlid") and not vals.get("loan_type_id"):
+        # Base values
+        vals = {
+            "type": "lead",
+            "user_id": int(_get("user_id")) if _get("user_id") else False,
+            "loan_amount": _float(_get("loan_amount") or _get("amount")),
+            "loan_term": _int(_get("loan_term") or _get("tenor")),
+            "loan_purpose": _get("loan_purpose") or _get("purpose"),
+            "collateral": _get("collateral"),
+            "source_of_repayment": _get("source_of_repayment"),
+            "customer_type": ctype,
+            # External metadata
+            "external_reference": _get("reference"),
+            "external_status": _get("status"),
+            "external_kyc_id": str(_get("kyc_id")) if _get("kyc_id") is not None else False,
+            # Document URL fields (first link per type)
+            "loan_document_url": doc_urls["loan_documents"][0] if doc_urls["loan_documents"] else False,
+            "passport_url": doc_urls["passport"][0] if doc_urls["passport"] else False,
+            "govt_issued_id_url": doc_urls["govt_issued_id"][0] if doc_urls["govt_issued_id"] else False,
+            "staff_id_url": doc_urls["staff_id"][0] if doc_urls["staff_id"] else False,
+            "pay_slip_url": doc_urls["pay_slip"][0] if doc_urls["pay_slip"] else False,
+            "bank_statement_url": doc_urls["bank_statement"][0] if doc_urls["bank_statement"] else False,
+            "utility_bill_url": doc_urls["utility_bill"][0] if doc_urls["utility_bill"] else False,
+            "certificate_of_incorporation_url": doc_urls["certificate_of_incorporation"][0] if doc_urls["certificate_of_incorporation"] else False,
+            # Preserve all URLs as JSON strings
+            "loan_document_urls": json.dumps(doc_urls["loan_documents"]),
+            "passport_urls": json.dumps(doc_urls["passport"]),
+            "govt_issued_id_urls": json.dumps(doc_urls["govt_issued_id"]),
+            "staff_id_urls": json.dumps(doc_urls["staff_id"]),
+            "pay_slip_urls": json.dumps(doc_urls["pay_slip"]),
+            "bank_statement_urls": json.dumps(doc_urls["bank_statement"]),
+            "utility_bill_urls": json.dumps(doc_urls["utility_bill"]),
+            "certificate_of_incorporation_urls": json.dumps(doc_urls["certificate_of_incorporation"]),
+        }
+
+        if not ctype:
+            vals.pop("customer_type", None)
+
+        # Handle loan_type_id (required for showing in Loan Leads menu)
+        if _get("loan_type_id") is not None:
             try:
-                vals["loan_type_id"] = env.ref(payload["loan_type_xmlid"]).id
+                vals["loan_type_id"] = int(_get("loan_type_id"))
+            except Exception:
+                _bad("Invalid loan_type_id")
+
+        # Support resolving loan_type from XMLID
+        if _get("loan_type_xmlid") and not vals.get("loan_type_id"):
+            try:
+                vals["loan_type_id"] = env.ref(_get("loan_type_xmlid")).id
             except Exception:
                 _bad("Invalid loan_type_xmlid")
 
-        # Corporate vs Consumer mapping
-        if ctype == "corporate":
-            comp_name = app.get("company_name") or payload.get("reference") or payload.get("purpose") or "Company"
-            vals.update({
+        # Corporate vs Individual mapping
+        if ctype == "company":
+            # Corporate fields from flat payload
+            comp_name = _get("company_name") or _get("reference") or _get("purpose") or "Company"
+            corp_vals = {
                 "name": comp_name,
-                "partner_name": comp_name,  # drive company creation
-                "company_name": app.get("company_name"),
-                "company_email": app.get("company_email"),
-                "company_phone": app.get("company_phone"),
-                "company_address": app.get("company_address"),
-                "company_rc_number": app.get("rc_number"),
-                "date_of_incorporation": app.get("date_of_incorporation"),
-                "annual_turnover": float(app.get("annual_turnover") or 0),
-                # Director
-                "director_title": (dirc.get("title") if dirc else False),
-                "director_name": " ".join(filter(None, [dirc.get("first_name"), dirc.get("middle_name"), dirc.get("surname")])) if dirc else False,
-                "director_phone": dirc.get("phone"),
-                "director_email": dirc.get("email"),
-                "director_nin": dirc.get("nin"),
-                "director_bvn": dirc.get("bvn"),
-                "director_date_of_birth": dirc.get("dob"),
-                "director_address": dirc.get("address"),
-                "director_marital_status": dirc.get("marital_status"),
-                "director_designation": dirc.get("designation"),
-            })
+                "partner_name": comp_name,
+                "company_name": _get("company_name"),
+                "company_email": _get("company_email"),
+                "company_phone": _get("company_phone"),
+                "company_address": _get("company_address"),
+                "company_rc_number": _get("company_rc_number") or _get("rc_number"),
+                "date_of_incorporation": _get("date_of_incorporation"),
+                "annual_turnover": _float(_get("annual_turnover")),
+                # Director fields from flat payload
+                "director_title": _get("director_title"),
+                "director_name": " ".join(filter(None, [
+                    _get("director_first_name"),
+                    _get("director_middle_name"),
+                    _get("director_surname")
+                ])) or False,
+                "director_phone": _get("director_phone"),
+                "director_email": _get("director_email"),
+                "director_nin": _get("director_nin"),
+                "director_bvn": _get("director_bvn"),
+                "director_date_of_birth": _get("director_date_of_birth") or _get("director_dob"),
+                "director_address": _get("director_address"),
+                "director_marital_status": _get("director_marital_status"),
+                "director_designation": _get("director_designation"),
+            }
+            vals.update(_clean_vals(corp_vals))
         else:
-            full_name = " ".join(filter(None, [app.get("first_name"), app.get("middle_name"), app.get("surname")])) or payload.get("reference") or "Lead"
-            vals.update({
+            # Individual/Consumer fields from flat payload
+            full_name = " ".join(filter(None, [
+                _get("applicant_first_name"),
+                _get("applicant_middle_name"),
+                _get("applicant_surname")
+            ])) or _get("reference") or "Lead"
+            indiv_vals = {
                 "name": full_name,
-                "contact_name": full_name,  # drive person creation
-                "email_from": app.get("email"),
-                "phone": app.get("phone"),
-                "nin": app.get("nin"),
-                "bvn": app.get("bvn"),
-                "marital_status": app.get("marital_status"),
-                "applicant_title": app.get("title"),
-                "applicant_address": app.get("address"),
-                # Next of Kin
-                "nok_name": kin.get("name"),
-                "nok_phone": kin.get("phone"),
-                # Employment
-                "company_name": emp.get("company_name"),
-                "company_email": emp.get("company_email"),
-                "company_address": emp.get("company_address"),
-                "salary": float(emp.get("salary") or 0),
-                "service_length": int("".join(ch for ch in (emp.get("length_of_service") or "") if ch.isdigit()) or 0),
-                "designation": emp.get("designation"),
-            })
+                "contact_name": full_name,
+                "email_from": _get("applicant_email"),
+                "phone": _get("applicant_phone"),
+                "nin": _get("applicant_nin"),
+                "bvn": _get("applicant_bvn"),
+                "marital_status": _get("applicant_marital_status"),
+                "applicant_title": _get("applicant_title"),
+                "applicant_address": _get("applicant_address"),
+                # Next of Kin from flat payload
+                "nok_name": _get("next_of_kin_name"),
+                "nok_phone": _get("next_of_kin_phone"),
+                "nok_address": _get("next_of_kin_address"),
+                "nok_relationship": _get("next_of_kin_relationship"),
+                "nok_occupation": _get("next_of_kin_occupation"),
+                "nok_email": _get("next_of_kin_email"),
+                # Employment from flat payload
+                "company_name": _get("employment_company_name"),
+                "company_email": _get("employment_company_email"),
+                "company_address": _get("employment_company_address"),
+                "salary": _float(_get("employment_salary")),
+                "service_length": _int(_get("employment_length_of_service")),
+                "designation": _get("employment_designation"),
+            }
+            vals.update(_clean_vals(indiv_vals))
 
-        # Guarantor (optional)
-        vals.update({
-            "guarantor_name": guar.get("name"),
-            "guarantor_phone": guar.get("phone"),
-            "guarantor_email": guar.get("email"),
-            "guarantor_relationship": guar.get("relationship"),
-            "guarantor_title": guar.get("title"),
-        })
+        # Always ensure lead has a name
+        vals["name"] = vals.get("name") or _get("reference") or "Lead"
 
+        # Guarantor fields (common to both) from flat payload
+        guar_vals = {
+            "guarantor_title": _get("guarantor_title"),
+            "guarantor_name": _get("guarantor_name"),
+            "guarantor_phone": _get("guarantor_phone"),
+            "guarantor_email": _get("guarantor_email"),
+            "guarantor_relationship": _get("guarantor_relationship"),
+        }
+        vals.update(_clean_vals(guar_vals))
+
+        # Clean all vals before creating (remove None and empty strings)
+        vals = _clean_vals(vals)
+
+        # Create partner first if we have enough info, then set partner_id during lead creation
+        partner_id = False
+        if ctype == "company":
+            partner_name = _get("company_name") or _get("reference") or "Company"
+            # Try to find existing partner
+            partner = env["res.partner"].sudo().search([
+                ("name", "=", partner_name),
+                ("is_company", "=", True)
+            ], limit=1)
+            if not partner and partner_name:
+                partner = env["res.partner"].sudo().create({
+                    "name": partner_name,
+                    "is_company": True,
+                    "email": _get("company_email"),
+                    "phone": _get("company_phone"),
+                    "street": _get("company_address"),
+                })
+            partner_id = partner.id if partner else False
+        else:
+            # Individual - try to find by email or phone
+            email = _get("applicant_email")
+            phone = _get("applicant_phone")
+            partner = False
+            if email:
+                partner = env["res.partner"].sudo().search([
+                    ("email", "=", email),
+                    ("is_company", "=", False)
+                ], limit=1)
+            if not partner and phone:
+                partner = env["res.partner"].sudo().search([
+                    ("phone", "=", phone),
+                    ("is_company", "=", False)
+                ], limit=1)
+            if not partner:
+                full_name = vals.get("name") or _get("reference") or "Lead"
+                partner = env["res.partner"].sudo().create({
+                    "name": full_name,
+                    "is_company": False,
+                    "email": email,
+                    "phone": phone,
+                    "street": _get("applicant_address"),
+                })
+            partner_id = partner.id if partner else False
+
+        # Set partner_id in vals if we have one
+        if partner_id:
+            vals["partner_id"] = partner_id
+
+        # Create lead
         lead = env["crm.lead"].sudo().create(vals)
 
-        # Create/link customer immediately
-        partner = lead._find_matching_partner() or lead._create_customer()
-        lead.sudo().write({"partner_id": partner.id})
+        # Ensure partner is linked (in case creation didn't set it)
+        if not lead.partner_id and partner_id:
+            lead.sudo().write({"partner_id": partner_id})
 
         return {
             "id": lead.id,
-            "partner_id": partner.id,
+            "partner_id": lead.partner_id.id if lead.partner_id else partner_id,
             "customer_type": lead.customer_type,
         }
-
-    @http.route(f"{API_PREFIX}/leads/<int:lead_id>", methods=["PUT"], type="json", auth="none", csrf=False)
-    def update_lead(self, lead_id, **payload):
-        payload = _payload(payload)
-        env = _auth_required()
-        lead = env["crm.lead"].sudo().browse(lead_id)
-        if not lead.exists():
-            raise NotFound("Lead not found")
-        lead.write(payload)
-        return lead.read()[0]
-
-    @http.route(f"{API_PREFIX}/leads/<int:lead_id>", methods=["GET"], type="json", auth="none", csrf=False)
-    def get_lead(self, lead_id):
-        """Retrieve a single lead."""
-        env = _auth_required()
-        lead = env["crm.lead"].sudo().browse(lead_id)
-        if not lead.exists():
-            raise NotFound("Lead not found")
-        return lead.read()[0]
 
     @http.route(f"{API_PREFIX}/leads", methods=["GET"], type="json", auth="none", csrf=False)
     def list_leads(self, **params):
@@ -293,72 +435,6 @@ class CustomAPI(http.Controller):
         leads = env["crm.lead"].sudo().search(domain)
         return _paginate(leads.read(["id", "name", "email_from", "phone", "active"]), params.get("limit"),
                          params.get("offset"))
-
-    # Opportunities ---------------------------------------------------------
-    @http.route(f"{API_PREFIX}/opportunities", methods=["POST"], type="json", auth="none", csrf=False)
-    def create_opp(self, **payload):
-        payload = _payload(payload)
-        env = _auth_required()
-        if "name" not in payload:
-            _bad("name required")
-        vals = {
-            "name": payload["name"],
-            "expected_revenue": payload.get("expected_revenue", 0.0),
-            "probability": payload.get("probability", 0),
-            "user_id": payload.get("user_id"),
-            "type": "opportunity",
-        }
-        opp = env["crm.lead"].sudo().create(vals)
-
-        # Return formatted response
-        return {
-            "id": opp.id,
-            "name": opp.name,
-            "expected_revenue": opp.expected_revenue,
-            "probability": opp.probability,
-            "user_id": opp.user_id.id if opp.user_id else None,
-            "create_date": opp.create_date.isoformat() if opp.create_date else None,
-            "stage_id": opp.stage_id.id if opp.stage_id else None,
-        }
-
-    @http.route(f"{API_PREFIX}/opportunities/<int:opp_id>", methods=["PUT"], type="json", auth="none", csrf=False)
-    def update_opp(self, opp_id, **payload):
-        payload = _payload(payload)
-        env = _auth_required()
-        opp = env["crm.lead"].sudo().browse(opp_id)
-        if not opp.exists():
-            raise NotFound("Opportunity not found")
-        opp.write(payload)
-        return opp.read()[0]
-
-    @http.route(f"{API_PREFIX}/opportunities/<int:opp_id>", methods=["GET"], type="json", auth="none", csrf=False)
-    def get_opp(self, opp_id):
-        """Retrieve a single opportunity."""
-        env = _auth_required()
-        opp = env["crm.lead"].sudo().browse(opp_id)
-        if not opp.exists():
-            raise NotFound("Opportunity not found")
-        return opp.read()[0]
-
-    @http.route(f"{API_PREFIX}/opportunities/<int:opp_id>/stage", methods=["PATCH"], type="json", auth="none",
-                csrf=False)
-    def move_stage(self, opp_id, stage_id=None, **kwargs):
-        """Move an opportunity to a new stage."""
-        env = _auth_required()
-
-        # Retrieve stage_id from query or body
-        if stage_id is None:
-            stage_id = kwargs.get("stage_id")
-
-        if not stage_id:
-            raise BadRequest("stage_id required")
-
-        opp = env["crm.lead"].sudo().browse(opp_id)
-        if not opp.exists():
-            raise NotFound("Opportunity not found")
-
-        opp.write({"stage_id": int(stage_id)})
-        return opp.read()[0]
 
     @http.route(f"{API_PREFIX}/opportunities", methods=["GET"], type="json", auth="none", csrf=False)
     def list_opps(self, **params):
@@ -371,83 +447,10 @@ class CustomAPI(http.Controller):
                          params.get("offset"))
 
     # Quotes ----------------------------------------------------------------
-    @http.route(f"{API_PREFIX}/quotes", methods=["POST"], type="json", auth="none", csrf=False)
-    def create_quote(self, **payload):
-        payload = _payload(payload)
-        env = _auth_required()
+    
 
-        # Debug: Log what we received
-        _logger = logging.getLogger(__name__)
-        _logger.info(f"Received payload: {payload}")
-        _logger.info(f"Payload keys: {list(payload.keys()) if payload else 'None'}")
+    
 
-        if not payload:
-            _bad("No data received")
-        if "order_line" not in payload:
-            _bad(f"order_line required. Received keys: {list(payload.keys())}")
-        vals = {
-            "partner_id": payload.get("partner_id") or env.user.partner_id.id,
-            "validity_date": payload.get("validity_date"),
-            "order_line": [(0, 0, line) for line in payload["order_line"]],
-        }
+    
 
-        so = env["sale.order"].sudo().create(vals)
-
-        # Return data directly - this is the key fix!
-        return {
-            "id": so.id,
-            "name": so.name,
-            "partner_name": so.partner_id.name,
-            "partner_email": so.partner_id.email or "",
-            "partner_phone": so.partner_id.phone or "",
-            "user_id": so.user_id.id if so.user_id else None,
-            "create_date": so.create_date.isoformat() if so.create_date else None,
-            "state": so.state,
-            "amount_total": so.amount_total,
-        }
-
-    @http.route(f"{API_PREFIX}/quotes/<int:quote_id>", methods=["GET"], type="json", auth="none", csrf=False)
-    def get_quote(self, quote_id):
-        env = _auth_required()
-        so = env["sale.order"].sudo().browse(quote_id)
-        if not so.exists():
-            raise NotFound("Quote not found")
-        return so.read()[0]
-
-    @http.route(f"{API_PREFIX}/quotes", methods=["GET"], type="json", auth="none", csrf=False)
-    def list_quotes(self, **params):
-        env = _auth_required()
-        domain = []
-        if params.get("state"):
-            domain.append(("state", "=", params["state"]))
-        quotes = env["sale.order"].sudo().search(domain)
-        return _paginate(quotes.read(["id", "name", "state", "validity_date"]), params.get("limit"),
-                         params.get("offset"))
-
-    # Test endpoint to debug payload issues
-    @http.route(f"{API_PREFIX}/test", methods=["POST"], type="json", auth="none", csrf=False)
-    def test_payload(self, **payload):
-        try:
-            payload = _payload(payload)
-            return {
-                "received_payload": payload,
-                "payload_type": type(payload).__name__,
-                "keys": list(payload.keys()) if isinstance(payload, dict) else [],
-                "has_order_line": "order_line" in payload if isinstance(payload, dict) else False,
-                "raw_payload": str(payload)
-            }
-        except Exception as e:
-            return {"error": str(e), "type": type(e).__name__}
-
-    # Activities ------------------------------------------------------------
-    @http.route(f"{API_PREFIX}/activities", methods=["GET"], type="json", auth="none", csrf=False)
-    def list_activities(self, model, res_id, **params):
-        env = _auth_required()
-        msgs = env["mail.message"].sudo().search([("model", "=", model), ("res_id", "=", int(res_id))],
-                                                 order="date desc")
-        result = [
-            {"id": m.id, "author_id": m.author_id.id if m.author_id else False, "date": m.date.isoformat(),
-             "message": m.body or ""}
-            for m in msgs
-        ]
-        return _paginate(result, params.get("limit"), params.get("offset"))
+    # (all other endpoints removed)

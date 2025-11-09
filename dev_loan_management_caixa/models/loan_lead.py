@@ -9,6 +9,7 @@
 ##############################################################################
 
 from odoo import fields, models, api
+from odoo.exceptions import ValidationError
 
 class LoanLead(models.Model):
     _inherit = 'crm.lead'
@@ -182,4 +183,27 @@ class LoanLead(models.Model):
             vals['company_type'] = 'person'
             vals['is_company'] = False
         return vals
+
+    @api.constrains('customer_type', 'bvn', 'nin')
+    def _check_individual_required_fields(self):
+        """Validate that BVN and NIN are required for individual customers"""
+        for record in self:
+            if record.customer_type == 'individual':
+                if not record.bvn or (isinstance(record.bvn, str) and not record.bvn.strip()):
+                    raise ValidationError("BVN is required for Individual customers.")
+                if not record.nin or (isinstance(record.nin, str) and not record.nin.strip()):
+                    raise ValidationError("NIN is required for Individual customers.")
+
+    def convert_opportunity(self, partner, user_ids=False, team_id=False):
+        """Override convert_opportunity to validate director BVN and NIN for corporate leads"""
+        # Validate director fields for corporate leads before conversion
+        for lead in self:
+            if lead.customer_type == 'company':
+                if not lead.director_bvn or (isinstance(lead.director_bvn, str) and not lead.director_bvn.strip()):
+                    raise ValidationError("Director BVN is required to convert Corporate lead to opportunity.")
+                if not lead.director_nin or (isinstance(lead.director_nin, str) and not lead.director_nin.strip()):
+                    raise ValidationError("Director NIN is required to convert Corporate lead to opportunity.")
+        
+        # Call parent method to perform the conversion
+        return super().convert_opportunity(partner, user_ids=user_ids, team_id=team_id)
 

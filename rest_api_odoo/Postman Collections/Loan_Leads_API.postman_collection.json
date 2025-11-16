@@ -1,8 +1,8 @@
 {
 	"info": {
 		"_postman_id": "loan-leads-api-collection",
-		"name": "REST API Odoo - Loan Leads",
-		"description": "Collection for testing REST API Odoo module, including the custom loan leads endpoint",
+		"name": "REST API Odoo - Loan Leads & Requests",
+		"description": "Collection for testing REST API Odoo module, including loan leads endpoint (/loan_leads) and direct loan requests endpoint (/loan_requests)",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -227,6 +227,84 @@
 					]
 				},
 				"description": "Create a lead using generic API. Requires fields and values structure."
+			},
+			"response": []
+		},
+		{
+			"name": "6. Create Loan Request (Consumer)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "api-key",
+						"value": "{{api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "db",
+						"value": "{{db}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"user_id\": 2,\n  \"kyc_id\": 12,\n  \"reference\": \"LRFC-36434\",\n  \"amount\": \"100000\",\n  \"tenor\": \"5\",\n  \"purpose\": \"Working capital\",\n  \"collateral\": \"Vehicle\",\n  \"source_of_repayment\": \"Salary\",\n  \"status\": \"pending\",\n  \"customer_type\": \"consumer\",\n  \"loan_type_id\": 1,\n  \"applicant_title\": \"Mr\",\n  \"applicant_first_name\": \"John\",\n  \"applicant_middle_name\": \"Doe\",\n  \"applicant_surname\": \"Smith\",\n  \"applicant_email\": \"john@example.com\",\n  \"applicant_phone\": \"08012345678\",\n  \"applicant_nin\": \"12345678901\",\n  \"applicant_bvn\": \"1234567890\",\n  \"applicant_address\": \"123 Example Street\",\n  \"applicant_marital_status\": \"single\",\n  \"next_of_kin_name\": \"Jane Doe\",\n  \"next_of_kin_phone\": \"08087654321\",\n  \"employment_company_name\": \"Example Ltd\",\n  \"employment_company_email\": \"hr@example.com\",\n  \"employment_company_address\": \"45 Industrial Road\",\n  \"employment_salary\": \"200000\",\n  \"employment_length_of_service\": \"3 years\",\n  \"employment_designation\": \"Accountant\",\n  \"guarantor_title\": \"Mr\",\n  \"guarantor_name\": \"Paul\",\n  \"guarantor_phone\": \"08142555137\",\n  \"guarantor_email\": \"paul@example.com\",\n  \"guarantor_relationship\": \"Colleague\",\n  \"kyc_documents_passport\": \"https://example.com/passport.jpg\",\n  \"kyc_documents_govt_issued_id\": \"https://example.com/id.jpg\",\n  \"loan_documents_additional_document\": \"https://example.com/loan_doc.pdf\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/loan_requests",
+					"host": ["{{base_url}}"],
+					"path": ["loan_requests"]
+				},
+				"description": "Create a consumer loan request directly (bypasses CRM leads). Requires loan_type_id. Creates dev.loan.loan record."
+			},
+			"response": []
+		},
+		{
+			"name": "7. Create Loan Request (Corporate)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "api-key",
+						"value": "{{api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "db",
+						"value": "{{db}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"user_id\": 5,\n  \"kyc_id\": 13,\n  \"reference\": \"LRFC-89082\",\n  \"amount\": \"100000\",\n  \"tenor\": \"5\",\n  \"purpose\": \"Business expansion\",\n  \"collateral\": \"Property\",\n  \"source_of_repayment\": \"Revenue\",\n  \"status\": \"pending\",\n  \"customer_type\": \"corporate\",\n  \"loan_type_id\": 1,\n  \"company_name\": \"Example Tech Ltd\",\n  \"company_email\": \"admin@example.com\",\n  \"company_phone\": \"08011223344\",\n  \"rc_number\": \"RC-556677\",\n  \"date_of_incorporation\": \"2015-03-20\",\n  \"annual_turnover\": \"50000000\",\n  \"company_address\": \"10 Adeola Odeku, Lagos\",\n  \"director_title\": \"Mr\",\n  \"director_first_name\": \"Michael\",\n  \"director_middle_name\": \"James\",\n  \"director_surname\": \"Smith\",\n  \"director_phone\": \"08033445566\",\n  \"director_email\": \"michael@example.com\",\n  \"director_nin\": \"22334455667\",\n  \"director_dob\": \"1986-05-14\",\n  \"director_bvn\": \"2244556677\",\n  \"director_address\": \"24 Lekki Phase 1, Lagos\",\n  \"director_marital_status\": \"married\",\n  \"director_designation\": \"Managing Director\",\n  \"guarantor_title\": \"Mr\",\n  \"guarantor_name\": \"Paul\",\n  \"guarantor_phone\": \"08142555137\",\n  \"guarantor_email\": \"paul@example.com\",\n  \"guarantor_relationship\": \"Partner\",\n  \"kyc_documents_passport\": \"https://example.com/passport.jpg\",\n  \"kyc_documents_certificate_of_incorporation\": \"https://example.com/cert.pdf\",\n  \"loan_documents_contract_award_letter\": \"https://example.com/contract.pdf\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/loan_requests",
+					"host": ["{{base_url}}"],
+					"path": ["loan_requests"]
+				},
+				"description": "Create a corporate loan request directly (bypasses CRM leads). Requires loan_type_id. Creates dev.loan.loan record."
 			},
 			"response": []
 		}

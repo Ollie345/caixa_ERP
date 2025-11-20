@@ -9,9 +9,10 @@
 ##############################################################################
 
 from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError, AccessError, RedirectWarning
-from datetime import date
+from odoo.exceptions import ValidationError
+from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
+from odoo.exceptions import RedirectWarning
 
 
 class dev_loan_loan(models.Model):
@@ -31,32 +32,11 @@ class dev_loan_loan(models.Model):
     loan_purpose = fields.Char('Loan Purpose')
     collateral = fields.Char('Collateral')
     source_of_repayment = fields.Char('Source of Repayment')
-    is_interest_apply = fields.Boolean(
-    string='Apply Interest',
-    default=lambda self: self.loan_type_id.is_interest_apply if self.loan_type_id else False)
+    is_interest_apply = fields.Boolean(related='loan_type_id.is_interest_apply', string='Apply Interest')
     interest_rate = fields.Float(string='Interest Rate')
     none_interest_month = fields.Integer(string='None Interest Month')
     loan_term = fields.Integer('Loan Term', required="1")
-    interest_mode = fields.Selection(
-        [('flat', 'Flat'), 
-        ('reducing', 'Reducing')],
-        string='Interest Mode',
-        default=lambda self: self.loan_type_id.interest_mode if self.loan_type_id else False
-        )
-    is_amortization_customized = fields.Boolean(
-        string='Amortization Customized',
-        default=False,
-        help='Indicates if amortization settings were customized for this loan')
-    is_loan_manager = fields.Boolean(
-        string='Is Loan Manager',
-        compute='_compute_is_loan_manager',
-        help='Technical field to check if current user is a loan manager')
-    
-    @api.depends()
-    def _compute_is_loan_manager(self):
-        """Check if current user has loan manager group"""
-        for record in self:
-            record.is_loan_manager = self.env.user.has_group('dev_loan_management_caixa.group_loan_manager')
+    interest_mode = fields.Selection(related='loan_type_id.interest_mode', string='Interest Mode')	
     
     state = fields.Selection([('draft','Draft'),
                               ('confirm','Confirm'),
@@ -128,95 +108,6 @@ class dev_loan_loan(models.Model):
     lead_id = fields.Many2one('crm.lead',string="Lead")
     task_count = fields.Integer(compute="get_task_count")
     loan_notice=fields.Integer(string='Notice',compute='compute_loan_notice_count')
-    
-    # Customer Type
-    customer_type = fields.Selection(
-        selection=[
-            ("individual", "Individual"),
-            ("company", "Company"),
-        ],
-        string='Customer Type',
-        default="individual",
-    )
-    
-    # Individual Customer Details
-    bvn = fields.Char('BVN')
-    nin = fields.Char('NIN')
-    partner_tin = fields.Char(string="TIN")
-    bank_name = fields.Char('Bank Name')
-    account_number = fields.Char('Account Number')
-    marital_status = fields.Char('Marital Status')
-    applicant_title = fields.Char('Applicant Title')
-    applicant_address = fields.Char('Applicant Address')
-    
-    # Next of Kin Details
-    nok_name = fields.Char('Next Of Kin Name')
-    nok_phone = fields.Char('Next Of Kin Phone')
-    nok_address = fields.Char('Next Of Kin Address')
-    nok_relationship = fields.Char('Next Of Kin Relationship')
-    nok_occupation = fields.Char('Next Of Kin Occupation')
-    nok_email = fields.Char('Next Of Kin Email')
-    
-    # Employment Details
-    employment_company_name = fields.Char('Company Name')
-    employment_company_address = fields.Char('Company Address')
-    employment_company_email = fields.Char('Company Email')
-    salary = fields.Float('Salary')
-    service_length = fields.Integer('Length of Service')
-    designation = fields.Char('Designation')
-    
-    # Guarantor Details
-    guarantor_title = fields.Char('Guarantor Title')
-    guarantor_name = fields.Char('Guarantor Name')
-    guarantor_phone = fields.Char('Guarantor Phone')
-    guarantor_email = fields.Char('Guarantor Email')
-    guarantor_relationship = fields.Char('Guarantor Relationship')
-    
-    # Corporate Customer Details
-    company_phone = fields.Char('Phone Number')
-    date_of_incorporation = fields.Date('Date of Incorporation')
-    annual_turnover = fields.Float('Annual Turnover')
-    company_rc_number = fields.Char('RC Number')
-    company_bank_name = fields.Char('Bank Name')
-    company_bank_account_number = fields.Char('Bank Account Number')
-    company_bank_account_name = fields.Char('Bank Account Name')
-    
-    # Director Information
-    director_title = fields.Char("Director's Title")
-    director_name = fields.Char('Director\'s Name')
-    director_phone = fields.Char('Director\'s Phone')
-    director_email = fields.Char('Director\'s Email')
-    director_nin = fields.Char('Director\'s NIN')
-    director_date_of_birth = fields.Date('Director\'s Date of Birth')
-    director_bvn = fields.Char('Director\'s BVN')
-    director_address = fields.Char('Director\'s Address')
-    director_marital_status = fields.Char('Director\'s Marital Status')
-    director_designation = fields.Char('Director\'s Designation')
-    
-    # Document URLs (clickable links shown in the form)
-    loan_document_url = fields.Char('Loan Document URL')
-    passport_url = fields.Char('Passport URL')
-    govt_issued_id_url = fields.Char('Govt. ID URL')
-    staff_id_url = fields.Char('Staff ID URL')
-    pay_slip_url = fields.Char('Pay Slip URL')
-    bank_statement_url = fields.Char('Bank Statement URL')
-    utility_bill_url = fields.Char('Utility Bill URL')
-    certificate_of_incorporation_url = fields.Char('Certificate of Incorporation URL')
-    
-    # Document URL lists (raw JSON strings to preserve all links)
-    loan_document_urls = fields.Text('Loan Document URLs')
-    passport_urls = fields.Text('Passport URLs')
-    govt_issued_id_urls = fields.Text('Govt. ID URLs')
-    staff_id_urls = fields.Text('Staff ID URLs')
-    pay_slip_urls = fields.Text('Pay Slip URLs')
-    bank_statement_urls = fields.Text('Bank Statement URLs')
-    utility_bill_urls = fields.Text('Utility Bill URLs')
-    certificate_of_incorporation_urls = fields.Text('Certificate of Incorporation URLs')
-    
-    # External metadata
-    external_reference = fields.Char('External Reference')
-    external_status = fields.Char('External Status')
-    external_kyc_id = fields.Char('External KYC ID')
     
     
     def compute_loan_notice_count(self):
@@ -621,57 +512,21 @@ class dev_loan_loan(models.Model):
     @api.onchange('loan_type_id')
     def onchange_loan_type(self):
         if self.loan_type_id:
-            # Only set defaults if not already customized
-            if not self.is_amortization_customized:
-                self.interest_rate = self.loan_type_id.rate or 0.0
-                self.none_interest_month = self.loan_type_id.none_interest_month or 0
-                self.interest_mode = self.loan_type_id.interest_mode or False
-                self.is_interest_apply = self.loan_type_id.is_interest_apply or False
-            # Always set loan term from type (unless customized)
-            if not self.is_amortization_customized:
-                self.loan_term = self.loan_type_id.loan_term_by_month
+            self.interest_rate = self.loan_type_id and self.loan_type_id.rate or 0.0
+            self.none_interest_month = self.loan_type_id and self.loan_type_id.none_interest_month or 0
         else:
-            if not self.is_amortization_customized:
-                self.interest_rate = 0.0
-                self.none_interest_month = 0
-                self.interest_mode = False
-                self.is_interest_apply = False
+            self.interest_rate = 0.0
+            self.none_interest_month = 0
             
         if self.loan_type_id and self.loan_type_id.proof_ids:
-            self.proof_ids = [(6, 0, self.loan_type_id.proof_ids.ids)]
+            self.proof_ids = [(6,0, self.loan_type_id.proof_ids.ids)]
         else:
             self.proof_ids = False
-    
-    def action_customize_amortization(self):
-        """Mark amortization settings as customized - allows CAT team to override loan type defaults"""
-        self.ensure_one()
-        if not self.env.user.has_group('dev_loan_management_caixa.group_loan_manager'):
-            raise AccessError(_("Only Loan Managers can customize amortization settings."))
-        self.is_amortization_customized = True
-        return True
-    
-    @api.onchange('interest_rate', 'interest_mode', 'none_interest_month', 'loan_term', 'is_interest_apply')
-    def onchange_amortization_fields(self):
-        """Auto-mark as customized if any amortization field is manually changed"""
-        if self.loan_type_id and not self.is_amortization_customized:
-            # Check if current values differ from loan type defaults
-            if (self.interest_rate != self.loan_type_id.rate or
-                self.interest_mode != self.loan_type_id.interest_mode or
-                self.none_interest_month != self.loan_type_id.none_interest_month or
-                self.loan_term != self.loan_type_id.loan_term_by_month or
-                self.is_interest_apply != self.loan_type_id.is_interest_apply):
-                self.is_amortization_customized = True
             
-    
-    @api.constrains('customer_type', 'bvn', 'nin')
-    def _check_individual_required_fields(self):
-        """Validate that BVN and NIN are required for Individual customers"""
-        for record in self:
-            if record.customer_type == 'individual':
-                if not record.bvn or (isinstance(record.bvn, str) and not record.bvn.strip()):
-                    raise ValidationError(_("BVN is required for Individual customers."))
-                if not record.nin or (isinstance(record.nin, str) and not record.nin.strip()):
-                    raise ValidationError(_("NIN is required for Individual customers."))
+        if self.loan_type_id:
+            self.loan_term = self.loan_type_id.loan_term_by_month
+            
+            
     
     @api.constrains('loan_term','loan_amount','loan_type_id')        
     def check_rate(self):
@@ -680,64 +535,18 @@ class dev_loan_loan(models.Model):
                 
         if self.loan_amount <= 0:
             raise ValidationError(_("Loan Amount Must be Positive !!!"))
-        
-        # Only enforce loan type limits if not customized
-        if self.loan_type_id and not self.is_amortization_customized:
+                
+        if self.loan_type_id:
             if self.loan_term > self.loan_type_id.loan_term_by_month:
-                raise ValidationError(_("Loan Term Must be less than or equal %s Month") % (self.loan_type_id.loan_term_by_month))
+                raise ValidationError(_("Loan Term Must be less then or equal %s Month")%(self.loan_type_id.loan_term_by_month))
         
         if self.loan_type_id and self.loan_amount:
-            if not self.is_amortization_customized and self.loan_amount > self.loan_type_id.loan_amount:
-                raise ValidationError(_("Loan Amount Must be less than or equal %s Amount") % (self.loan_type_id.loan_amount))
+            if self.loan_amount > self.loan_type_id.loan_amount:
+                raise ValidationError(_("Loan Amount Must be less then or equal %s Amount")%(self.loan_type_id.loan_amount))
             
         
     @api.model
     def create(self, vals):
-        # Normalize external customer_type values to the internal selection keys
-        # consumer -> individual, corporate -> company
-        ct = vals.get('customer_type')
-        if ct is not None:
-            ct_lower = str(ct).lower()
-            if ct_lower == 'consumer':
-                vals['customer_type'] = 'individual'
-            elif ct_lower == 'corporate':
-                vals['customer_type'] = 'company'
-        
-        # Populate customer details from lead if lead_id is provided
-        lead_id = vals.get('lead_id')
-        if lead_id:
-            lead = self.env['crm.lead'].browse(lead_id)
-            if lead.exists():
-                # Map customer details from lead to loan
-                customer_fields = [
-                    'customer_type', 'bvn', 'nin', 'partner_tin', 'bank_name', 'account_number',
-                    'marital_status', 'applicant_title', 'applicant_address',
-                    'nok_name', 'nok_phone', 'nok_address', 'nok_relationship', 'nok_occupation', 'nok_email',
-                    'salary', 'service_length', 'designation',
-                    'guarantor_title', 'guarantor_name', 'guarantor_phone', 'guarantor_email', 'guarantor_relationship',
-                    'company_phone', 'date_of_incorporation', 'annual_turnover', 'company_rc_number',
-                    'company_bank_name', 'company_bank_account_number', 'company_bank_account_name',
-                    'director_title', 'director_name', 'director_phone', 'director_email', 'director_nin',
-                    'director_date_of_birth', 'director_bvn', 'director_address', 'director_marital_status', 'director_designation',
-                    'loan_document_url', 'passport_url', 'govt_issued_id_url', 'staff_id_url', 'pay_slip_url',
-                    'bank_statement_url', 'utility_bill_url', 'certificate_of_incorporation_url',
-                    'loan_document_urls', 'passport_urls', 'govt_issued_id_urls', 'staff_id_urls',
-                    'pay_slip_urls', 'bank_statement_urls', 'utility_bill_urls', 'certificate_of_incorporation_urls',
-                    'external_reference', 'external_status', 'external_kyc_id'
-                ]
-                # Map employment company fields (lead uses company_name, loan uses employment_company_name)
-                if lead.customer_type == 'individual':
-                    if lead.company_name and not vals.get('employment_company_name'):
-                        vals['employment_company_name'] = lead.company_name
-                    if lead.company_address and not vals.get('employment_company_address'):
-                        vals['employment_company_address'] = lead.company_address
-                    if lead.company_email and not vals.get('employment_company_email'):
-                        vals['employment_company_email'] = lead.company_email
-                
-                for field in customer_fields:
-                    if hasattr(lead, field) and field not in vals and getattr(lead, field, False):
-                        vals[field] = getattr(lead, field)
-        
         # Assign sequence number only if it passes validation
         loan = super(dev_loan_loan, self).create(vals)
         if loan.name == '/':  # Check if sequence number is not yet assigned

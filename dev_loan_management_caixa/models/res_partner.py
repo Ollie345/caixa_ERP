@@ -26,29 +26,6 @@ class res_partner(models.Model):
         compute='_compute_borrower_status', store=True,
         string="Is Past Borrower"
     )
-    duplicate_bank_partner_ids = fields.Many2many(
-        'res.partner',
-        'res_partner_duplicate_bank_rel',
-        'partner_id',
-        'duplicate_partner_id',
-        string='Duplicate Bank Partners',
-        compute='_compute_duplicate_bank_partner_ids',
-        store=False,
-    )
-    available_peppol_eas = fields.Json(
-        compute='_compute_available_peppol_eas',
-        store=False,
-    )
-    
-    def _compute_duplicate_bank_partner_ids(self):
-        """Compute duplicate bank partners - placeholder implementation"""
-        for partner in self:
-            partner.duplicate_bank_partner_ids = [(5, 0, 0)]  # Clear all records
-    
-    def _compute_available_peppol_eas(self):
-        """Compute available PEPPOL EAS codes - placeholder implementation"""
-        for partner in self:
-            partner.available_peppol_eas = []
     
     @api.depends('loan_ids.state')
     def _compute_borrower_status(self):

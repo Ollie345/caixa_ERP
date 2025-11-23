@@ -90,24 +90,89 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                     <h1>
                         <field name="name" readonly="1"/>
                     </h1>
+                    
+                    <!-- Loan Information and Dates & Status -->
                     <group>
-                        <group>
+                        <group string="Loan Information">
                             <field name="client_id" readonly="state != 'draft'"
                                    context="{'default_is_allow_loan':True}"/>
                             <field name="domain_loan_type_ids" invisible="1"/>
+                            <field name="is_amortization_customized" invisible="1"/>
                             <field name="loan_type_id" readonly="state != 'draft'"
                                    domain="[('id', 'in', domain_loan_type_ids)]"
                                    options="{'no_create': True, 'no_quick_create': True, 'no_create_edit':True}"/>
-                            <field name="loan_term" readonly="state != 'draft'"/>
                             <field name="loan_amount" readonly="state != 'draft'"/>
+                            <field name="is_loan_manager" invisible="1"/>
+                            <field name="loan_term" 
+                                   readonly="state != 'draft' and (not is_amortization_customized or not is_loan_manager)"/>
                             <field name="loan_purpose" readonly="state != 'draft'"/>
                             <field name="collateral" readonly="state != 'draft'"/>
                             <field name="source_of_repayment" readonly="state != 'draft'"/>
+                            <field name="lead_id" readonly="1"/>
+                        </group>
+                        <group string="Dates &amp; Status">
+                            <field name="request_date" readonly="state != 'draft'"/>
+                            <field name="approve_date"
+                                   invisible="state in ['draft','confirm','cancel']"
+                                   readonly="1"/>
+                            <field name="disbursement_date"
+                                   invisible="state not in ['disburse','open','close']"
+                                   readonly="1"/>
+                            <field name="user_id" readonly="1"/>
+                            <field name="company_id" readonly="1"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Financial Summary -->
+                    <group string="Financial Summary">
+                        <group string="Loan Amounts">
                             <field name="total_interest"/>
                             <field name="emi_estimate"/>
-                            <field name="paid_amount"/>
                             <field name="total_estimated_paid_amount"/>
+                        </group>
+                        <group string="Payment Status">
+                            <field name="paid_amount"/>
                             <field name="remaing_amount"/>
+                            <field name="next_installment_date" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Interest Configuration -->
+                    <group string="Interest Configuration" invisible="not is_interest_apply">
+                        <group>
+                            <field name="is_interest_apply" invisible="1"/>
+                            <field name="is_amortization_customized" invisible="1"/>
+                            <field name="is_loan_manager" invisible="1"/>
+                            <label for="interest_rate"/>
+                            <div>
+                                <field name="interest_rate" 
+                                       readonly="state != 'draft' and (not is_amortization_customized or not is_loan_manager)"
+                                       force_save="1"/>
+                                <button name="action_customize_amortization" 
+                                        type="object" 
+                                        string="Customize Amortization"
+                                        class="oe_link"
+                                        invisible="is_amortization_customized or state != 'draft'"
+                                        groups="dev_loan_management_caixa.group_loan_manager"
+                                        help="Allow customization of amortization settings for this loan"/>
+                                <button name="%(action_update_rate)d" 
+                                        type="action" 
+                                        string="Update" 
+                                        class="oe_link"
+                                        invisible="state != 'open'"
+                                        context="{'default_rate':interest_rate}"/>
+                            </div>
+                            <field name="interest_mode" 
+                                   readonly="state != 'draft' and (not is_amortization_customized or not is_loan_manager)"/>
+                            <field name="none_interest_month" 
+                                   readonly="state != 'draft' and (not is_amortization_customized or not is_loan_manager)"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Processing Fees -->
+                    <group string="Processing Fees">
+                        <group>
                             <field name="processing_fee" readonly="state != 'draft'"/>
                             <field name="fee_type" invisible="processing_fee == False" readonly="state != 'draft'"/>
                             <field name="processing_fixed_amount"
@@ -117,32 +182,12 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                                    invisible="processing_fee == False or fee_type == 'fixed'"
                                    readonly="state not in ['draft','confirm','approve']"/>
                         </group>
+                    </group>
+                    
+                    <!-- Co-Borrower -->
+                    <group string="Co-Borrower">
                         <group>
-                            <field name="request_date" readonly="state != 'draft'"/>
-                            <field name="disbursement_date"
-                                   invisible="state not in ['disburse','open','close']"
-                                   readonly="1"/>
-                            <field name="approve_date"
-                                   invisible="state in ['draft','confirm','cancel']"
-                                   readonly="1"/>
-                            <field name="user_id" readonly="1"/>
-                            <field name="company_id" readonly="1"/>
                             <field name="co_borrower"/>
-                            <field name="is_interest_apply" invisible="1"/>
-                            <label for="interest_rate" invisible="not is_interest_apply"/>
-                            <div>
-                                <field name="interest_rate" readonly="1" force_save="1"
-                                       invisible="not is_interest_apply"/>
-                                <button name="%(action_update_rate)d" type="action" string='update' class="oe_link"
-                                        invisible="not is_interest_apply or state != 'open'"
-                                        context="{'default_rate':interest_rate}"/>
-                            </div>
-                            <field name="interest_mode" readonly="1" invisible="not is_interest_apply"/>
-                            <field name="none_interest_month" invisible="not is_interest_apply"
-                                   readonly="state != 'draft'"
-                            />
-                            <field name="next_installment_date" invisible="1"/>
-                            <field name="currency_id" invisible="1"/>
                         </group>
                     </group>
 
@@ -203,6 +248,125 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                                     />
                                 </list>
                             </field>
+                        </page>
+                        <page string='Customer Details'>
+                            <!-- Customer Type -->
+                            <group>
+                                <field name="customer_type"/>
+                            </group>
+                            
+                            <!-- Individual Customer Information -->
+                            <group string="Applicant Information" invisible="customer_type != 'individual'">
+                                <group>
+                                    <field name="applicant_title"/>
+                                    <field name="applicant_address"/>
+                                    <field name="bvn"/>
+                                    <field name="nin"/>
+                                    <field name="marital_status"/>
+                                </group>
+                                <group>
+                                    <field name="bank_name"/>
+                                    <field name="account_number"/>
+                                    <field name="partner_tin"/>
+                                </group>
+                            </group>
+                            
+                            <!-- Corporate Customer Information -->
+                            <group string="Company Information" invisible="customer_type != 'company'">
+                                <group>
+                                    <field name="company_phone"/>
+                                    <field name="date_of_incorporation"/>
+                                    <field name="annual_turnover"/>
+                                    <field name="company_rc_number"/>
+                                </group>
+                                <group>
+                                    <field name="company_bank_name"/>
+                                    <field name="company_bank_account_number"/>
+                                    <field name="company_bank_account_name"/>
+                                </group>
+                            </group>
+                            
+                            <!-- Director Information (Corporate) -->
+                            <group string="Director Information" invisible="customer_type != 'company'">
+                                <group>
+                                    <field name="director_title"/>
+                                    <field name="director_name"/>
+                                    <field name="director_phone"/>
+                                    <field name="director_email"/>
+                                    <field name="director_date_of_birth"/>
+                                    <field name="director_address"/>
+                                </group>
+                                <group>
+                                    <field name="director_bvn"/>
+                                    <field name="director_nin"/>
+                                    <field name="director_marital_status"/>
+                                    <field name="director_designation"/>
+                                </group>
+                            </group>
+                            
+                            <!-- Employment Details (Individual) -->
+                            <group string="Employment Details" invisible="customer_type != 'individual'">
+                                <group>
+                                    <field name="employment_company_name"/>
+                                    <field name="employment_company_address"/>
+                                    <field name="employment_company_email"/>
+                                    <field name="designation"/>
+                                </group>
+                                <group>
+                                    <field name="salary"/>
+                                    <field name="service_length"/>
+                                </group>
+                            </group>
+                            
+                            <!-- Next of Kin (Individual) -->
+                            <group string="Next of Kin" invisible="customer_type != 'individual'">
+                                <group>
+                                    <field name="nok_name"/>
+                                    <field name="nok_phone"/>
+                                    <field name="nok_email"/>
+                                    <field name="nok_relationship"/>
+                                </group>
+                                <group>
+                                    <field name="nok_address"/>
+                                    <field name="nok_occupation"/>
+                                </group>
+                            </group>
+                            
+                            <!-- Guarantor Information -->
+                            <group string="Guarantor Information">
+                                <group>
+                                    <field name="guarantor_title"/>
+                                    <field name="guarantor_name"/>
+                                    <field name="guarantor_phone"/>
+                                    <field name="guarantor_email"/>
+                                    <field name="guarantor_relationship"/>
+                                </group>
+                            </group>
+                            
+                            <!-- External Metadata -->
+                            <group string="External Reference" invisible="not external_reference">
+                                <group>
+                                    <field name="external_reference"/>
+                                    <field name="external_status"/>
+                                    <field name="external_kyc_id"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string='Document Links'>
+                            <group>
+                                <group string="Loan Documents">
+                                    <field name="loan_document_url" widget="url" placeholder="https://..."/>
+                                </group>
+                                <group string="KYC Documents">
+                                    <field name="passport_url" widget="url" placeholder="https://..."/>
+                                    <field name="govt_issued_id_url" widget="url" placeholder="https://..."/>
+                                    <field name="staff_id_url" widget="url" placeholder="https://..."/>
+                                    <field name="pay_slip_url" widget="url" placeholder="https://..."/>
+                                    <field name="bank_statement_url" widget="url" placeholder="https://..."/>
+                                    <field name="utility_bill_url" widget="url" placeholder="https://..."/>
+                                    <field name="certificate_of_incorporation_url" widget="url" placeholder="https://..." invisible="customer_type != 'company'"/>
+                                </group>
+                            </group>
                         </page>
                         <page string='Loan Proof Documents'>
                             <group>

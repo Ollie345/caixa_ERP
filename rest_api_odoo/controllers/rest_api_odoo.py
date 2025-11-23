@@ -232,7 +232,7 @@ class RestApi(http.Controller):
         else:
             return auth_api
 
-    @http.route(['/odoo_connect', '/odoo_connect/'], type="http", auth="none", csrf=False,
+    @http.route(['/odoo_connect'], type="http", auth="none", csrf=False,
                 methods=['GET'])
     def odoo_connect(self, **kw):
         """This is the controller which initializes the api transaction by
@@ -547,73 +547,299 @@ class RestApi(http.Controller):
         except Exception as e:
             _logger.error("Error creating loan lead: %s", str(e), exc_info=True)
             return ("<html><body><h2>Error creating lead: %s</h2><p>Check Odoo logs for details.</p></body></html>" % str(e))
-
-    @http.route(['/loans'], type='http', auth='none', methods=['GET'], csrf=False)
-    def get_all_loans(self, **kw):
-        """Return all loans with optional fields filter via query param:
-        ?fields=id,name,state,loan_amount"""
+    
+    @http.route(['/loan_requests'], type='http',
+                auth='none',
+                methods=['POST'], csrf=False)
+    def create_loan_request(self, **kw):
+        """Dedicated endpoint for creating loan requests directly with flat payload structure.
+        Uses API key authentication from rest_api_odoo.
+        Creates dev.loan.loan records directly (bypassing CRM leads).
+        """
+        import json
+        
+        # Authenticate using API key and get user
         api_key = request.httprequest.headers.get('api-key')
         if not api_key:
             return ("<html><body><h2>No <i>API Key</i> Provided</h2></body></html>")
-        # Resolve DB from headers or session
+        
+        # Get database name from headers or session
         db = request.httprequest.headers.get('db') or request.session.db
         if not db:
             db = getattr(request, 'db', None)
         if not db:
             return ("<html><body><h2>Database not specified. Please provide 'db' header.</h2></body></html>")
+        
+        # Initialize session with database
         try:
             request.session.update(http.get_default_session(), db=db)
         except Exception:
             pass
-        # Authenticate user by API key
+        
+        # Get user from API key
         user = request.env['res.users'].sudo().search([('api_key', '=', api_key)], limit=1)
         if not user:
             return ("<html><body><h2>Invalid <i>API Key</i>!</h2></body></html>")
+        
+        # Set up environment with authenticated user
         env = request.env(user=user.id)
-        # Fields handling
-        default_fields = ['id', 'name', 'state', 'client_id', 'loan_amount', 'loan_type_id', 'request_date', 'approve_date', 'disbursement_date']
-        fields_param = kw.get('fields')
-        fields = [f.strip() for f in fields_param.split(',')] if fields_param else default_fields
+        
+        # Get payload
         try:
-            records = env['dev.loan.loan'].sudo().search_read(domain=[], fields=fields)
-            # Convert date/datetime to isoformat
-            for rec in records:
-                for k, v in rec.items():
-                    if isinstance(v, (datetime, date)):
-                        rec[k] = v.isoformat()
-            payload = json.dumps({'records': records})
-            return request.make_response(data=payload, headers=[('Content-Type', 'application/json')])
+            payload = json.loads(request.httprequest.data)
         except Exception as e:
-            _logger.error("Error fetching loans: %s", str(e), exc_info=True)
-            return ("<html><body><h2>Error fetching loans</h2></body></html>")
-
-    @http.route(['/loans/<int:loan_id>/stage'], type='http', auth='none', methods=['GET'], csrf=False)
-    def get_loan_stage(self, loan_id, **kw):
-        """Return the current stage (state) of a loan by ID."""
-        api_key = request.httprequest.headers.get('api-key')
-        if not api_key:
-            return ("<html><body><h2>No <i>API Key</i> Provided</h2></body></html>")
-        # Resolve DB
-        db = request.httprequest.headers.get('db') or request.session.db
-        if not db:
-            db = getattr(request, 'db', None)
-        if not db:
-            return ("<html><body><h2>Database not specified. Please provide 'db' header.</h2></body></html>")
+            _logger.error("Error parsing JSON: %s", str(e))
+            return ("<html><body><h2>Invalid JSON Data</h2></body></html>")
+        
+        # Helper functions
+        def _get(key, default=None):
+            return payload.get(key, default)
+        
+        def _float(val):
+            try:
+                return float(val) if val else 0.0
+            except (ValueError, TypeError):
+                return 0.0
+        
+        def _int(val):
+            try:
+                if isinstance(val, str):
+                    digits = "".join(ch for ch in val if ch.isdigit())
+                    return int(digits) if digits else 0
+                return int(val) if val else 0
+            except (ValueError, TypeError):
+                return 0
+        
+        def _clean_vals(vals_dict):
+            """Remove None and empty string values from dict, but keep False for Many2one fields"""
+            cleaned = {}
+            for k, v in vals_dict.items():
+                if v is False:
+                    cleaned[k] = v
+                elif v is not None and v != "":
+                    cleaned[k] = v
+            return cleaned
+        
+        # Normalize customer_type
+        ctype_raw = (_get("customer_type") or "").lower().strip()
+        ctype_map = {
+            "consumer": "individual",
+            "corporate": "company",
+            "cooperate": "company",
+            "individual": "individual",
+            "company": "company",
+        }
+        ctype = ctype_map.get(ctype_raw)
+        
+        # Collect document URLs from flat payload
+        doc_urls = {
+            "loan_documents": [],
+            "passport": [],
+            "govt_issued_id": [],
+            "staff_id": [],
+            "pay_slip": [],
+            "bank_statement": [],
+            "utility_bill": [],
+            "certificate_of_incorporation": [],
+        }
+        
+        for key, value in payload.items():
+            if key.startswith("loan_documents_"):
+                if value:
+                    doc_urls["loan_documents"].append(value)
+            elif key.startswith("kyc_documents_passport"):
+                if value:
+                    doc_urls["passport"].append(value)
+            elif key.startswith("kyc_documents_govt_issued_id"):
+                if value:
+                    doc_urls["govt_issued_id"].append(value)
+            elif key.startswith("kyc_documents_staff_id"):
+                if value:
+                    doc_urls["staff_id"].append(value)
+            elif key.startswith("kyc_documents_pay_slip"):
+                if value:
+                    doc_urls["pay_slip"].append(value)
+            elif key.startswith("kyc_documents_bank_statement"):
+                if value:
+                    doc_urls["bank_statement"].append(value)
+            elif key.startswith("kyc_documents_utility_bill"):
+                if value:
+                    doc_urls["utility_bill"].append(value)
+            elif key.startswith("kyc_documents_certificate_of_incorporation"):
+                if value:
+                    doc_urls["certificate_of_incorporation"].append(value)
+        
+        # Base loan values
+        vals = {
+            "state": "draft",
+            "user_id": int(_get("user_id")) if _get("user_id") else user.id,
+            "loan_amount": _float(_get("loan_amount") or _get("amount")),
+            "loan_term": _int(_get("loan_term") or _get("tenor")),
+            "loan_purpose": _get("loan_purpose") or _get("purpose"),
+            "collateral": _get("collateral"),
+            "source_of_repayment": _get("source_of_repayment"),
+            "customer_type": ctype or "individual",
+            # External metadata
+            "external_reference": _get("reference"),
+            "external_status": _get("status"),
+            "external_kyc_id": str(_get("kyc_id")) if _get("kyc_id") is not None else False,
+            # Document URL fields (first link per type)
+            "loan_document_url": doc_urls["loan_documents"][0] if doc_urls["loan_documents"] else False,
+            "passport_url": doc_urls["passport"][0] if doc_urls["passport"] else False,
+            "govt_issued_id_url": doc_urls["govt_issued_id"][0] if doc_urls["govt_issued_id"] else False,
+            "staff_id_url": doc_urls["staff_id"][0] if doc_urls["staff_id"] else False,
+            "pay_slip_url": doc_urls["pay_slip"][0] if doc_urls["pay_slip"] else False,
+            "bank_statement_url": doc_urls["bank_statement"][0] if doc_urls["bank_statement"] else False,
+            "utility_bill_url": doc_urls["utility_bill"][0] if doc_urls["utility_bill"] else False,
+            "certificate_of_incorporation_url": doc_urls["certificate_of_incorporation"][0] if doc_urls["certificate_of_incorporation"] else False,
+            # Preserve all URLs as JSON strings
+            "loan_document_urls": json.dumps(doc_urls["loan_documents"]),
+            "passport_urls": json.dumps(doc_urls["passport"]),
+            "govt_issued_id_urls": json.dumps(doc_urls["govt_issued_id"]),
+            "staff_id_urls": json.dumps(doc_urls["staff_id"]),
+            "pay_slip_urls": json.dumps(doc_urls["pay_slip"]),
+            "bank_statement_urls": json.dumps(doc_urls["bank_statement"]),
+            "utility_bill_urls": json.dumps(doc_urls["utility_bill"]),
+            "certificate_of_incorporation_urls": json.dumps(doc_urls["certificate_of_incorporation"]),
+        }
+        
+        # Handle loan_type_id (required for loan)
+        if _get("loan_type_id") is not None:
+            try:
+                vals["loan_type_id"] = int(_get("loan_type_id"))
+            except Exception:
+                return ("<html><body><h2>Invalid loan_type_id</h2></body></html>")
+        else:
+            return ("<html><body><h2>loan_type_id is required</h2></body></html>")
+        
+        # Corporate vs Individual mapping
+        if ctype == "company":
+            comp_name = _get("company_name") or _get("reference") or "Company"
+            corp_vals = {
+                "company_phone": _get("company_phone"),
+                "date_of_incorporation": _get("date_of_incorporation"),
+                "annual_turnover": _float(_get("annual_turnover")),
+                "company_rc_number": _get("company_rc_number") or _get("rc_number"),
+                "company_bank_name": _get("company_bank_name"),
+                "company_bank_account_number": _get("company_bank_account_number"),
+                "company_bank_account_name": _get("company_bank_account_name"),
+                "director_title": _get("director_title"),
+                "director_name": " ".join(filter(None, [
+                    _get("director_first_name"),
+                    _get("director_middle_name"),
+                    _get("director_surname")
+                ])) or False,
+                "director_phone": _get("director_phone"),
+                "director_email": _get("director_email"),
+                "director_nin": _get("director_nin"),
+                "director_bvn": _get("director_bvn"),
+                "director_date_of_birth": _get("director_date_of_birth") or _get("director_dob"),
+                "director_address": _get("director_address"),
+                "director_marital_status": _get("director_marital_status"),
+                "director_designation": _get("director_designation"),
+            }
+            vals.update(_clean_vals(corp_vals))
+        else:
+            indiv_vals = {
+                "bvn": _get("applicant_bvn") or _get("bvn"),
+                "nin": _get("applicant_nin") or _get("nin"),
+                "marital_status": _get("applicant_marital_status") or _get("marital_status"),
+                "applicant_title": _get("applicant_title"),
+                "applicant_address": _get("applicant_address"),
+                "bank_name": _get("bank_name"),
+                "account_number": _get("account_number"),
+                "nok_name": _get("next_of_kin_name"),
+                "nok_phone": _get("next_of_kin_phone"),
+                "nok_address": _get("next_of_kin_address"),
+                "nok_relationship": _get("next_of_kin_relationship"),
+                "nok_occupation": _get("next_of_kin_occupation"),
+                "nok_email": _get("next_of_kin_email"),
+                "employment_company_name": _get("employment_company_name"),
+                "employment_company_email": _get("employment_company_email"),
+                "employment_company_address": _get("employment_company_address"),
+                "salary": _float(_get("employment_salary")),
+                "service_length": _int(_get("employment_length_of_service")),
+                "designation": _get("employment_designation"),
+            }
+            vals.update(_clean_vals(indiv_vals))
+        
+        # Guarantor fields
+        guar_vals = {
+            "guarantor_title": _get("guarantor_title"),
+            "guarantor_name": _get("guarantor_name"),
+            "guarantor_phone": _get("guarantor_phone"),
+            "guarantor_email": _get("guarantor_email"),
+            "guarantor_relationship": _get("guarantor_relationship"),
+        }
+        vals.update(_clean_vals(guar_vals))
+        
+        vals = _clean_vals(vals)
+        
+        # Create partner
+        partner_id = False
+        if ctype == "company":
+            partner_name = _get("company_name") or _get("reference") or "Company"
+            partner = env["res.partner"].sudo().search([
+                ("name", "=", partner_name),
+                ("is_company", "=", True)
+            ], limit=1)
+            if not partner and partner_name:
+                partner = env["res.partner"].sudo().create({
+                    "name": partner_name,
+                    "is_company": True,
+                    "email": _get("company_email"),
+                    "phone": _get("company_phone"),
+                    "street": _get("company_address"),
+                    "is_allow_loan": True,
+                })
+            partner_id = partner.id if partner else False
+        else:
+            email = _get("applicant_email")
+            phone = _get("applicant_phone")
+            partner = False
+            if email:
+                partner = env["res.partner"].sudo().search([
+                    ("email", "=", email),
+                    ("is_company", "=", False)
+                ], limit=1)
+            if not partner and phone:
+                partner = env["res.partner"].sudo().search([
+                    ("phone", "=", phone),
+                    ("is_company", "=", False)
+                ], limit=1)
+            if not partner:
+                full_name = " ".join(filter(None, [
+                    _get("applicant_first_name"),
+                    _get("applicant_middle_name"),
+                    _get("applicant_surname")
+                ])) or _get("reference") or "Customer"
+                partner = env["res.partner"].sudo().create({
+                    "name": full_name,
+                    "is_company": False,
+                    "email": email,
+                    "phone": phone,
+                    "street": _get("applicant_address"),
+                    "is_allow_loan": True,
+                })
+            partner_id = partner.id if partner else False
+        
+        if partner_id:
+            vals["client_id"] = partner_id
+        
+        # Create loan request
         try:
-            request.session.update(http.get_default_session(), db=db)
-        except Exception:
-            pass
-        # Authenticate user
-        user = request.env['res.users'].sudo().search([('api_key', '=', api_key)], limit=1)
-        if not user:
-            return ("<html><body><h2>Invalid <i>API Key</i>!</h2></body></html>")
-        env = request.env(user=user.id)
-        try:
-            loan = env['dev.loan.loan'].sudo().browse(loan_id)
-            if not loan.exists():
-                return ("<html><body><h2>Loan not found</h2></body></html>")
-            payload = json.dumps({'id': loan.id, 'state': loan.state})
-            return request.make_response(data=payload, headers=[('Content-Type', 'application/json')])
+            loan = env["dev.loan.loan"].sudo().create(vals)
+            # Trigger onchange to set defaults from loan type
+            loan.onchange_loan_type()
+            
+            result = json.dumps({
+                "id": loan.id,
+                "name": loan.name,
+                "client_id": loan.client_id.id if loan.client_id else partner_id,
+                "customer_type": loan.customer_type,
+                "state": loan.state,
+            })
+            return request.make_response(data=result, headers=[('Content-Type', 'application/json')])
         except Exception as e:
-            _logger.error("Error fetching loan stage: %s", str(e), exc_info=True)
-            return ("<html><body><h2>Error fetching loan stage</h2></body></html>")
+            _logger.error("Error creating loan request: %s", str(e), exc_info=True)
+            return ("<html><body><h2>Error creating loan request: %s</h2><p>Check Odoo logs for details.</p></body></html>" % str(e))

@@ -20,6 +20,8 @@ class res_partner(models.Model):
     borrower_category_id = fields.Many2one('borrower.category',string="Borrower Category")
     # Fallback field to satisfy views referencing this field from other modules
     duplicate_bank_partner_ids = fields.Boolean(string="Duplicate Bank Partners", default=False)
+    # Fallback placeholder for base view compatibility in some editions
+    available_peppol_eas = fields.Char(string="Available PEPPOL EAS")
     is_active_borrower = fields.Boolean(
         compute='_compute_borrower_status', store=True,
         string="Is Active Borrower"

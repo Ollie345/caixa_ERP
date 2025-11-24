@@ -45,8 +45,12 @@
 				],
 				"url": {
 					"raw": "{{base_url}}/odoo_connect",
-					"host": ["{{base_url}}"],
-					"path": ["odoo_connect"]
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"odoo_connect"
+					]
 				},
 				"description": "Generate API key for authentication. Save the api-key from response to use in other requests."
 			},
@@ -84,8 +88,12 @@
 				},
 				"url": {
 					"raw": "{{base_url}}/loan_leads",
-					"host": ["{{base_url}}"],
-					"path": ["loan_leads"]
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"loan_leads"
+					]
 				},
 				"description": "Create a consumer loan lead with flat payload structure"
 			},
@@ -123,8 +131,12 @@
 				},
 				"url": {
 					"raw": "{{base_url}}/loan_leads",
-					"host": ["{{base_url}}"],
-					"path": ["loan_leads"]
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"loan_leads"
+					]
 				},
 				"description": "Create a corporate loan lead with flat payload structure"
 			},
@@ -162,8 +174,12 @@
 				},
 				"url": {
 					"raw": "{{base_url}}/send_request?model=crm.lead&Id=1",
-					"host": ["{{base_url}}"],
-					"path": ["send_request"],
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"send_request"
+					],
 					"query": [
 						{
 							"key": "model",
@@ -217,8 +233,12 @@
 				},
 				"url": {
 					"raw": "{{base_url}}/send_request?model=crm.lead",
-					"host": ["{{base_url}}"],
-					"path": ["send_request"],
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"send_request"
+					],
 					"query": [
 						{
 							"key": "model",
@@ -248,8 +268,12 @@
 				],
 				"url": {
 					"raw": "{{base_url}}/loans?fields=id,name,state,loan_amount",
-					"host": ["{{base_url}}"],
-					"path": ["loans"],
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"loans"
+					],
 					"query": [
 						{
 							"key": "fields",
@@ -280,8 +304,14 @@
 				],
 				"url": {
 					"raw": "{{base_url}}/loans/{{loan_id}}/stage",
-					"host": ["{{base_url}}"],
-					"path": ["loans", "{{loan_id}}", "stage"]
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"loans",
+						"{{loan_id}}",
+						"stage"
+					]
 				},
 				"description": "Get the current stage (state) for a given loan ID."
 			},
@@ -314,8 +344,12 @@
 				},
 				"url": {
 					"raw": "{{base_url}}/loan_requests",
-					"host": ["{{base_url}}"],
-					"path": ["loan_requests"]
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"loan_requests"
+					]
 				},
 				"description": "Create a consumer loan request directly (bypasses CRM leads). Requires loan_type_id."
 			},
@@ -348,8 +382,12 @@
 				},
 				"url": {
 					"raw": "{{base_url}}/loan_requests",
-					"host": ["{{base_url}}"],
-					"path": ["loan_requests"]
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"loan_requests"
+					]
 				},
 				"description": "Create a corporate loan request directly (bypasses CRM leads). Requires loan_type_id."
 			},

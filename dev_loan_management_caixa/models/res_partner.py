@@ -18,6 +18,8 @@ class res_partner(models.Model):
     is_allow_loan = fields.Boolean('Allow Loan')
     loan_request = fields.Integer('Loan Request Per Year', default=1)
     borrower_category_id = fields.Many2one('borrower.category',string="Borrower Category")
+    # Fallback field to satisfy views referencing this field from other modules
+    duplicate_bank_partner_ids = fields.Boolean(string="Duplicate Bank Partners", default=False)
     is_active_borrower = fields.Boolean(
         compute='_compute_borrower_status', store=True,
         string="Is Active Borrower"

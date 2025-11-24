@@ -286,6 +286,74 @@
 				"description": "Get the current stage (state) for a given loan ID."
 			},
 			"response": []
+		},
+		{
+			"name": "8. Create Loan Request (Consumer)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "api-key",
+						"value": "{{api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "db",
+						"value": "{{db}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"loan_type_id\": 1,\n  \"amount\": \"150000\",\n  \"tenor\": \"12\",\n  \"purpose\": \"Working capital\",\n  \"applicant_first_name\": \"John\",\n  \"applicant_surname\": \"Doe\",\n  \"applicant_email\": \"john@example.com\",\n  \"applicant_phone\": \"08012345678\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/loan_requests",
+					"host": ["{{base_url}}"],
+					"path": ["loan_requests"]
+				},
+				"description": "Create a consumer loan request directly (bypasses CRM leads). Requires loan_type_id."
+			},
+			"response": []
+		},
+		{
+			"name": "9. Create Loan Request (Corporate)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "api-key",
+						"value": "{{api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "db",
+						"value": "{{db}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"loan_type_id\": 1,\n  \"amount\": \"300000\",\n  \"tenor\": \"18\",\n  \"purpose\": \"Expansion\",\n  \"customer_type\": \"corporate\",\n  \"company_name\": \"Example Tech Ltd\",\n  \"company_email\": \"admin@example.com\",\n  \"company_phone\": \"08011223344\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/loan_requests",
+					"host": ["{{base_url}}"],
+					"path": ["loan_requests"]
+				},
+				"description": "Create a corporate loan request directly (bypasses CRM leads). Requires loan_type_id."
+			},
+			"response": []
 		}
 	],
 	"variable": [

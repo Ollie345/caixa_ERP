@@ -4,7 +4,7 @@ class DevLoanApproveWizard(models.TransientModel):
     _name = 'dev.loan.approve.wizard'
     _description = 'Approve Loan Wizard'
 
-    loan_id = fields.Many2one('dev.loan.loan', string="Loan")
+    loan_id = fields.Many2one('dev.loan.loan', string="Loan", required=True)
     approval_reason = fields.Text('Approval Reason', required=True)
 
     def action_confirm_approve(self):

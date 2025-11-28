@@ -5,7 +5,7 @@
         <field name="arch" type="xml">
             <form string="Approve Loan">
                 <group>
-                    <field name="loan_id" readonly="1"/>
+                    <field name="loan_id"/>
                     <field name="approval_reason"/>
                 </group>
                 <footer>

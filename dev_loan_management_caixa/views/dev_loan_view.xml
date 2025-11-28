@@ -214,8 +214,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                         <!-- Approve Comment -->
                         <group string="Loan Officer Comment" invisible="state == 'draft'" groups="dev_loan_management_caixa.group_loan_officer,dev_loan_management_caixa.group_loan_manager,base.group_system">
                             <field name="comment"
-                                   readonly="state != 'review'"
-                                   required="1"/>
+                                   readonly="state != 'review'"/>
                         </group>
                     </group>
 

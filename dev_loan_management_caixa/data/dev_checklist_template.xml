@@ -1,0 +1,177 @@
+<odoo>
+    <!-- =================== Payday Loans =================== -->
+    <record id="template_payday_line1" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_payday"/>
+        <field name="name">BVN and employer verification</field>
+    </record>
+
+    <record id="template_payday_line2" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_payday"/>
+        <field name="name">Salary confirmation and payslip validation</field>
+    </record>
+
+    <record id="template_payday_line3" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_payday"/>
+        <field name="name">Employment confirmation via partner organization portal</field>
+    </record>
+
+    <record id="template_payday_line4" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_payday"/>
+        <field name="name">Prepare 1 % fee invoice for payment</field>
+    </record>
+
+    <record id="template_payday_line5" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_payday"/>
+        <field name="name">Employer risk rating review</field>
+    </record>
+
+    <record id="template_payday_line6" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_payday"/>
+        <field name="name">Debt-to-income ratio and repayment capacity check</field>
+    </record>
+
+    <record id="template_payday_line7" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_payday"/>
+        <field name="name">Approval or rejection with comments</field>
+    </record>
+
+    <!-- Level 2: Second Level Approver -->
+    <record id="template_payday_line8" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_payday"/>
+        <field name="name">Confirm 1 % processing fee payment</field>
+    </record>
+
+    <record id="template_payday_line9" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_payday"/>
+        <field name="name">Verify virtual wallet creation</field>
+    </record>
+
+    <record id="template_payday_line10" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_payday"/>
+        <field name="name">Approve fund disbursement authorization</field>
+    </record>
+
+    <!-- =================== SME Loans =================== -->
+    <record id="template_sme_line1" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_sme"/>
+        <field name="name">CAC registration and KYC verification</field>
+    </record>
+
+    <record id="template_sme_line2" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_sme"/>
+        <field name="name">Financial statement upload</field>
+    </record>
+
+    <record id="template_sme_line3" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_sme"/>
+        <field name="name">Preliminary cashflow and viability assessment</field>
+    </record>
+
+    <record id="template_sme_line4" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_sme"/>
+        <field name="name">Collateral documentation check</field>
+    </record>
+
+    <record id="template_sme_line5" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_sme"/>
+        <field name="name">Business viability score</field>
+    </record>
+
+    <record id="template_sme_line6" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_sme"/>
+        <field name="name">Management competence assessment</field>
+    </record>
+
+    <record id="template_sme_line7" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_sme"/>
+        <field name="name">Asset coverage ratio</field>
+    </record>
+
+    <record id="template_sme_line8" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_sme"/>
+        <field name="name">Cashflow projections validation</field>
+    </record>
+
+    <record id="template_sme_line9" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_sme"/>
+        <field name="name">Approval decision</field>
+    </record>
+
+    <!-- Level 2: Second Level Approver -->
+    <record id="template_sme_line10" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_sme"/>
+        <field name="name">Confirm 1 % processing fee payment</field>
+    </record>
+
+    <record id="template_sme_line11" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_sme"/>
+        <field name="name">Verify wallet creation and account linkage</field>
+    </record>
+
+    <record id="template_sme_line12" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_sme"/>
+        <field name="name">Confirm disbursement limits within policy</field>
+    </record>
+
+    <record id="template_sme_line13" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_sme"/>
+        <field name="name">Authorize fund release</field>
+    </record>
+
+    <!-- =================== LPO Financing =================== -->
+    <record id="template_lpo_line1" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_lpo"/>
+        <field name="name">LPO authenticity check</field>
+    </record>
+
+    <record id="template_lpo_line2" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_lpo"/>
+        <field name="name">Principal contract and relationship verification</field>
+    </record>
+
+    <record id="template_lpo_line3" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_lpo"/>
+        <field name="name">Supplier capacity and delivery capability pre-check</field>
+    </record>
+
+    <record id="template_lpo_line4" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_lpo"/>
+        <field name="name">Contract margin adequacy review</field>
+    </record>
+
+    <record id="template_lpo_line5" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_lpo"/>
+        <field name="name">Principal payment credibility assessment</field>
+    </record>
+
+    <record id="template_lpo_line6" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_lpo"/>
+        <field name="name">Delivery timeline and risk analysis</field>
+    </record>
+
+    <record id="template_lpo_line7" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_lpo"/>
+        <field name="name">Approval decision</field>
+    </record>
+
+    <!-- Level 2: Second Level Approver -->
+    <record id="template_lpo_line8" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_lpo"/>
+        <field name="name">Confirm 1 % upfront fee payment</field>
+    </record>
+
+    <record id="template_lpo_line9" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_lpo"/>
+        <field name="name">Validate milestone-based disbursement structure</field>
+    </record>
+
+    <record id="template_lpo_line10" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_lpo"/>
+        <field name="name">Verify BaaS wallet integration and principal repayment control</field>
+    </record>
+
+    <record id="template_lpo_line11" model="dev.checklist.template.line">
+        <field name="type_id" ref="loan_type_lpo"/>
+        <field name="name">Authorize fund disbursement</field>
+    </record>
+</odoo>

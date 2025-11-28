@@ -20,5 +20,6 @@ from . import dev_loan_account_summary
 from . import create_task
 from . import generate_notice
 from . import dev_loan_restructure_wizard
+from . import dev_loan_approve_wizard
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

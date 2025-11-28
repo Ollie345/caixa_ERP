@@ -59,14 +59,14 @@ class dev_loan_loan(models.Model):
             record.is_loan_manager = self.env.user.has_group('dev_loan_management_caixa.group_loan_manager')
     
     state = fields.Selection([('draft','Draft'),
-                              ('confirm','Confirm'),
-                              ('review','Reviewed'),
-                              ('approve','Approve'),
-                              ('disburse','Disburse'),
+                              ('review','Review'),
+                              ('confirm','Confirmed'),
+                              ('approve','Approved'),
+                              ('disburse','Disbursed'),
                               ('open','Open'),
-                              ('close','Close'),
+                              ('close','Closed'),
                               ('cancel','Cancel'),
-                              ('reject','Reject')], string='Status', required="1", default='draft',tracking=1)
+                              ('reject','Rejected')], string='Status', required="1", default='draft',tracking=1)
     
     
     installment_ids = fields.One2many('dev.loan.installment','loan_id', string='Installments')
@@ -76,6 +76,8 @@ class dev_loan_loan(models.Model):
     remaing_amount = fields.Monetary('Remaining Amount', compute='get_total_interest')
     total_estimated_paid_amount = fields.Monetary('Total Estimated Amount To Pay', compute='get_total_estimated_paid_amount')
     notes = fields.Text('Notes')
+    approve_reason = fields.Text('Approve Reason', copy=False)
+    approve_user_id = fields.Many2one('res.users','Approved By', copy=False)
     reject_reason = fields.Text('Reject Reason', copy=False)
     reject_user_id = fields.Many2one('res.users','Reject By', copy=False)
     company_id = fields.Many2one('res.company', string='Company', default=lambda self:self.env.user.company_id.id)
@@ -217,8 +219,19 @@ class dev_loan_loan(models.Model):
     external_reference = fields.Char('External Reference')
     external_status = fields.Char('External Status')
     external_kyc_id = fields.Char('External KYC ID')
-    
-    
+
+    # checklist
+    comment = fields.Char('Comment')
+    checklist_item_ids = fields.Many2many(
+        "dev.checklist.template.line",
+        string="Checklist"
+    )
+    #
+    # @api.onchange('loan_type_id')
+    # def _onchange_loan_type(self):
+    #     for rec in self:
+    #         rec.checklist_item_ids = [(5, 0, 0)]  # Clear
+
     def compute_loan_notice_count(self):
        for loan in self:
             loan_ids=self.env['ln.notice'].search([('partner_id','=',self.client_id.id),('loan_id','=',self.id)])
@@ -560,7 +573,7 @@ class dev_loan_loan(models.Model):
             for installment in self.installment_ids:
                 installment.with_context({'force_delete':True}).unlink()
         opening_balance = self.loan_amount
-        if self.state == 'draft':
+        if self.state == 'review':
             date = self.request_date
         else:
             date = date
@@ -757,8 +770,12 @@ class dev_loan_loan(models.Model):
                     else:
                         email= user.partner_id.email
         return email
-        
-        
+
+    # SUbmit for review button
+    def action_submit_loan(self):
+        self.ensure_one()
+        self.write({'state': 'review'})
+
     def action_confirm_loan(self):
         self.compute_installment()
         ir_model_data = self.env['ir.model.data']
@@ -772,14 +789,22 @@ class dev_loan_loan(models.Model):
             if self.percentage != 100.0:
                 raise ValidationError(_("not submitted 100% Document so please submit "))
         self.state = 'confirm'
-    
-    def action_approve_loan(self):
-        self.state = 'approve'
-        if self.loan_type_id:
-            self.loan_account_id = self.loan_type_id.loan_account_id and self.loan_type_id.loan_account_id.id or False
-            self.disburse_journal_id = self.loan_type_id.disburse_journal_id and self.loan_type_id.disburse_journal_id.id or False
-        self.approve_date = date.today()
-        
+
+    def action_approve_loan(self, reason=None):
+        """Approve the loan directly or via wizard.
+        If `reason` is provided, it sets approve_reason; otherwise it stays empty."""
+        for loan in self:
+            loan.state = 'approve'
+            loan.approve_user_id = self.env.user
+            loan.approve_date = date.today()
+            if reason:
+                loan.approve_reason = reason
+
+            # Set account and journal if loan type is defined
+            if loan.loan_type_id:
+                loan.loan_account_id = loan.loan_type_id.loan_account_id.id if loan.loan_type_id.loan_account_id else False
+                loan.disburse_journal_id = loan.loan_type_id.disburse_journal_id.id if loan.loan_type_id.disburse_journal_id else False
+
     def action_set_to_draft(self):
         if self.installment_ids:
             for installment in self.installment_ids:

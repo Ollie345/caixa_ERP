@@ -11,22 +11,32 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
         <field name="arch" type="xml">
             <form string="Loan">
                 <header>
-                    <button name="action_confirm_loan" invisible="state != 'draft'" string="Confirm"
-                            class="btn-primary" type="object" groups="dev_loan_management_caixa.group_loan_user"/>
+                    <button name="action_submit_loan" invisible="state != 'draft'" string="Submit"
+                            class="btn-primary" type="object"
+                            groups="dev_loan_management_caixa.group_loan_officer,base.group_system"/>
 
-                    <button name="compute_installment" invisible="state != 'draft'" string='Calculate Installment'
+                    <button name="action_confirm_loan" invisible="state != 'review'" string="Confirm"
+                            class="btn-primary" type="object"
+                            groups="dev_loan_management_caixa.group_loan_manager,base.group_system"/>
+
+                    <button name="compute_installment" invisible="state != 'review'" string='Calculate Installment'
                             type="object"
-                            class="btn-primary" groups="dev_loan_management_caixa.group_loan_user"/>
+                            class="btn-primary"
+                            groups="dev_loan_management_caixa.group_loan_officer,base.group_system"/>
 
                     <button name="action_set_to_draft" type="object" invisible="state != 'reject'" string='Set to Draft'
-                            groups="dev_loan_management_caixa.group_loan_user"/>
+                            groups="dev_loan_management_caixa.group_loan_manager"/>
 
 
-                    <button name="action_approve_loan" invisible="state != 'confirm'" string="Approve"
-                            class="btn-primary" type="object" groups="dev_loan_management_caixa.group_loan_manager"/>
+                    <button name="%(action_dev_loan_approve_wizard)d"
+                            string="Approve"
+                            type="action"
+                            class="btn-primary"
+                            invisible="state != 'confirm'"
+                            groups="dev_loan_management_caixa.group_loan_manager,base.group_system"/>
 
                     <button name="%(action_dev_loan_reject_form)d" invisible="state != 'confirm'" string="Reject"
-                            type="action" groups="dev_loan_management_caixa.group_loan_manager"/>
+                            type="action" groups="dev_loan_management_caixa.group_loan_manager,base.group_system"/>
 
                     <button name="action_disburse_loan" invisible="state != 'approve'" string="Disburse Loan"
                             class="btn-primary" type="object" groups="account.group_account_invoice"/>
@@ -55,7 +65,8 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                     />
 
 
-                    <field name="state" widget="statusbar" statusbar_visible="draft,confirm,approve"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,review,confirm,approve,disburse,open,close"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -90,7 +101,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                     <h1>
                         <field name="name" readonly="1"/>
                     </h1>
-                    
+
                     <!-- Loan Information and Dates & Status -->
                     <group>
                         <group string="Loan Information">
@@ -103,7 +114,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                                    options="{'no_create': True, 'no_quick_create': True, 'no_create_edit':True}"/>
                             <field name="loan_amount" readonly="state != 'draft'"/>
                             <field name="is_loan_manager" invisible="1"/>
-                            <field name="loan_term" 
+                            <field name="loan_term"
                                    readonly="state != 'draft' and (not is_amortization_customized or not is_loan_manager)"/>
                             <field name="loan_purpose" readonly="state != 'draft'"/>
                             <field name="collateral" readonly="state != 'draft'"/>
@@ -123,7 +134,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                             <field name="currency_id" invisible="1"/>
                         </group>
                     </group>
-                    
+
                     <!-- Financial Summary -->
                     <group string="Financial Summary">
                         <group string="Loan Amounts">
@@ -137,7 +148,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                             <field name="next_installment_date" readonly="1"/>
                         </group>
                     </group>
-                    
+
                     <!-- Interest Configuration -->
                     <group string="Interest Configuration" invisible="not is_interest_apply">
                         <group>
@@ -146,30 +157,30 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                             <field name="is_loan_manager" invisible="1"/>
                             <label for="interest_rate"/>
                             <div>
-                                <field name="interest_rate" 
+                                <field name="interest_rate"
                                        readonly="state != 'draft' and (not is_amortization_customized or not is_loan_manager)"
                                        force_save="1"/>
-                                <button name="action_customize_amortization" 
-                                        type="object" 
+                                <button name="action_customize_amortization"
+                                        type="object"
                                         string="Customize Amortization"
                                         class="oe_link"
                                         invisible="is_amortization_customized or state != 'draft'"
                                         groups="dev_loan_management_caixa.group_loan_manager"
                                         help="Allow customization of amortization settings for this loan"/>
-                                <button name="%(action_update_rate)d" 
-                                        type="action" 
-                                        string="Update" 
+                                <button name="%(action_update_rate)d"
+                                        type="action"
+                                        string="Update"
                                         class="oe_link"
                                         invisible="state != 'open'"
                                         context="{'default_rate':interest_rate}"/>
                             </div>
-                            <field name="interest_mode" 
+                            <field name="interest_mode"
                                    readonly="state != 'draft' and (not is_amortization_customized or not is_loan_manager)"/>
-                            <field name="none_interest_month" 
+                            <field name="none_interest_month"
                                    readonly="state != 'draft' and (not is_amortization_customized or not is_loan_manager)"/>
                         </group>
                     </group>
-                    
+
                     <!-- Processing Fees -->
                     <group string="Processing Fees">
                         <group>
@@ -183,13 +194,31 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                                    readonly="state not in ['draft','confirm','approve']"/>
                         </group>
                     </group>
-                    
+
                     <!-- Co-Borrower -->
                     <group string="Co-Borrower">
                         <group>
                             <field name="co_borrower"/>
                         </group>
                     </group>
+
+                    <group>
+                        <!-- Approval Checklist -->
+                        <group string="Approval Checklist" invisible="state == 'draft'"
+                               groups="dev_loan_management_caixa.group_loan_officer,dev_loan_management_caixa.group_loan_manager,base.group_system">
+                            <field name="checklist_item_ids" widget="many2many_checkboxes"
+                                   domain="[('type_id', '=', loan_type_id)]"
+                                   readonly="state not in ['review']"/>
+                        </group>
+
+                        <!-- Approve Comment -->
+                        <group string="Loan Officer Comment" invisible="state == 'draft'" groups="dev_loan_management_caixa.group_loan_officer,dev_loan_management_caixa.group_loan_manager,base.group_system">
+                            <field name="comment"
+                                   readonly="state != 'review'"
+                                   required="1"/>
+                        </group>
+                    </group>
+
 
                     <notebook>
                         <page string='Installments'>
@@ -254,7 +283,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                             <group>
                                 <field name="customer_type"/>
                             </group>
-                            
+
                             <!-- Individual Customer Information -->
                             <group string="Applicant Information" invisible="customer_type != 'individual'">
                                 <group>
@@ -270,7 +299,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                                     <field name="partner_tin"/>
                                 </group>
                             </group>
-                            
+
                             <!-- Corporate Customer Information -->
                             <group string="Company Information" invisible="customer_type != 'company'">
                                 <group>
@@ -285,7 +314,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                                     <field name="company_bank_account_name"/>
                                 </group>
                             </group>
-                            
+
                             <!-- Director Information (Corporate) -->
                             <group string="Director Information" invisible="customer_type != 'company'">
                                 <group>
@@ -303,7 +332,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                                     <field name="director_designation"/>
                                 </group>
                             </group>
-                            
+
                             <!-- Employment Details (Individual) -->
                             <group string="Employment Details" invisible="customer_type != 'individual'">
                                 <group>
@@ -317,7 +346,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                                     <field name="service_length"/>
                                 </group>
                             </group>
-                            
+
                             <!-- Next of Kin (Individual) -->
                             <group string="Next of Kin" invisible="customer_type != 'individual'">
                                 <group>
@@ -331,7 +360,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                                     <field name="nok_occupation"/>
                                 </group>
                             </group>
-                            
+
                             <!-- Guarantor Information -->
                             <group string="Guarantor Information">
                                 <group>
@@ -342,7 +371,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                                     <field name="guarantor_relationship"/>
                                 </group>
                             </group>
-                            
+
                             <!-- External Metadata -->
                             <group string="External Reference" invisible="not external_reference">
                                 <group>
@@ -364,7 +393,8 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                                     <field name="pay_slip_url" widget="url" placeholder="https://..."/>
                                     <field name="bank_statement_url" widget="url" placeholder="https://..."/>
                                     <field name="utility_bill_url" widget="url" placeholder="https://..."/>
-                                    <field name="certificate_of_incorporation_url" widget="url" placeholder="https://..." invisible="customer_type != 'company'"/>
+                                    <field name="certificate_of_incorporation_url" widget="url"
+                                           placeholder="https://..." invisible="customer_type != 'company'"/>
                                 </group>
                             </group>
                         </page>
@@ -796,7 +826,8 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
 
     <!--  Menu Items-->
 
-    <menuitem name="Loan Request" id="menu_dev_loan_request" parent="dev_loan_management_caixa.menu_dev_loan_request_main"
+    <menuitem name="Loan Request" id="menu_dev_loan_request"
+              parent="dev_loan_management_caixa.menu_dev_loan_request_main"
               action="action_dev_loan_loan" sequence="1"/>
 
     <menuitem name="Loan Request to Approve" id="menu_dev_loan_request_approve"

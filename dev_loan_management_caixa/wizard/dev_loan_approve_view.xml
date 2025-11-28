@@ -1,0 +1,28 @@
+<odoo>
+    <record id="view_dev_loan_approve_wizard_form" model="ir.ui.view">
+        <field name="name">dev.loan.approve.wizard.form</field>
+        <field name="model">dev.loan.approve.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Approve Loan">
+                <group>
+                    <field name="loan_id" readonly="1"/>
+                    <field name="approval_reason"/>
+                </group>
+                <footer>
+                    <button name="action_confirm_approve"
+                            string="Approve"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel" class="btn-default" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_dev_loan_approve_wizard" model="ir.actions.act_window">
+        <field name="name">Loan Approval Reason</field>
+        <field name="res_model">dev.loan.approve.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

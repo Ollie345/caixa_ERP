@@ -1,0 +1,14 @@
+<odoo>
+    <!-- Borrower Categories -->
+    <record id="borrower_category_business" model="borrower.category">
+        <field name="name">Business</field>
+    </record>
+
+    <record id="borrower_category_shopkeeper" model="borrower.category">
+        <field name="name">Shopkeeper</field>
+    </record>
+
+    <record id="borrower_category_job" model="borrower.category">
+        <field name="name">Job</field>
+    </record>
+</odoo>

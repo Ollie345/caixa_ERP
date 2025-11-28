@@ -1,0 +1,44 @@
+<odoo>
+    <!-- Category -->
+    <record model="ir.module.category" id="category_loan_management">
+        <field name="name">Loan Management</field>
+        <field name="sequence">20</field>
+        <field name="description">Groups related to Loan Management</field>
+    </record>
+
+    <!-- Loan Officer -->
+    <record id="group_loan_officer" model="res.groups">
+        <field name="name">Loan Officer</field>
+        <field name="category_id" ref="category_loan_management"/>
+    </record>
+
+    <!-- Credit Approver -->
+    <record id="group_credit_approver" model="res.groups">
+        <field name="name">Credit Approver</field>
+        <field name="category_id" ref="category_loan_management"/>
+    </record>
+
+    <!-- Super Admin / Loan Manager -->
+    <record id="group_loan_manager" model="res.groups">
+        <field name="name">Loan Manager / Super Admin</field>
+        <field name="category_id" ref="category_loan_management"/>
+    </record>
+
+    <!-- Finance -->
+    <record id="group_finance_team" model="res.groups">
+        <field name="name">Finance Team</field>
+        <field name="category_id" ref="category_loan_management"/>
+    </record>
+
+    <!-- CAT / Treasury -->
+    <record id="group_treasury_team" model="res.groups">
+        <field name="name">CAT / Treasury</field>
+        <field name="category_id" ref="category_loan_management"/>
+    </record>
+
+    <!-- Compliance / Audit -->
+    <record id="group_compliance" model="res.groups">
+        <field name="name">Compliance / Audit</field>
+        <field name="category_id" ref="category_loan_management"/>
+    </record>
+</odoo>

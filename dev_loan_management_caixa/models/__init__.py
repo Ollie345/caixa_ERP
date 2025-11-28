@@ -35,4 +35,5 @@ from . import reminder_days
 from . import loan_lead
 from . import dev_loan_restructure
 from . import dev_loan_restructure_line
+from . import dev_checklist_template_line
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

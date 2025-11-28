@@ -1,17 +1,19 @@
 <?xml version="1.0"?>
 <odoo>
-        <!--Email template -->
-        <record id="dev_loan_loan_request" model="mail.template">
-            <field name="name">Request to Loan Manager</field>
+    <!--Email template -->
+    <record id="dev_loan_loan_request" model="mail.template">
+        <field name="name">Request to Loan Manager</field>
 
-			<field name="email_from">{{(object.user_id.email and '%s &lt;%s&gt;' % (object.user_id.company_id.name, object.user_id.email))}}</field>
+        <field name="email_from">{{(object.user_id.email and '%s &lt;%s&gt;' % (object.user_id.company_id.name,
+            object.user_id.email))}}
+        </field>
 
 
-            <field name="subject">Loan {{object.name}} Request form {{object.client_id.name}}</field>
-            <field name="partner_to"></field>
-            <field name="model_id" ref="dev_loan_management_caixa.model_dev_loan_loan"/>
-            <field name="auto_delete" eval="True"/>
-            <field name="body_html"><![CDATA[
+        <field name="subject">Loan {{object.name}} Request form {{object.client_id.name}}</field>
+        <field name="partner_to"></field>
+        <field name="model_id" ref="dev_loan_management_caixa.model_dev_loan_loan"/>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html"><![CDATA[
             	<p><b>To Manager</b>,</p>
             	<p></p>
             	<p> Loan request from <b><i><t t-out="object.client_id.name"></t> </i></b></p>  
@@ -38,16 +40,18 @@
             	<b>Regards,</b><br/>
         		<t t-out="object.user_id.name">
                 ]]></field>
-         </record>
-         
-         <record id="dev_loan_loan_request_reject" model="mail.template">
-            <field name="name">Loan Request Rejected Manager</field>
-            <field name="email_from">{{(object.user_id.email and '%s &lt;%s&gt;' % (object.user_id.company_id.name, object.user_id.email))}}</field>
-            <field name="subject">Loan {{object.name}} has been Rejected</field>
-            <field name="partner_to">{{object.user_id.partner_id.id}}</field>
-            <field name="model_id" ref="dev_loan_management_caixa.model_dev_loan_loan"/>
-            <field name="auto_delete" eval="True"/>
-            <field name="body_html"><![CDATA[
+    </record>
+
+    <record id="dev_loan_loan_request_reject" model="mail.template">
+        <field name="name">Loan Request Rejected Manager</field>
+        <field name="email_from">{{(object.user_id.email and '%s &lt;%s&gt;' % (object.user_id.company_id.name,
+            object.user_id.email))}}
+        </field>
+        <field name="subject">Loan {{object.name}} has been Rejected</field>
+        <field name="partner_to">{{object.user_id.partner_id.id}}</field>
+        <field name="model_id" ref="dev_loan_management_caixa.model_dev_loan_loan"/>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html"><![CDATA[
             	<p><b>To <t t-out="object.client_id.name"></t></b>,</p>
             	
             	
@@ -60,18 +64,43 @@
             	<b>Regards,</b><br/>
         		<t t-out="object.user_id.name">
                 ]]></field>
-         </record>
-         
-         
-         <record id="installment_reminder_email_template" model="mail.template">
-            <field name="name">Loan  Installment Reminder</field>
-            <field name="email_from">{{(object.loan_id.company_id.email and '%s &lt;%s&gt;' % (object.loan_id.company_id.name, object.loan_id.company_id.email))}}</field>
-            <field name="subject">Installment {{object.name}} is Due on {{object.date}}</field>
-            <field name="email_to">{{object.client_id.email}}</field>
-            <field name="model_id" ref="dev_loan_management_caixa.model_dev_loan_installment"/>
-            <field name="auto_delete" eval="True"/>
+    </record>
 
-            <field name="body_html">
+    <record id="dev_loan_loan_request_approve" model="mail.template">
+        <field name="name">Loan Request Approved Manager</field>
+        <field name="email_from">
+            {{(object.user_id.email and '%s &lt;%s&gt;' % (object.user_id.company_id.name, object.user_id.email))}}
+        </field>
+        <field name="subject">Loan {{object.name}} has been Approved</field>
+        <field name="partner_to">{{object.user_id.partner_id.id}}</field>
+        <field name="model_id" ref="dev_loan_management_caixa.model_dev_loan_loan"/>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html"><![CDATA[
+        <p><b>To <t t-out="object.client_id.name"/></b>,</p>
+        <p>Your loan request <b><t t-out="object.name"/></b> has been approved.</p>
+        <p><b>Approve Reason:</b> <t t-out="object.approve_reason"/></p>
+        <p>You can access your loan from the URL below:</p>
+        <p>
+            <a t-attf-href="{{object._make_url}}" style="background-color: #0DAC9E; padding: 8px; text-decoration: none; color: #fff; border-radius: 5px; font-size: 16px;">
+                View Loan
+            </a>
+        </p>
+        <br/><b>Regards,</b><br/><t t-out="object.user_id.name"/>
+    ]]></field>
+    </record>
+
+
+    <record id="installment_reminder_email_template" model="mail.template">
+        <field name="name">Loan Installment Reminder</field>
+        <field name="email_from">{{(object.loan_id.company_id.email and '%s &lt;%s&gt;' %
+            (object.loan_id.company_id.name, object.loan_id.company_id.email))}}
+        </field>
+        <field name="subject">Installment {{object.name}} is Due on {{object.date}}</field>
+        <field name="email_to">{{object.client_id.email}}</field>
+        <field name="model_id" ref="dev_loan_management_caixa.model_dev_loan_installment"/>
+        <field name="auto_delete" eval="True"/>
+
+        <field name="body_html">
             <![CDATA[
                 <p>Dear <strong><t t-out="object.client_id.name"/></strong>,</p>
 
@@ -92,8 +121,8 @@
                 <p><strong>Regards,</strong><br/>
                 <strong><t t-out="object.company_id.name"/></strong></p>
             ]]>
-            </field>
-         </record>
+        </field>
+    </record>
 
 </odoo>
         

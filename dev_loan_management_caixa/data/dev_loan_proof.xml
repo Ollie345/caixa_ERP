@@ -1,0 +1,16 @@
+<odoo>
+    <record id="dev_loan_proof_aadhar" model="dev.loan.proof">
+        <field name="name">Aadhar Card</field>
+        <field name="is_required">True</field>
+    </record>
+
+    <record id="dev_loan_proof_pan" model="dev.loan.proof">
+        <field name="name">PAN Card</field>
+        <field name="is_required">True</field>
+    </record>
+
+    <record id="dev_loan_proof_light_bill" model="dev.loan.proof">
+        <field name="name">Light Bill</field>
+        <field name="is_required">False</field>
+    </record>
+</odoo>

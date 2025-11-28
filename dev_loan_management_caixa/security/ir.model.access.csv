@@ -17,6 +17,15 @@ access_user_dev_loan_loan,dev.loan.loan,model_dev_loan_loan,group_loan_user,1,1,
 access_manager_dev_loan_loan,dev.loan.loan,model_dev_loan_loan,group_loan_manager,1,1,1,1
 access_acc_user_dev_loan_loan,dev.loan.loan.acc.manager,model_dev_loan_loan,account.group_account_invoice,1,1,0,0
 
+access_dev_loan_loan_officer,dev.loan.loan,model_dev_loan_loan,group_loan_officer,1,1,0,0
+access_dev_loan_loan_credit_approver,dev.loan.loan,model_dev_loan_loan,group_credit_approver,1,1,0,0
+access_dev_loan_loan_cat,dev.loan.loan,model_dev_loan_loan,group_treasury_team,1,1,0,0
+
+access_dev_checklist_template_line_officer,dev.checklist.template.line.officer,model_dev_checklist_template_line,group_loan_officer,1,1,1,1
+access_dev_checklist_template_line_manager,dev.checklist.template.line.manager,model_dev_checklist_template_line,group_loan_manager,1,1,1,1
+
+access_dev_loan_approve_wizard_manager,dev.loan.approve.wizard_manager,model_dev_loan_approve_wizard,group_loan_manager,1,1,1,1
+access_dev_loan_reject_manager,dev.loan.reject.manager,model_dev_loan_reject,group_loan_manager,1,1,1,1
 
 access_user_dev_loan_installment,dev.loan.installment,model_dev_loan_installment,group_loan_user,1,1,1,1
 access_manager_dev_loan_installment,dev.loan.installment,model_dev_loan_installment,group_loan_manager,1,1,1,1
@@ -63,15 +72,10 @@ access_ln_notice,ln.notice,model_ln_notice,,1,1,1,1
 access_eligibility,access.eligibility,model_dev_loan_eligibility,,1,1,1,1
 
 
-
-
-
-
-
-
-
-
 access_dev_loan_restructure_user,dev.loan.restructure.user,model_dev_loan_restructure,dev_loan_management_caixa.group_loan_user,1,1,1,0
 access_dev_loan_restructure_manager,dev.loan.restructure.manager,model_dev_loan_restructure,dev_loan_management_caixa.group_loan_manager,1,1,1,1
 access_dev_loan_restructure_line_user,dev.loan.restructure.line.user,model_dev_loan_restructure_line,,1,0,0,0
 access_dev_loan_restructure_wizard,dev.loan.restructure.wizard,model_dev_loan_restructure_wizard,,1,1,1,1
+
+access_loan_type_user,Loan Type User,model_dev_loan_type,base.group_user,1,0,0,0
+access_loan_type_manager,Loan Type Manager,model_dev_loan_type,base.group_user,1,1,1,1

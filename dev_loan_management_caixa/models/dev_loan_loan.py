@@ -226,6 +226,74 @@ class dev_loan_loan(models.Model):
         "dev.checklist.template.line",
         string="Checklist"
     )
+
+    # fields for the penalty
+    grace_period = fields.Integer(
+        string="Grace Period (Days)",
+        related="loan_type_id.grace_period",
+        store=True
+    )
+
+    penalty_rate = fields.Float(
+        string="Daily Penalty Rate (%)",
+        related="loan_type_id.penalty_rate",
+        store=True
+    )
+
+    # Calculate the internal penalty
+    def _calculate_penalty(self):
+        today = date.today()
+        penalty_total = 0.0
+
+        # Loop through loan installments
+        for inst in self.installment_ids:
+
+            # Skip paid installments
+            if inst.state == 'paid':
+                continue
+
+            # Skip installments with no due date
+            if not inst.due_date:
+                continue
+
+            # Grace period logic
+            penalty_start = inst.due_date + timedelta(days=self.grace_days)
+
+            if today <= penalty_start:
+                continue  # Still in grace period → no penalty
+
+            # Number of overdue days
+            overdue_days = (today - penalty_start).days
+
+            # Daily rate = interest_rate + penalty_rate
+            daily_rate = (self.interest_rate + self.penalty_rate) / 100
+
+            # Penalty applies on installment remaining principal
+            penalty_total += inst.balance * daily_rate * overdue_days
+
+        return penalty_total
+
+    # Cron Jo applies Penalty
+    def cron_apply_daily_penalties(self):
+        today = date.today()
+
+        loans = self.search([
+            ('state', 'in', ['approved', 'disbursed']),
+        ])
+
+        for loan in loans:
+
+            # Prevent double-run in one day
+            if loan.last_penalty_calc_date == today:
+                continue
+
+            # Calculate penalty
+            new_penalty = loan._calculate_penalty()
+
+            loan.write({
+                'penalty_amount': new_penalty,
+                'last_penalty_calc_date': today
+            })
     #
     # @api.onchange('loan_type_id')
     # def _onchange_loan_type(self):

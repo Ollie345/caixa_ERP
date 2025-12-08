@@ -10,7 +10,7 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
-from datetime import datetime,date
+from datetime import datetime,date,timedelta
 from dateutil.relativedelta import relativedelta
 
 
@@ -45,6 +45,53 @@ class dev_loan_installment(models.Model):
     
     mobile = fields.Char(string="Mobile",related="client_id.mobile",readonly=False)
     email = fields.Char(string="Email",related="client_id.email",readonly=False)
+
+    days_overdue = fields.Integer(string="Days Overdue", readonly=True)
+    penalty_amount = fields.Float(string="Penalty Amount", readonly=True)
+
+    #Calculate penalty for each installment
+    def compute_penalty(self):
+        """Calculate penalty for each installment."""
+        today = date.today()
+
+        for inst in self:
+            if inst.state == 'paid':
+                inst.write({
+                    'days_overdue': 0,
+                    'penalty_amount': 0,
+                })
+                continue
+            if not inst.due_date:
+                continue
+
+            loan = inst.loan_id
+            grace_end = inst.due_date + timedelta(days=loan.grace_period)
+
+            # still inside grace period → no penalty
+            if today <= grace_end:
+                inst.write({
+                    'days_overdue': 0,
+                    'penalty_amount': 0,
+                })
+                continue
+
+            # overdue days
+            overdue_days = (today - grace_end).days
+
+            # daily rate = interest + penalty
+            daily_rate = (loan.interest_rate + loan.penalty_rate) / 100
+
+            # penalty is applied on remaining balance
+            penalty = inst.balance * daily_rate * overdue_days
+            inst.write({
+                'days_overdue': overdue_days,
+                'penalty_amount': penalty,
+            })
+    #Cron Job logic
+    @api.model
+    def cron_apply_penalty(self):
+        installments = self.search([('state', '!=', 'paid')])
+        installments.compute_penalty()
 
     def send_by_mail(self):
         self.ensure_one()

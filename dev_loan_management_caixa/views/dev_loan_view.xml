@@ -212,9 +212,11 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                         </group>
 
                         <!-- Approve Comment -->
-                        <group string="Loan Officer Comment" invisible="state == 'draft'" groups="dev_loan_management_caixa.group_loan_officer,dev_loan_management_caixa.group_loan_manager,base.group_system">
+                        <group string="Loan Officer Comment" invisible="state == 'draft'"
+                               groups="dev_loan_management_caixa.group_loan_officer,dev_loan_management_caixa.group_loan_manager,base.group_system">
                             <field name="comment"
-                                   readonly="state != 'review'"/>
+                                   readonly="state != 'review'"
+                                   required="state == 'review'"/>
                         </group>
                     </group>
 
@@ -231,6 +233,8 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                                     <field name="interest" sum="interest"/>
                                     <field name="total_amount" string='EMI (Installment)' sum="total_amount"/>
                                     <field name="closing_balance"/>
+                                    <field name="days_overdue"/>
+                                    <field name="penalty_amount"/>
                                     <field name="state"/>
                                     <field name="is_last_line" column_invisible="1"/>
                                     <field name="currency_id" column_invisible="1"/>

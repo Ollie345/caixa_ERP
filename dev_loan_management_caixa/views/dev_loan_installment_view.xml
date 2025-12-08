@@ -9,25 +9,27 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
         <field name="name">view.dev.loan.installment.form</field>
         <field name="model">dev.loan.installment</field>
         <field name="arch" type="xml">
-            <form string="Loan" create="false" edit="false" >
+            <form string="Loan" create="false" edit="false">
                 <header>
                     <button name="%(action_dev_paid_installment)d"
-                                        invisible="state != 'unpaid'"  string="Pay"
-                                        class="btn-primary"
-                                        context="{'default_opening_balance':opening_balance,
+                            invisible="state != 'unpaid'" string="Pay"
+                            class="btn-primary"
+                            context="{'default_opening_balance':opening_balance,
                                                   'default_principal_amount':amount,
                                                   'default_interest_amount':interest,
                                                   'default_emi_amount':total_amount,
                                                   'default_closing_amount':closing_balance,
                                                   'default_paid_amount':total_amount,
                                                  }"
-                                        type="action" groups="account.group_account_invoice"/>
-                            
-					<field name="state" widget="statusbar" statusbar_visible="unpaid,paid"/>
-				</header>
+                            type="action" groups="account.group_account_invoice"/>
+
+                    <field name="state" widget="statusbar" statusbar_visible="unpaid,paid"/>
+                </header>
                 <sheet>
                     <label for="name" class="oe_edit_only"/>
-                	<h1><field name="name" readonly="1"/></h1>
+                    <h1>
+                        <field name="name" readonly="1"/>
+                    </h1>
                     <group>
                         <group>
                             <field name="client_id" readonly="1"/>
@@ -36,10 +38,12 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                         </group>
                         <group>
                             <field name="date" readonly="1"/>
-                            <field name="payment_date" readonly="1" invisible= "state != 'paid'" />
+                            <field name="payment_date" readonly="1" invisible="state != 'paid'"/>
                             <field name="amount" readonly="1"/>
                             <field name="interest" readonly="1"/>
                             <field name="total_amount" readonly="1"/>
+                            <field name="days_overdue"/>
+                            <field name="penalty_amount"/>
                             <field name="closing_balance" invisible="1"/>
                             <field name="opening_balance" invisible="1"/>
                         </group>
@@ -76,11 +80,13 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                 <field name="interest"/>
                 <field name="total_amount"/>
                 <field name="state"/>
+                <field name="days_overdue"/>
+                <field name="penalty_amount"/>
                 <field name="currency_id" column_invisible="1"/>
             </list>
         </field>
     </record>
-    
+
     <record id="filter_dev_loan_installment" model="ir.ui.view">
         <field name="name">filter.dev.loan.installment</field>
         <field name="model">dev.loan.installment</field>
@@ -107,12 +113,15 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
         <field name="search_view_id" ref="filter_dev_loan_installment"/>
         <field name="view_mode">list,form</field>
     </record>
-    
-    
-    <menuitem name="Loan Installment" id="menu_dev_loan_installment" parent="dev_loan_management_caixa.menu_dev_loan_request_main" action="action_dev_loan_installment" sequence="5"/>
-    
-    <menuitem name="Loan Installment" id="menu_dev_loan_installment_account" parent="dev_loan_management_caixa.menu_account_loan_main" action="action_dev_loan_installment" sequence="2"/>
-    
-    
-    
+
+
+    <menuitem name="Loan Installment" id="menu_dev_loan_installment"
+              parent="dev_loan_management_caixa.menu_dev_loan_request_main" action="action_dev_loan_installment"
+              sequence="5"/>
+
+    <menuitem name="Loan Installment" id="menu_dev_loan_installment_account"
+              parent="dev_loan_management_caixa.menu_account_loan_main" action="action_dev_loan_installment"
+              sequence="2"/>
+
+
 </odoo>

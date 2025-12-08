@@ -40,7 +40,8 @@ class dev_loan_type(models.Model):
     image = fields.Binary(string="Image")
     eligibility_ids = fields.Many2many('dev.loan.eligibility')
     processing_fee = fields.Text('Processing Fees')
-    
+    grace_period = fields.Integer(default=3, string="Grace Days")
+    penalty_rate = fields.Float(default=7.0, string="Daily Penalty Rate (%)")
     
     @api.constrains('reminder_count', 'reminder_days')
     def _check_reminder_days_count(self):

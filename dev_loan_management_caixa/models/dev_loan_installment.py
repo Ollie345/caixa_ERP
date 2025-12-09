@@ -61,11 +61,11 @@ class dev_loan_installment(models.Model):
                     'penalty_amount': 0,
                 })
                 continue
-            if not inst.due_date:
+            if not inst.date:  # Changed from inst.due_date
                 continue
 
             loan = inst.loan_id
-            grace_end = inst.due_date + timedelta(days=loan.grace_period)
+            grace_end = inst.date + timedelta(days=loan.grace_period)  # Changed from inst.due_date
 
             # still inside grace period → no penalty
             if today <= grace_end:
@@ -81,8 +81,8 @@ class dev_loan_installment(models.Model):
             # daily rate = interest + penalty
             daily_rate = (loan.interest_rate + loan.penalty_rate) / 100
 
-            # penalty is applied on remaining balance
-            penalty = inst.balance * daily_rate * overdue_days
+            # penalty is applied on remaining balance (opening balance)
+            penalty = inst.opening_balance * daily_rate * overdue_days  # Changed from inst.balance
             inst.write({
                 'days_overdue': overdue_days,
                 'penalty_amount': penalty,

@@ -58,6 +58,8 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                             <group>
                                 <field name="is_required_documents"/>
                                 <field name="color" placeholder="#FFFFFF"/>
+                                <field name="grace_period" string="Grace Period (Days)"/>
+                                <field name="penalty_rate" string="Daily Penalty Rate (%)"/>
                             </group>
                             <group>
                                 <field name="reminder_count"/>

@@ -657,7 +657,7 @@ class dev_loan_loan(models.Model):
                 emi = opening_balance + interest
             principal = emi - interest
             closing_amount = opening_balance - principal
-            date = date+relativedelta(months=1)
+            date = date+relativedelta(days=30)
             none_interest = False
             if i <= self.none_interest_month:
                 none_interest = True

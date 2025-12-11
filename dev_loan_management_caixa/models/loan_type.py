@@ -18,7 +18,7 @@ class dev_loan_type(models.Model):
     
     name = fields.Char('Name', required="1", copy=False)
     is_interest_apply = fields.Boolean('Apply Interest')
-    interest_mode = fields.Selection([('flat','Flat'),('reducing','Reducing')], string='Interest Mode')
+    interest_mode = fields.Selection([('flat','Flat'),('reducing','Reducing')], string='Interest Mode', default='reducing') 
     rate = fields.Float('Rate', required="1")
     proof_ids = fields.Many2many('dev.loan.proof', string='Loan Proof', required="1")
     loan_amount = fields.Float('Loan Amount Limit', required="1")

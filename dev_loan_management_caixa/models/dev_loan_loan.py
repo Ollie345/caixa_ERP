@@ -920,7 +920,9 @@ class dev_loan_loan(models.Model):
         
     
     def action_disburse_loan(self):
-        self.disbursement_date = date.today()
+        # Only set to today if not already set (allows manual date selection for testing)
+        if not self.disbursement_date:
+            self.disbursement_date = date.today()
         if self.disbursement_date:
             account_move_val = self.get_account_move_vals()
             account_move_id = self.env['account.move'].create(account_move_val)

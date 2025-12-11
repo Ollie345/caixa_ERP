@@ -127,8 +127,8 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                                    invisible="state in ['draft','confirm','cancel']"
                                    readonly="1"/>
                             <field name="disbursement_date"
-                                   invisible="state not in ['disburse','open','close']"
-                                   readonly="1"/>
+                                   invisible="state not in ['approve','disburse','open','close']"
+                                   readonly="state != 'approve'"/>
                             <field name="user_id" readonly="1"/>
                             <field name="company_id" readonly="1"/>
                             <field name="currency_id" invisible="1"/>

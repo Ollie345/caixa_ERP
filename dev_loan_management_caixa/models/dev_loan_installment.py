@@ -55,34 +55,56 @@ class dev_loan_installment(models.Model):
         today = date.today()
 
         for inst in self:
+            # Skip paid installments
             if inst.state == 'paid':
                 inst.write({
                     'days_overdue': 0,
                     'penalty_amount': 0,
                 })
                 continue
-            if not inst.date:  # Changed from inst.due_date
+            
+            # Skip if no date
+            if not inst.date:
                 continue
-
+            
+            # Skip if no loan
             loan = inst.loan_id
-            grace_end = inst.date + timedelta(days=loan.grace_period)  # Changed from inst.due_date
-
-            # still inside grace period → no penalty
+            if not loan:
+                continue
+            
+            # Get values with defaults to prevent None errors
+            grace_period = loan.grace_period if loan.grace_period is not None else 0
+            penalty_rate = loan.penalty_rate if loan.penalty_rate is not None else 0.0
+            interest_rate = loan.interest_rate if loan.interest_rate is not None else 0.0
+            opening_balance = inst.opening_balance if inst.opening_balance is not None else 0.0
+            
+            # Calculate grace end date
+            grace_end = inst.date + timedelta(days=grace_period)
+            
+            # Still inside grace period → no penalty
             if today <= grace_end:
                 inst.write({
                     'days_overdue': 0,
                     'penalty_amount': 0,
                 })
                 continue
-
-            # overdue days
+            
+            # Calculate overdue days
             overdue_days = (today - grace_end).days
-
-            # daily rate = interest + penalty
-            daily_rate = (loan.interest_rate + loan.penalty_rate) / 100
-
-            # penalty is applied on remaining balance (opening balance)
-            penalty = inst.opening_balance * daily_rate * overdue_days  # Changed from inst.balance
+            
+            # Ensure overdue_days is not negative (safety check)
+            if overdue_days < 0:
+                overdue_days = 0
+            
+            # Calculate daily rate (only if rates are set)
+            if penalty_rate == 0.0 and interest_rate == 0.0:
+                daily_rate = 0.0
+            else:
+                daily_rate = (interest_rate + penalty_rate) / 100
+            
+            # Calculate penalty
+            penalty = opening_balance * daily_rate * overdue_days
+            
             inst.write({
                 'days_overdue': overdue_days,
                 'penalty_amount': penalty,
@@ -90,7 +112,12 @@ class dev_loan_installment(models.Model):
     #Cron Job logic
     @api.model
     def cron_apply_penalty(self):
-        installments = self.search([('state', '!=', 'paid')])
+        """Daily cron job to calculate penalties for all unpaid installments of active loans."""
+        # Only process unpaid installments for active loans
+        installments = self.search([
+            ('state', '!=', 'paid'),
+            ('loan_id.state', '=', 'open')  # Only active loans
+        ])
         installments.compute_penalty()
 
     def send_by_mail(self):

@@ -63,7 +63,17 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                             class="oe_highlight"
                             invisible="state not in ['approve','disburse','open']"
                     />
+                    <button name="action_compute_closure"
+                            type="object"
+                            string="Compute Closure"
+                            class="btn-primary"
+                            invisible="state != 'open'"/>
 
+                    <button name="action_confirm_early_closure"
+                            type="object"
+                            string="Confirm Early Closure"
+                            class="btn-success"
+                            invisible="closure_amount == 0"/>
 
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,review,confirm,approve,disburse,open,close"/>

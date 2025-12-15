@@ -9,7 +9,7 @@
 ##############################################################################
 
 from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError, AccessError, RedirectWarning
+from odoo.exceptions import ValidationError, AccessError, RedirectWarning,UserError
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
@@ -240,6 +240,23 @@ class dev_loan_loan(models.Model):
         store=True
     )
 
+    closure_date = fields.Date(
+        string="Closure Date",
+        tracking=True
+    )
+
+    closure_amount = fields.Monetary(
+        string="Closure Amount",
+        compute="_compute_closure_amount",
+        store=True,
+        tracking=True
+    )
+
+    is_early_closure = fields.Boolean(
+        string="Early Closure",
+        default=False
+    )
+
     # Calculate the internal penalty
     def _calculate_penalty(self):
         today = date.today()
@@ -294,7 +311,101 @@ class dev_loan_loan(models.Model):
                 'penalty_amount': new_penalty,
                 'last_penalty_calc_date': today
             })
-    #
+
+    #compute closure amount 
+    @api.depends('closure_date', 'installment_ids', 'balance_amount')
+    def _compute_closure_amount(self):
+        for loan in self:
+            loan.closure_amount = 0.0
+
+            if not loan.is_early_closure or not loan.closure_date:
+                continue
+
+            if loan.balance_amount <= 0:
+                continue
+
+            # Get last PAID installment
+            paid_installments = loan.installment_ids.filtered(
+                lambda ins: ins.state == 'paid'
+            )
+
+            if not paid_installments:
+                raise UserError(_("No paid installment found."))
+
+            last_installment = max(
+                paid_installments,
+                key=lambda ins: ins.due_date
+            )
+
+            # Days elapsed
+            days_elapsed = (loan.closure_date - last_installment.due_date).days
+            days_elapsed = min(max(days_elapsed, 0), 30)
+
+            # Interest calculation
+            monthly_rate = loan.interest_rate / 100
+            daily_rate = monthly_rate / 30
+
+            interest = loan.balance_amount * daily_rate * days_elapsed
+
+            loan.closure_amount = loan.balance_amount + interest
+
+    #button action to compute closure
+    def action_compute_closure(self):
+        for loan in self:
+            if loan.state != 'open':
+                raise UserError(_("Loan must be open to compute closure."))
+
+            if not loan.closure_date:
+                raise UserError(_("Please select a closure date."))
+
+            loan.is_early_closure = True
+            loan._compute_closure_amount()
+
+    # button action to confirm early closure
+    def action_confirm_early_closure(self):
+        for loan in self:
+            if not loan.is_early_closure:
+                raise UserError(_("This is not an early closure."))
+
+            if loan.closure_amount <= 0:
+                raise UserError(_("Closure amount not computed."))
+
+            journal = loan.company_id.loan_journal_id
+            if not journal:
+                raise UserError(_("Loan journal not configured."))
+
+            move = self.env['account.move'].create({
+                'journal_id': journal.id,
+                'date': loan.closure_date,
+                'ref': f"Early Closure - {loan.name}",
+                'line_ids': [
+                    (0, 0, {
+                        'account_id': loan.partner_id.property_account_receivable_id.id,
+                        'debit': loan.closure_amount,
+                        'credit': 0.0,
+                    }),
+                    (0, 0, {
+                        'account_id': loan.loan_account_id.id,
+                        'credit': loan.closure_amount,
+                        'debit': 0.0,
+                    }),
+                ]
+            })
+
+            move.action_post()
+
+            loan.state = 'closed'
+            loan._send_closure_email()
+
+    # send closure email
+    def _send_closure_email(self):
+        template = self.env.ref(
+            'dev_loan_management_caixa.mail_template_early_loan_closure',
+            raise_if_not_found=False
+        )
+        if template:
+            template.send_mail(self.id, force_send=True)
+
     # @api.onchange('loan_type_id')
     # def _onchange_loan_type(self):
     #     for rec in self:

@@ -74,6 +74,12 @@ class dev_loan_loan(models.Model):
     total_interest = fields.Monetary('Interest Amount', compute='get_total_interest')
     paid_amount = fields.Monetary('Paid Amount', compute='get_total_interest')
     remaing_amount = fields.Monetary('Remaining Amount', compute='get_total_interest')
+    # Outstanding principal used for early closure computation
+    balance_amount = fields.Monetary(
+        string='Outstanding Principal',
+        compute='_compute_balance_amount',
+        store=True,
+    )
     total_estimated_paid_amount = fields.Monetary('Total Estimated Amount To Pay', compute='get_total_estimated_paid_amount')
     notes = fields.Text('Notes')
     approve_reason = fields.Text('Approve Reason', copy=False)
@@ -315,6 +321,11 @@ class dev_loan_loan(models.Model):
     #compute closure amount 
     @api.depends('closure_date', 'installment_ids', 'balance_amount')
     def _compute_closure_amount(self):
+        """Compute the closure amount for early closure.
+
+        Uses outstanding principal (balance_amount) plus pro‑rated interest
+        from the last PAID installment date up to the selected closure_date.
+        """
         for loan in self:
             loan.closure_amount = 0.0
 
@@ -332,13 +343,14 @@ class dev_loan_loan(models.Model):
             if not paid_installments:
                 raise UserError(_("No paid installment found."))
 
+            # Use the installment's 'date' field
             last_installment = max(
                 paid_installments,
-                key=lambda ins: ins.due_date
+                key=lambda ins: ins.date
             )
 
-            # Days elapsed
-            days_elapsed = (loan.closure_date - last_installment.due_date).days
+            # Days elapsed from last installment date to closure date
+            days_elapsed = (loan.closure_date - last_installment.date).days
             days_elapsed = min(max(days_elapsed, 0), 30)
 
             # Interest calculation
@@ -363,16 +375,18 @@ class dev_loan_loan(models.Model):
 
     # button action to confirm early closure
     def action_confirm_early_closure(self):
+        """Post journal entry and close loan for early closure."""
         for loan in self:
             if not loan.is_early_closure:
                 raise UserError(_("This is not an early closure."))
-
+            
             if loan.closure_amount <= 0:
                 raise UserError(_("Closure amount not computed."))
 
-            journal = loan.company_id.loan_journal_id
+            # Use an existing journal from the loan or its type instead of a non-existent company field
+            journal = loan.disburse_journal_id or (loan.loan_type_id and loan.loan_type_id.loan_payment_journal_id)
             if not journal:
-                raise UserError(_("Loan journal not configured."))
+                raise UserError(_("Loan journal not configured. Please set a disburse journal or payment journal on the loan type."))
 
             move = self.env['account.move'].create({
                 'journal_id': journal.id,
@@ -380,7 +394,8 @@ class dev_loan_loan(models.Model):
                 'ref': f"Early Closure - {loan.name}",
                 'line_ids': [
                     (0, 0, {
-                        'account_id': loan.partner_id.property_account_receivable_id.id,
+                        # Use borrower (client_id) receivable account
+                        'account_id': loan.client_id.property_account_receivable_id.id,
                         'debit': loan.closure_amount,
                         'credit': 0.0,
                     }),
@@ -391,10 +406,11 @@ class dev_loan_loan(models.Model):
                     }),
                 ]
             })
-
+            
             move.action_post()
-
-            loan.state = 'closed'
+            
+            # Align with selection values: 'close' is the closed state
+            loan.state = 'close'
             loan._send_closure_email()
 
     # send closure email
@@ -716,6 +732,16 @@ class dev_loan_loan(models.Model):
             loan.total_interest = total_interest
             loan.paid_amount = paid_amount
             loan.remaing_amount = remaing_amount
+    
+    @api.depends('installment_ids', 'installment_ids.state', 'installment_ids.amount')
+    def _compute_balance_amount(self):
+        """Compute outstanding principal from unpaid installments."""
+        for loan in self:
+            balance = 0.0
+            for inst in loan.installment_ids:
+                if inst.state != 'paid':
+                    balance += inst.amount or 0.0
+            loan.balance_amount = balance
             
     @api.depends('installment_ids')
     def get_total_estimated_paid_amount(self):

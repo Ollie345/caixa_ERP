@@ -126,12 +126,14 @@
 
     <record id="mail_template_early_loan_closure" model="mail.template">
         <field name="name">Early Loan Closure Notification</field>
-        <field name="model_id" ref="model_dev_loan_loan"/>
+        <!-- Use the dev.loan.loan model -->
+        <field name="model_id" ref="dev_loan_management_caixa.model_dev_loan_loan"/>
         <field name="subject">Loan Closed Successfully</field>
-        <field name="email_to">${object.partner_id.email}</field>
+        <!-- Send to the borrower (client_id) -->
+        <field name="email_to">${object.client_id.email}</field>
         <field name="body_html">
             <![CDATA[
-                <p>Dear ${object.partner_id.name},</p>
+                <p>Dear ${object.client_id.name},</p>
 
                 <p>Your loan <strong>${object.name}</strong> has been successfully closed.</p>
 

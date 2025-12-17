@@ -140,7 +140,7 @@ Loan Management system in odoo for customer and supplier, Customer Loan, Supplie
         'data/restructure_sequence.xml',
         'views/dev_loan_restructure_views.xml',
         'wizard/dev_loan_restructure_wizard.xml',
-          
+        'wizard/dev_loan_closure_view.xml'
         ],
     'demo': [],
     'test': [],

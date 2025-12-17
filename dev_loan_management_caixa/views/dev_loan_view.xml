@@ -69,11 +69,11 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                             class="btn-primary"
                             invisible="state != 'open'"/>
 
-                    <button name="action_confirm_early_closure"
-                            type="object"
-                            string="Confirm Early Closure"
-                            class="btn-success"
-                            invisible="closure_amount == 0"/>
+<!--                    <button name="action_confirm_early_closure"-->
+<!--                            type="object"-->
+<!--                            string="Confirm Early Closure"-->
+<!--                            class="btn-success"-->
+<!--                            invisible="closure_amount == 0"/>-->
 
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,review,confirm,approve,disburse,open,close"/>
@@ -140,14 +140,14 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                                    invisible="state not in ['approve','disburse','open','close']"
                                    readonly="state != 'approve'"/>
                             <!-- Early Closure Fields -->
-                            <field name="closure_date"
-                                   string="Closure Date"
-                                   invisible="state not in ['open','close']"
-                                   readonly="state != 'open'"/>
-                            <field name="closure_amount"
-                                   string="Closure Amount"
-                                   invisible="state not in ['open','close']"
-                                   readonly="1"/>
+<!--                            <field name="closure_date"-->
+<!--                                   string="Closure Date"-->
+<!--                                   invisible="state not in ['open','close']"-->
+<!--                                   readonly="state != 'open'"/>-->
+<!--                            <field name="closure_amount"-->
+<!--                                   string="Closure Amount"-->
+<!--                                   invisible="state not in ['open','close']"-->
+<!--                                   readonly="1"/>-->
                             <field name="user_id" readonly="1"/>
                             <field name="company_id" readonly="1"/>
                             <field name="currency_id" invisible="1"/>

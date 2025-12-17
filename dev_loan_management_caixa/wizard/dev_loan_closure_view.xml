@@ -1,0 +1,45 @@
+<odoo>
+    <record id="dev_loan_closure_wizard_form" model="ir.ui.view">
+        <field name="name">dev.loan.closure.wizard.form</field>
+        <field name="model">dev.loan.closure.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Early Loan Closure">
+                <sheet>
+                    <group>
+                        <field name="loan_id" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="balance_amount"/>
+
+                        <field name="closure_date"/>
+
+                        <field name="closure_amount"
+                               invisible="closure_amount == 0"
+                               widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                    </group>
+                    <footer>
+                        <!--                    <button name="action_compute_closure_amount"-->
+                        <!--                            string="Compute Closure"-->
+                        <!--                            type="object"-->
+                        <!--                            class="oe_highlight"/>-->
+
+                        <button name="action_confirm_early_closure"
+                                string="Confirm Early Closure"
+                                type="object"
+                                class="btn-primary"
+                                invisible="closure_amount == 0"/>
+<!--                                attrs="{'invisible': [('closure_amount', '=', 0)]}"/>-->
+
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_dev_loan_closure_wizard" model="ir.actions.act_window">
+        <field name="name">Early Loan Closure</field>
+        <field name="res_model">dev.loan.closure.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -79,3 +79,5 @@ access_dev_loan_restructure_wizard,dev.loan.restructure.wizard,model_dev_loan_re
 
 access_loan_type_user,Loan Type User,model_dev_loan_type,base.group_user,1,0,0,0
 access_loan_type_manager,Loan Type Manager,model_dev_loan_type,base.group_user,1,1,1,1
+
+access_dev_loan_closure_wizard,dev.loan.closure.wizard,model_dev_loan_closure_wizard,,1,1,1,1

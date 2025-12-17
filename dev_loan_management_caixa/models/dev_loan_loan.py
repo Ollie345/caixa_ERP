@@ -253,7 +253,7 @@ class dev_loan_loan(models.Model):
 
     closure_amount = fields.Monetary(
         string="Closure Amount",
-        compute="_compute_closure_amount",
+        # compute="_compute_closure_amount",
         store=True,
         tracking=True
     )
@@ -318,100 +318,55 @@ class dev_loan_loan(models.Model):
                 'last_penalty_calc_date': today
             })
 
-    #compute closure amount 
-    @api.depends('closure_date', 'installment_ids', 'balance_amount')
-    def _compute_closure_amount(self):
-        """Compute the closure amount for early closure.
-
-        Uses outstanding principal (balance_amount) plus pro‑rated interest
-        from the last PAID installment date up to the selected closure_date.
-        """
-        for loan in self:
-            loan.closure_amount = 0.0
-
-            if not loan.is_early_closure or not loan.closure_date:
-                continue
-
-            if loan.balance_amount <= 0:
-                continue
-
-            # Get last PAID installment
-            paid_installments = loan.installment_ids.filtered(
-                lambda ins: ins.state == 'paid'
-            )
-
-            if not paid_installments:
-                raise UserError(_("No paid installment found."))
-
-            # Use the installment's 'date' field
-            last_installment = max(
-                paid_installments,
-                key=lambda ins: ins.date
-            )
-
-            # Days elapsed from last installment date to closure date
-            days_elapsed = (loan.closure_date - last_installment.date).days
-            days_elapsed = min(max(days_elapsed, 0), 30)
-
-            # Interest calculation
-            monthly_rate = loan.interest_rate / 100
-            daily_rate = monthly_rate / 30
-
-            interest = loan.balance_amount * daily_rate * days_elapsed
-
-            loan.closure_amount = loan.balance_amount + interest
-
     #button action to compute closure
     def action_compute_closure(self):
         for loan in self:
             if loan.state != 'open':
                 raise UserError(_("Loan must be open to compute closure."))
 
-            if not loan.closure_date:
-                raise UserError(_("Please select a closure date."))
+            # if not loan.closure_date:
+            #     raise UserError(_("Please select a closure date."))
 
-            loan.is_early_closure = True
-            loan._compute_closure_amount()
+            # loan.is_early_closure = True
+            # loan._compute_closure_amount()
 
-    # button action to confirm early closure
-    def action_confirm_early_closure(self):
-        """Post journal entry and close loan for early closure."""
-        for loan in self:
-            if not loan.is_early_closure:
-                raise UserError(_("This is not an early closure."))
-            
-            if loan.closure_amount <= 0:
-                raise UserError(_("Closure amount not computed."))
+            return {
+                'name': _('Early Loan Closure'),
+                'type': 'ir.actions.act_window',
+                'res_model': 'dev.loan.closure.wizard',
+                'view_mode': 'form',
+                'target': 'new',
+                'context': {
+                    'default_loan_id': self.id,
+                    'default_closure_date': fields.Date.context_today(self),
+                }
+            }
 
-            # Use an existing journal from the loan or its type instead of a non-existent company field
-            journal = loan.disburse_journal_id or (loan.loan_type_id and loan.loan_type_id.loan_payment_journal_id)
-            if not journal:
-                raise UserError(_("Loan journal not configured. Please set a disburse journal or payment journal on the loan type."))
-
-            move = self.env['account.move'].create({
-                'journal_id': journal.id,
-                'date': loan.closure_date,
-                'ref': f"Early Closure - {loan.name}",
-                'line_ids': [
-                    (0, 0, {
-                        # Use borrower (client_id) receivable account
-                        'account_id': loan.client_id.property_account_receivable_id.id,
-                        'debit': loan.closure_amount,
-                        'credit': 0.0,
-                    }),
-                    (0, 0, {
-                        'account_id': loan.loan_account_id.id,
-                        'credit': loan.closure_amount,
-                        'debit': 0.0,
-                    }),
-                ]
-            })
-            
-            move.action_post()
-            
-            # Align with selection values: 'close' is the closed state
-            loan.state = 'close'
-            loan._send_closure_email()
+        # New button action to open the wizard
+        # def action_compute_closure(self):
+        #     self.ensure_one()
+        #
+        #     if self.state != 'open':
+        #         raise UserError(_("Loan must be open to compute closure."))
+        #
+        #     # Create an instance of the wizard
+        #     wizard_vals = {
+        #         'loan_id': self.id,
+        #         'closure_date': fields.Date.today(),
+        #     }
+        #
+        #     wizard = self.env['dev.loan.closure.wizard'].create(wizard_vals)
+        #
+        #     # Open the wizard form view
+        #     return {
+        #         'name': _('Early Loan Closure'),
+        #         'type': 'ir.actions.act_window',
+        #         'res_model': 'dev.loan.closure.wizard',
+        #         'view_mode': 'form',
+        #         'res_id': wizard.id,
+        #         'target': 'new',
+        #         'context': self.env.context,
+        #     }
 
     # send closure email
     def _send_closure_email(self):

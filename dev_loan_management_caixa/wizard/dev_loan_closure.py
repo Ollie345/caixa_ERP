@@ -32,34 +32,31 @@ class DevLoanClosureWizard(models.TransientModel):
 
     is_early_closure = fields.Boolean(
         string="Early Closure",
-        default=False
+        default=True  # Set to True since this wizard is specifically for early closure
     )
 
     # Outstanding principal used for early closure computation
     balance_amount = fields.Monetary(
         string='Outstanding Principal',
-        compute='_compute_closure_amount',
-        store=True,
-    )
-
-    currency_id = fields.Many2one(
-        related='loan_id.currency_id',
-        readonly=True
+        related='loan_id.balance_amount',  # Changed from compute to related
+        readonly=True,
     )
 
     #compute closure amount
-    @api.depends('closure_date')
+    @api.depends('closure_date', 'loan_id', 'loan_id.balance_amount', 'loan_id.installment_ids', 'loan_id.installment_ids.state', 'loan_id.interest_rate')
     def _compute_closure_amount(self):
         """Compute the closure amount for early closure.
 
         Uses outstanding principal (balance_amount) plus pro‑rated interest
         from the last PAID installment date up to the selected closure_date.
         """
-        for loan in self:
-            loan.closure_amount = 0.0
+        for wizard in self:  # Changed variable name from 'loan' to 'wizard' for clarity
+            wizard.closure_amount = 0.0
 
-            if not loan.is_early_closure or not loan.closure_date:
+            if not wizard.is_early_closure or not wizard.closure_date or not wizard.loan_id:
                 continue
+
+            loan = wizard.loan_id  # Get the actual loan record
 
             if loan.balance_amount <= 0:
                 continue
@@ -79,7 +76,7 @@ class DevLoanClosureWizard(models.TransientModel):
             )
 
             # Days elapsed from last installment date to closure date
-            days_elapsed = (loan.closure_date - last_installment.date).days
+            days_elapsed = (wizard.closure_date - last_installment.date).days
             days_elapsed = min(max(days_elapsed, 0), 30)
 
             # Interest calculation
@@ -88,45 +85,54 @@ class DevLoanClosureWizard(models.TransientModel):
 
             interest = loan.balance_amount * daily_rate * days_elapsed
 
-            loan.closure_amount = loan.balance_amount + interest
+            wizard.closure_amount = loan.balance_amount + interest
 
     # button action to confirm early closure
     def action_confirm_early_closure(self):
         """Post journal entry and close loan for early closure."""
-        for loan in self:
-            if not loan.is_early_closure:
-                raise UserError(_("This is not an early closure."))
+        self.ensure_one()  # Wizards typically work with single records
+        
+        wizard = self
+        loan = wizard.loan_id  # Get the actual loan record
 
-            if loan.closure_amount <= 0:
-                raise UserError(_("Closure amount not computed."))
+        if not wizard.is_early_closure:
+            raise UserError(_("This is not an early closure."))
 
-            # Use an existing journal from the loan or its type instead of a non-existent company field
-            journal = loan.disburse_journal_id or (loan.loan_type_id and loan.loan_type_id.loan_payment_journal_id)
-            if not journal:
-                raise UserError(
-                    _("Loan journal not configured. Please set a disburse journal or payment journal on the loan type."))
+        if wizard.closure_amount <= 0:
+            raise UserError(_("Closure amount not computed."))
 
-            move = self.env['account.move'].create({
-                'journal_id': journal.id,
-                'date': loan.closure_date,
-                'ref': f"Early Closure - {loan.name}",
-                'line_ids': [
-                    (0, 0, {
-                        # Use borrower (client_id) receivable account
-                        'account_id': loan.client_id.property_account_receivable_id.id,
-                        'debit': loan.closure_amount,
-                        'credit': 0.0,
-                    }),
-                    (0, 0, {
-                        'account_id': loan.loan_account_id.id,
-                        'credit': loan.closure_amount,
-                        'debit': 0.0,
-                    }),
-                ]
-            })
+        # Use an existing journal from the loan or its type instead of a non-existent company field
+        journal = loan.disburse_journal_id or (loan.loan_type_id and loan.loan_type_id.loan_payment_journal_id)
+        if not journal:
+            raise UserError(
+                _("Loan journal not configured. Please set a disburse journal or payment journal on the loan type."))
 
-            move.action_post()
+        move = self.env['account.move'].create({
+            'journal_id': journal.id,
+            'date': wizard.closure_date,
+            'ref': f"Early Closure - {loan.name}",
+            'line_ids': [
+                (0, 0, {
+                    # Use borrower (client_id) receivable account
+                    'account_id': loan.client_id.property_account_receivable_id.id,
+                    'debit': wizard.closure_amount,
+                    'credit': 0.0,
+                }),
+                (0, 0, {
+                    'account_id': loan.loan_account_id.id,
+                    'credit': wizard.closure_amount,
+                    'debit': 0.0,
+                }),
+            ]
+        })
 
-            # Align with selection values: 'close' is the closed state
-            loan.state = 'close'
-            loan._send_closure_email()
+        move.action_post()
+
+        # Update loan record with closure information
+        loan.write({
+            'state': 'close',
+            'closure_date': wizard.closure_date,
+            'closure_amount': wizard.closure_amount,
+            'is_early_closure': True,
+        })
+        loan._send_closure_email()

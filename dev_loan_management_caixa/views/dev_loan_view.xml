@@ -68,6 +68,13 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                             string="Compute Closure"
                             class="btn-primary"
                             invisible="state != 'open'"/>
+                    <button name="%(dev_loan_management_caixa.action_dev_pay_selected_months)d"
+                            type="action"
+                            string="Pay Selected Months"
+                            class="oe_stat_button"
+                            icon="fa-money"
+                            invisible="state != 'open'"
+                            help="Pay multiple installments at once"/>
 
 <!--                    <button name="action_confirm_early_closure"-->
 <!--                            type="object"-->

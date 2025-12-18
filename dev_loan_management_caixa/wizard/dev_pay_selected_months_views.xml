@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_dev_pay_selected_months_form" model="ir.ui.view">
+        <field name="name">Pay Selected Months</field>
+        <field name="model">dev.pay.selected.months</field>
+        <field name="arch" type="xml">
+            <form string="Pay Selected Months">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="loan_id" readonly="1"/>
+                            <field name="payment_date"/>
+                        </group>
+                        <group>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="total_principal" readonly="1"/>
+                            <field name="total_interest" readonly="1"/>
+                            <field name="total_penalty" readonly="1"/>
+                            <field name="total_amount" readonly="1" class="oe_read_only"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Select Installments">
+                            <field name="installment_ids" widget="many2many_checkboxes" nolabel="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="date"/>
+                                    <field name="opening_balance" string="Opening Balance"/>
+                                    <field name="amount" string="Principal"/>
+                                    <field name="interest" string="Interest"/>
+                                    <field name="penalty_amount" string="Penalty"/>
+                                    <field name="total_amount" string="Total"/>
+                                </list>
+                            </field>
+                        </page>
+                        
+                        <page string="Summary">
+                            <group>
+                                <group string="Breakdown">
+                                    <field name="total_principal" readonly="1"/>
+                                    <field name="total_interest" readonly="1"/>
+                                    <field name="total_penalty" readonly="1"/>
+                                </group>
+                                <group string="Total">
+                                    <field name="total_amount" readonly="1" class="oe_stat_text"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <footer>
+                    <button name="action_pay_selected_months" 
+                            string="Confirm Payment" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="not installment_ids"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_dev_pay_selected_months" model="ir.actions.act_window">
+        <field name="name">Pay Selected Months</field>
+        <field name="res_model">dev.pay.selected.months</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_loan_id': active_id}</field>
+    </record>
+</odoo>

@@ -96,6 +96,7 @@ Loan Management system in odoo for customer and supplier, Customer Loan, Supplie
         'wizard/dev_paid_installment_views.xml',
         'wizard/dev_update_rate_views.xml',
         'wizard/add_advance_payment_views.xml',
+        'wizard/dev_pay_selected_months_views.xml',
         'wizard/generate_agreement.xml',
         'views/dev_loan_proof_view.xml',
         'views/dev_loan_type.xml',

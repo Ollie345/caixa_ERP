@@ -23,17 +23,41 @@ class dev_paid_installment(models.TransientModel):
     opening_balance = fields.Float('Opening Balance', required="1")
     principal_amount = fields.Float('Principal Amount', required="1")
     interest_amount = fields.Float('Interest Amount', required="1")
+    penalty_amount = fields.Float('Penalty Amount', readonly=True)
     emi_amount =fields.Float('EMI', required="1")
     paid_amount = fields.Float('Paid Amount', required="1")
     closing_amount = fields.Float('Closing Amount', required="1")
     
+    @api.model
+    def default_get(self, fields_list):
+        """Load penalty amount from installment and calculate paid_amount including penalty"""
+        res = super().default_get(fields_list)
+        active_id = self._context.get('active_id')
+        if active_id:
+            installment = self.env['dev.loan.installment'].browse(active_id)
+            penalty = installment.penalty_amount or 0.0
+            res['penalty_amount'] = penalty
+            
+            # Calculate paid_amount = EMI + Penalty
+            # Get emi_amount from context (passed as total_amount) or from installment
+            emi_amount = res.get('emi_amount', installment.total_amount or 0.0)
+            if not emi_amount:
+                # Fallback: calculate from installment fields
+                emi_amount = (installment.amount or 0.0) + (installment.interest or 0.0)
+            
+            # Override paid_amount to include penalty
+            res['paid_amount'] = emi_amount + penalty
+        return res
     
     def paid_installment(self):
         installment_pool = self.env['dev.loan.installment']
         active_id =self._context.get('active_id')
         obj = installment_pool.browse(active_id)
-        if self.paid_amount <= self.interest_amount:
-            raise ValidationError(_('Paid Amount Must be greater then Interest Amount'))
+        
+        # Calculate minimum payment including penalty
+        minimum_payment = self.interest_amount + (self.penalty_amount or 0.0)
+        if self.paid_amount <= minimum_payment:
+            raise ValidationError(_('Paid Amount Must be greater than Interest + Penalty Amount'))
         
         obj.total_amount = self.paid_amount
         obj.closing_balance = obj.opening_balance - obj.amount

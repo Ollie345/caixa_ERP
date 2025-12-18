@@ -288,11 +288,11 @@ class dev_loan_loan(models.Model):
             # Number of overdue days
             overdue_days = (today - penalty_start).days
 
-            # Daily rate = interest_rate + penalty_rate
-            daily_rate = (self.interest_rate + self.penalty_rate) / 100
-
-            # Penalty applies on installment remaining principal
-            penalty_total += inst.balance * daily_rate * overdue_days
+            # Calculate penalty: Opening Balance × Penalty Rate × Days elapsed after grace period
+            # Penalty per day = Opening Balance × Penalty Rate
+            # Total Penalty = Penalty per day × Overdue Days
+            if self.penalty_rate:
+                penalty_total += inst.balance * (self.penalty_rate / 100) * overdue_days
 
         return penalty_total
 
@@ -643,19 +643,20 @@ class dev_loan_loan(models.Model):
         for loan in self:
             loan.emi_estimate = 0.0
             if loan.interest_rate and loan.loan_amount and loan.loan_term:
-                if loan.interest_mode == 'reducing':
-                    if loan.interest_rate and loan.loan_term and loan.loan_amount:
-                        k = 12
-                        i = loan.interest_rate / 100
-                        a = i / k or 0.00
-                        b = (1 - (1 / ((1 + (i / k)) ** loan.loan_term))) or 0.00
-                        emi = ((loan.loan_amount * a) / b) or 0.00
-                        loan.emi_estimate =  emi
-                else:
-                    loan.emi_estimate = (loan.loan_amount / loan.loan_term) + ((loan.loan_amount * (loan.interest_rate / 100)) / 12)
-                    
-            if not loan.interest_rate and loan.loan_amount and loan.loan_term:
-                loan.emi_estimate = (loan.loan_amount / loan.loan_term)
+                # Equal Principal Amortization Formula
+                # Principal per month = Loan Amount / Number of Months
+                principal_per_month = loan.loan_amount / loan.loan_term
+                
+                # For EMI estimate, use first month payment (highest interest)
+                # Interest on full loan amount for first month (rate is already monthly)
+                first_month_interest = (loan.loan_amount * (loan.interest_rate / 100))
+                
+                # EMI estimate = Principal + First Month Interest
+                loan.emi_estimate = principal_per_month + first_month_interest
+            else:
+                # No interest case
+                if loan.loan_amount and loan.loan_term:
+                    loan.emi_estimate = loan.loan_amount / loan.loan_term
                     
                     
     def _make_url(self):
@@ -739,23 +740,55 @@ class dev_loan_loan(models.Model):
             date = date
         vals = []
         interest_account_id,installment_account_id,loan_payment_journal_id = self.get_loan_account_journal()
-        interest =  ((self.loan_amount * (self.interest_rate / 100)) / 12)
+        
+        # Equal Principal Formula: Principal Amount = Loan Amount / Number of Months
+        principal_per_month = self.loan_amount / self.loan_term
+        
         for i in range(1,self.loan_term+1):
-            emi = float("{:.2f}".format(self.emi_estimate))
-            if self.interest_mode != 'flat':
-                interest = (opening_balance * (self.interest_rate / 100)) / 12
+            # Principal payment is constant (equal principal amortization)
+            principal = principal_per_month
+            
+            # Adjust for final payment if remaining balance is less than principal
+            if opening_balance < principal:
+                principal = opening_balance
+            
+            # Monthly Interest = Monthly Interest Rate × Remainder of Loan Amount
+            if self.interest_rate:
+                if self.interest_mode == 'flat':
+                    # Flat interest: calculated on original loan amount (rate is already monthly)
+                    interest = (self.loan_amount * (self.interest_rate / 100))
+                else:
+                    # Reducing balance: calculated on remaining balance (rate is already monthly)
+                    interest = (opening_balance * (self.interest_rate / 100))
+            else:
+                interest = 0.0
+            
             interest = float("{:.2f}".format(interest))
-            if opening_balance < emi:
-                emi = opening_balance + interest
-            principal = emi - interest
+            principal = float("{:.2f}".format(principal))
+            
+            # Calculate closing balance
             closing_amount = opening_balance - principal
-            date = date+relativedelta(days=30)
+            
+            # Handle none interest months
             none_interest = False
             if i <= self.none_interest_month:
                 none_interest = True
-                closing_amount = opening_balance - emi
+                interest = 0.0
+                # For none interest months, only principal is paid
+                closing_amount = opening_balance - principal
+            
+            # Ensure closing balance doesn't go negative
             if closing_amount < 0.0:
                 closing_amount = 0.0
+                # Adjust principal if needed
+                principal = opening_balance
+            
+            # Calculate total payment
+            total_payment = principal + interest
+            
+            # Increment date by 30 days (each month = 30 days)
+            date = date + relativedelta(days=30)
+            
             vals.append((0, 0,{
                 'name':'INS - '+self.name+ ' - '+str(i),
                 'client_id':self.client_id and self.client_id.id or False,
@@ -765,7 +798,7 @@ class dev_loan_loan(models.Model):
                 'none_interest':none_interest,
                 'interest':interest,
                 'closing_balance':closing_amount,
-                'total_amount':float("{:.2f}".format(interest+principal)),
+                'total_amount':float("{:.2f}".format(total_payment)),
                 'state':'unpaid',
                 'interest_account_id':interest_account_id or False,
                 'installment_account_id':installment_account_id or False,
@@ -798,7 +831,11 @@ class dev_loan_loan(models.Model):
             if not self.is_amortization_customized:
                 self.interest_rate = self.loan_type_id.rate or 0.0
                 self.none_interest_month = self.loan_type_id.none_interest_month or 0
-                self.interest_mode = self.loan_type_id.interest_mode or False
+                # Always set interest_mode from loan type when loan_type changes
+                if self.loan_type_id.interest_mode:
+                    self.interest_mode = self.loan_type_id.interest_mode
+                else:
+                    self.interest_mode = False
                 self.is_interest_apply = self.loan_type_id.is_interest_apply or False
             # Always set loan term from type (unless customized)
             if not self.is_amortization_customized:

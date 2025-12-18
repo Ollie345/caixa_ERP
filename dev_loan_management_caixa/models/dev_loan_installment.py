@@ -96,14 +96,13 @@ class dev_loan_installment(models.Model):
             if overdue_days < 0:
                 overdue_days = 0
             
-            # Calculate daily rate (only if rates are set)
-            if penalty_rate == 0.0 and interest_rate == 0.0:
-                daily_rate = 0.0
+            # Calculate penalty: Opening Balance × Penalty Rate × Days elapsed after grace period
+            # Penalty per day = Opening Balance × Penalty Rate
+            # Total Penalty = Penalty per day × Overdue Days
+            if penalty_rate == 0.0:
+                penalty = 0.0
             else:
-                daily_rate = (interest_rate + penalty_rate) / 100
-            
-            # Calculate penalty
-            penalty = opening_balance * daily_rate * overdue_days
+                penalty = (penalty_rate / 100) * opening_balance * overdue_days
             
             inst.write({
                 'days_overdue': overdue_days,
@@ -262,6 +261,17 @@ class dev_loan_installment(models.Model):
             'date_maturity':date.today(),
         }
         return vals
+    
+    def get_penalty_lines(self):
+        vals={
+            'partner_id':self.client_id and self.client_id.id or False,
+            'account_id':self.interest_account_id and self.interest_account_id.id or False,
+            'debit':self.penalty_amount,
+            'credit':0.0,
+            'name':self.name or '/',
+            'date_maturity':date.today(),
+        }
+        return vals
         
         
     def set_loan_close(self):
@@ -297,18 +307,26 @@ class dev_loan_installment(models.Model):
         
         if self.client_id and not self.client_id.property_account_receivable_id:
             raise ValidationError(_("Select Client Receivable Account !!!"))
+        # Calculate total including penalty
+        total_with_penalty = self.total_amount + (self.penalty_amount or 0.0)
+        
         account_move_val = self.get_account_move_vals()
         account_move_id = self.env['account.move'].create(account_move_val)
         vals=[]
         if account_move_id:
             self.paid_interest = self.interest
             val = self.get_partner_lines()
+            val['credit'] = total_with_penalty  # Update to include penalty
             vals.append((0,0,val))
             if self.amount:
                 val = self.get_installment_lines()
                 vals.append((0,0,val))
             if self.interest:
                 val = self.get_interest_lines()
+                vals.append((0,0,val))
+            # Add penalty line if penalty exists
+            if self.penalty_amount and self.penalty_amount > 0:
+                val = self.get_penalty_lines()
                 vals.append((0,0,val))
             account_move_id.line_ids = vals
             self.journal_entry_id = account_move_id and account_move_id.id or False

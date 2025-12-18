@@ -19,6 +19,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                     <group>
                         <field name="principal_amount" readonly="1"/>
                         <field name="interest_amount" readonly="1"/>
+                        <field name="penalty_amount" readonly="1"/>
                         <field name="emi_amount" readonly="1"/>
                         <field name="paid_amount"/>
                     </group>

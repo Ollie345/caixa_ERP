@@ -5,7 +5,7 @@
         <field name="arch" type="xml">
             <form string="Approve Loan">
                 <group>
-                    <field name="loan_id"/>
+                    <field name="loan_id" readonly="1"/>
                     <field name="approval_reason"/>
                 </group>
                 <footer>
@@ -24,5 +24,6 @@
         <field name="res_model">dev.loan.approve.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
+        <field name="context">{'default_loan_id': active_id}</field>
     </record>
 </odoo>

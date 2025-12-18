@@ -22,5 +22,6 @@ from . import generate_notice
 from . import dev_loan_restructure_wizard
 from . import dev_loan_approve_wizard
 from . import dev_loan_closure
+from . import dev_pay_selected_months
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

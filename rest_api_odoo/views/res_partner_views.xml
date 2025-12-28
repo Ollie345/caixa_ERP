@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherited partner form view for wallet information -->
+    <record id="view_partner_form_wallet" model="ir.ui.view">
+        <field name="name">view.partner.form.wallet</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <!-- Add wallet information page after internal notes -->
+            <xpath expr="//page[@name='internal_notes']" position="after">
+                <page string="Wallet Information" name="wallet_info" invisible="not wallet_account_number">
+                    <group string="Wallet Details">
+                        <group>
+                            <field name="wallet_account_number" readonly="1"/>
+                            <field name="wallet_tier" readonly="1"/>
+                            <field name="wallet_status" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="wallet_created_date" readonly="1"/>
+                            <field name="baas_wallet_id" readonly="1"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+            
+            <!-- Add wallet account number in button box if wallet exists -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="%(action_view_wallet_info)d" 
+                        type="action" 
+                        class="oe_stat_button" 
+                        icon="fa-credit-card"
+                        invisible="not wallet_account_number">
+                    <field string="Wallet" name="wallet_account_number" widget="statinfo"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Action to view wallet information -->
+    <record id="action_view_wallet_info" model="ir.actions.act_window">
+        <field name="name">Wallet Information</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+</odoo>

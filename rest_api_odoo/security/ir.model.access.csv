@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_connection_api_user,access.connection.api.user,model_connection_api,,1,1,1,1
+access_baas_service,baas.service,model_baas_service,base.group_user,1,1,1,1

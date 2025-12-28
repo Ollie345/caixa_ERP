@@ -21,7 +21,7 @@
 #############################################################################
 {
     "name": "Odoo rest API",
-    "version": "18.0.1.0.1",
+    "version": "18.0.1.0.2",
     "category": "Tools",
     "summary": """This app helps to interact with odoo, backend with help of 
      rest api requests""",
@@ -34,7 +34,9 @@
     "depends": ['base', 'web'],
     "data": [
         'security/ir.model.access.csv',
+        'data/system_parameters.xml',
         'views/res_users_views.xml',
+        'views/res_partner_views.xml',
         'views/connection_api_views.xml'
     ],
     'images': ['static/description/banner.jpg'],

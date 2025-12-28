@@ -912,3 +912,274 @@ class RestApi(http.Controller):
         except Exception as e:
             _logger.error("Error fetching loan stage: %s", str(e), exc_info=True)
             return ("<html><body><h2>Error fetching loan stage</h2></body></html>")
+
+    @http.route(['/wallet/create-tier-one'], type='http', auth='none', methods=['POST'], csrf=False)
+    def create_wallet_tier_one(self, **kw):
+        """Create Tier One wallet with BVN using BaaS API
+        
+        Required headers:
+        - api-key: API key for authentication
+        - db: Database name
+        - Content-Type: application/json
+        
+        Request body (JSON):
+        {
+            "bvn": "31035529413",
+            "firstname": "John",
+            "lastname": "Doe",
+            "phone": "3103452948",
+            "dob": "1990-01-15",
+            "partner_id": 123  // Optional
+        }
+        
+        Returns JSON response with success status and account number
+        """
+        import json
+        
+        # Authenticate using API key
+        api_key = request.httprequest.headers.get('api-key')
+        if not api_key:
+            error_response = {
+                "success": False,
+                "message": "No API Key provided",
+                "account_number": None,
+                "errors": ["Missing api-key header"]
+            }
+            return request.make_response(
+                data=json.dumps(error_response),
+                headers=[('Content-Type', 'application/json')],
+                status=401
+            )
+        
+        # Get database name from headers or session
+        db = request.httprequest.headers.get('db') or request.session.db
+        if not db:
+            db = getattr(request, 'db', None)
+        if not db:
+            error_response = {
+                "success": False,
+                "message": "Database not specified",
+                "account_number": None,
+                "errors": ["Missing db header"]
+            }
+            return request.make_response(
+                data=json.dumps(error_response),
+                headers=[('Content-Type', 'application/json')],
+                status=400
+            )
+        
+        # Initialize session with database
+        try:
+            request.session.update(http.get_default_session(), db=db)
+        except Exception as e:
+            _logger.warning("Session update failed: %s", str(e))
+        
+        # Get user from API key
+        user = request.env['res.users'].sudo().search([('api_key', '=', api_key)], limit=1)
+        if not user:
+            error_response = {
+                "success": False,
+                "message": "Invalid API Key",
+                "account_number": None,
+                "errors": ["Invalid or expired api-key"]
+            }
+            return request.make_response(
+                data=json.dumps(error_response),
+                headers=[('Content-Type', 'application/json')],
+                status=401
+            )
+        
+        # Set up environment with authenticated user
+        env = request.env(user=user.id)
+        
+        # Get and parse payload
+        try:
+            payload_data = request.httprequest.data
+            if not payload_data:
+                error_response = {
+                    "success": False,
+                    "message": "Empty request body",
+                    "account_number": None,
+                    "errors": ["Request body is required"]
+                }
+                return request.make_response(
+                    data=json.dumps(error_response),
+                    headers=[('Content-Type', 'application/json')],
+                    status=400
+                )
+            
+            payload = json.loads(payload_data)
+        except json.JSONDecodeError as e:
+            _logger.error("Error parsing JSON: %s", str(e))
+            error_response = {
+                "success": False,
+                "message": "Invalid JSON data",
+                "account_number": None,
+                "errors": [f"JSON decode error: {str(e)}"]
+            }
+            return request.make_response(
+                data=json.dumps(error_response),
+                headers=[('Content-Type', 'application/json')],
+                status=400
+            )
+        except Exception as e:
+            _logger.error("Error reading request data: %s", str(e))
+            error_response = {
+                "success": False,
+                "message": "Error reading request data",
+                "account_number": None,
+                "errors": [str(e)]
+            }
+            return request.make_response(
+                data=json.dumps(error_response),
+                headers=[('Content-Type', 'application/json')],
+                status=400
+            )
+        
+        # Helper to get value with fallback
+        def _get(key, default=None):
+            return payload.get(key, default)
+        
+        # Validate required fields
+        bvn = _get("bvn") or _get("bvn_number")
+        firstname = _get("firstname") or _get("first_name")
+        lastname = _get("lastname") or _get("last_name")
+        phone = _get("phone") or _get("phone_number")
+        dob = _get("dob") or _get("date_of_birth") or _get("birthdate")
+        partner_id = _get("partner_id")
+        
+        # Validate required fields
+        missing_fields = []
+        if not bvn:
+            missing_fields.append("bvn")
+        if not firstname:
+            missing_fields.append("firstname")
+        if not lastname:
+            missing_fields.append("lastname")
+        if not phone:
+            missing_fields.append("phone")
+        if not dob:
+            missing_fields.append("dob")
+        
+        if missing_fields:
+            error_response = {
+                "success": False,
+                "message": f"Missing required fields: {', '.join(missing_fields)}",
+                "account_number": None,
+                "errors": [f"Required fields: {', '.join(missing_fields)}"]
+            }
+            return request.make_response(
+                data=json.dumps(error_response),
+                headers=[('Content-Type', 'application/json')],
+                status=400
+            )
+        
+        # If partner_id provided, use it; otherwise create wallet directly
+        if partner_id:
+            try:
+                partner_id_int = int(partner_id)
+                partner = env['res.partner'].sudo().browse(partner_id_int)
+                if not partner.exists():
+                    error_response = {
+                        "success": False,
+                        "message": "Partner not found",
+                        "account_number": None,
+                        "errors": [f"Partner with ID {partner_id} does not exist"]
+                    }
+                    return request.make_response(
+                        data=json.dumps(error_response),
+                        headers=[('Content-Type', 'application/json')],
+                        status=404
+                    )
+                result = partner.create_wallet_tier_one(bvn=bvn)
+            except ValueError:
+                error_response = {
+                    "success": False,
+                    "message": "Invalid partner_id format",
+                    "account_number": None,
+                    "errors": ["partner_id must be a valid integer"]
+                }
+                return request.make_response(
+                    data=json.dumps(error_response),
+                    headers=[('Content-Type', 'application/json')],
+                    status=400
+                )
+            except ValidationError as e:
+                _logger.error("Validation error creating wallet for partner: %s", str(e))
+                error_response = {
+                    "success": False,
+                    "message": str(e),
+                    "account_number": None,
+                    "errors": [str(e)]
+                }
+                return request.make_response(
+                    data=json.dumps(error_response),
+                    headers=[('Content-Type', 'application/json')],
+                    status=400
+                )
+            except Exception as e:
+                _logger.error("Error creating wallet for partner: %s", str(e), exc_info=True)
+                error_response = {
+                    "success": False,
+                    "message": "Error creating wallet",
+                    "account_number": None,
+                    "errors": [f"Internal error: {str(e)}"]
+                }
+                return request.make_response(
+                    data=json.dumps(error_response),
+                    headers=[('Content-Type', 'application/json')],
+                    status=500
+                )
+        else:
+            # Create wallet directly via service
+            try:
+                baas_service = env['baas.service']
+                result = baas_service.create_tier_one_wallet(
+                    firstname=firstname,
+                    lastname=lastname,
+                    phone=phone,
+                    dob=dob,
+                    bvn=bvn
+                )
+            except ValidationError as e:
+                _logger.error("Validation error creating wallet: %s", str(e))
+                error_response = {
+                    "success": False,
+                    "message": str(e),
+                    "account_number": None,
+                    "errors": [str(e)]
+                }
+                return request.make_response(
+                    data=json.dumps(error_response),
+                    headers=[('Content-Type', 'application/json')],
+                    status=400
+                )
+            except Exception as e:
+                _logger.error("Error creating wallet via service: %s", str(e), exc_info=True)
+                error_response = {
+                    "success": False,
+                    "message": "Error creating wallet",
+                    "account_number": None,
+                    "errors": [f"Internal error: {str(e)}"]
+                }
+                return request.make_response(
+                    data=json.dumps(error_response),
+                    headers=[('Content-Type', 'application/json')],
+                    status=500
+                )
+        
+        # Return response
+        status_code = 200 if result.get('success') else 400
+        response_data = {
+            "success": result.get('success', False),
+            "account_number": result.get('account_number'),
+            "message": result.get('message', ''),
+            "wallet_tier": "tier_1",
+            "errors": result.get('errors', [])
+        }
+        
+        return request.make_response(
+            data=json.dumps(response_data),
+            headers=[('Content-Type', 'application/json')],
+            status=status_code
+        )

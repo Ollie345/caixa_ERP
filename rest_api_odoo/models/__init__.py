@@ -21,3 +21,5 @@
 #############################################################################
 from . import connection_api
 from . import res_users
+from . import baas_service
+from . import res_partner

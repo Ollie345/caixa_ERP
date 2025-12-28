@@ -25,8 +25,7 @@
             
             <!-- Add wallet account number in button box if wallet exists -->
             <xpath expr="//div[@name='button_box']" position="inside">
-                <button name="%(action_view_wallet_info)d" 
-                        type="action" 
+                <button type="object" 
                         class="oe_stat_button" 
                         icon="fa-credit-card"
                         invisible="not wallet_account_number">
@@ -34,13 +33,5 @@
                 </button>
             </xpath>
         </field>
-    </record>
-    
-    <!-- Action to view wallet information -->
-    <record id="action_view_wallet_info" model="ir.actions.act_window">
-        <field name="name">Wallet Information</field>
-        <field name="res_model">res.partner</field>
-        <field name="view_mode">form</field>
-        <field name="target">current</field>
     </record>
 </odoo>

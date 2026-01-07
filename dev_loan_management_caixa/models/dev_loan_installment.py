@@ -180,7 +180,7 @@ class dev_loan_installment(models.Model):
             if ins.loan_id.interest_mode != 'flat':
                 if ins.opening_balance and not ins.none_interest:
                     if ins.state != 'paid':
-                        ins.interest = (ins.opening_balance * (ins.loan_id.interest_rate / 100))/12
+                        ins.interest = (ins.opening_balance * (ins.loan_id.interest_rate / 100))
                     else:
                         ins.interest = ins.paid_interest
                 else:
@@ -188,7 +188,7 @@ class dev_loan_installment(models.Model):
             else:
                 loan_id = ins.loan_id
                 if ins.state != 'paid':
-                    ins.interest = ((loan_id.loan_amount * (loan_id.interest_rate / 100)) / 12)
+                    ins.interest = (loan_id.loan_amount * (loan_id.interest_rate / 100))
                 else:
                     ins.interest = ins.paid_interest
                 

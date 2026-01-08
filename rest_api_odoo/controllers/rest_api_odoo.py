@@ -862,14 +862,23 @@ class RestApi(http.Controller):
                 
                 # Set borrower_category_id if provided or default exists
                 if borrower_category_id:
-                    partner_vals["borrower_category_id"] = int(borrower_category_id)
-                    # loan_request will be automatically set by the create method
+                    try:
+                        category = env["borrower.category"].sudo().browse(int(borrower_category_id))
+                        if category.exists() and category.loan_request_per_year:
+                            partner_vals["borrower_category_id"] = int(borrower_category_id)
+                            # Explicitly set loan_request to ensure it's set
+                            partner_vals["loan_request"] = category.loan_request_per_year
+                        else:
+                            _logger.warning("Borrower category %s not found or has no loan_request_per_year", borrower_category_id)
+                    except (ValueError, TypeError) as e:
+                        _logger.error("Invalid borrower_category_id: %s", borrower_category_id)
                 
                 partner = env["res.partner"].sudo().create(partner_vals)
-                # Refresh partner to ensure loan_request is set from category
+                # Verify loan_request was set correctly
                 if borrower_category_id:
-                    partner.sudo().invalidate_recordset(['loan_request'])
-                    partner.sudo().refresh()
+                    category = env["borrower.category"].sudo().browse(int(borrower_category_id))
+                    if category.exists() and partner.loan_request != category.loan_request_per_year:
+                        partner.sudo().write({'loan_request': category.loan_request_per_year})
             else:
                 # Update partner details if new information is provided
                 update_vals = {}
@@ -893,17 +902,33 @@ class RestApi(http.Controller):
                 
                 # Update borrower_category_id if provided
                 category_updated = False
+                category = None  # Initialize category variable
                 if borrower_category_id:
-                    update_vals["borrower_category_id"] = int(borrower_category_id)
-                    category_updated = True
-                    # loan_request will be automatically set by the write method
+                    # Verify category exists and has loan_request_per_year
+                    try:
+                        category = env["borrower.category"].sudo().browse(int(borrower_category_id))
+                        if category.exists() and category.loan_request_per_year:
+                            update_vals["borrower_category_id"] = int(borrower_category_id)
+                            # Explicitly set loan_request to ensure it's updated
+                            update_vals["loan_request"] = category.loan_request_per_year
+                            category_updated = True
+                        else:
+                            _logger.warning("Borrower category %s not found or has no loan_request_per_year", borrower_category_id)
+                            category = None  # Reset if not valid
+                    except (ValueError, TypeError) as e:
+                        _logger.error("Invalid borrower_category_id: %s", borrower_category_id)
+                        category = None  # Reset on error
                 
                 if update_vals:
                     partner.sudo().write(update_vals)
-                    # Refresh partner to ensure loan_request is updated from category
-                    if category_updated:
-                        partner.sudo().invalidate_recordset(['loan_request'])
+                    # Force refresh to ensure loan_request is updated
+                    if category_updated and category:
+                        partner.sudo().invalidate_recordset(['loan_request', 'borrower_category_id'])
                         partner.sudo().refresh()
+                        # Double-check loan_request was updated
+                        if partner.loan_request != category.loan_request_per_year:
+                            # Force update if refresh didn't work
+                            partner.sudo().write({'loan_request': category.loan_request_per_year})
             
             partner_id = partner.id if partner else False
         

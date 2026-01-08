@@ -10,6 +10,9 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class res_partner(models.Model):
@@ -59,12 +62,18 @@ class res_partner(models.Model):
         if self.borrower_category_id and self.borrower_category_id.loan_request_per_year:
             self.loan_request = self.borrower_category_id.loan_request_per_year
     
+
     def write(self, vals):
         """Override write to set loan_request when borrower_category_id is updated"""
-        if 'borrower_category_id' in vals and vals['borrower_category_id']:
-            category = self.env['borrower.category'].browse(vals['borrower_category_id'])
-            if category and category.loan_request_per_year:
-                vals['loan_request'] = category.loan_request_per_year
+        if 'borrower_category_id' in vals and vals.get('borrower_category_id'):
+            try:
+                category_id = int(vals['borrower_category_id'])
+                category = self.env['borrower.category'].sudo().browse(category_id)
+                if category.exists() and category.loan_request_per_year:
+                    vals['loan_request'] = category.loan_request_per_year
+            except (ValueError, TypeError) as e:
+                # If category_id is invalid, log but don't fail
+                _logger.warning("Invalid borrower_category_id: %s", vals.get('borrower_category_id'))
         return super().write(vals)
     
     @api.model_create_multi

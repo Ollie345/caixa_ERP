@@ -17,6 +17,9 @@ class res_partner(models.Model):
     
     is_allow_loan = fields.Boolean('Allow Loan')
     loan_request = fields.Integer('Loan Request Per Year', default=1)
+    # Add after line 24 (after available_peppol_eas field)
+    bvn = fields.Char('BVN', copy=False, help='Bank Verification Number')
+    nin = fields.Char('NIN', copy=False, help='National Identification Number')
     borrower_category_id = fields.Many2one('borrower.category',string="Borrower Category")
     # Fallback field to satisfy views referencing this field from other modules
     duplicate_bank_partner_ids = fields.Boolean(string="Duplicate Bank Partners", default=False)
@@ -47,6 +50,32 @@ class res_partner(models.Model):
     def check_rate(self):
         if self.is_allow_loan and self.loan_request <= 0:
             raise ValidationError(_("Loan Request Per Year Must be Positive !!!"))
+
+# Add this method after line 52 in res_partner.py (after the check_rate method):
+
+    @api.onchange('borrower_category_id')
+    def _onchange_borrower_category_id(self):
+        """Automatically set loan_request from borrower category"""
+        if self.borrower_category_id and self.borrower_category_id.loan_request_per_year:
+            self.loan_request = self.borrower_category_id.loan_request_per_year
+    
+    def write(self, vals):
+        """Override write to set loan_request when borrower_category_id is updated"""
+        if 'borrower_category_id' in vals and vals['borrower_category_id']:
+            category = self.env['borrower.category'].browse(vals['borrower_category_id'])
+            if category and category.loan_request_per_year:
+                vals['loan_request'] = category.loan_request_per_year
+        return super().write(vals)
+    
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Override create to set loan_request when borrower_category_id is set"""
+        for vals in vals_list:
+            if 'borrower_category_id' in vals and vals['borrower_category_id']:
+                category = self.env['borrower.category'].browse(vals['borrower_category_id'])
+                if category and category.loan_request_per_year:
+                    vals['loan_request'] = category.loan_request_per_year
+        return super().create(vals_list)
     
     
     loan_ids = fields.One2many('dev.loan.loan','client_id', string='Loans', domain=[('state','not in', ['draft','reject','cancel'])])

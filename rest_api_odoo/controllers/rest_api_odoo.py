@@ -23,6 +23,7 @@ import json
 import logging
 from odoo import http
 from odoo.http import request
+from odoo.exceptions import ValidationError
 from datetime import datetime, date
 
 _logger = logging.getLogger(__name__)
@@ -796,31 +797,104 @@ class RestApi(http.Controller):
         else:
             email = _get("applicant_email")
             phone = _get("applicant_phone")
+            bvn = _get("applicant_bvn") or _get("bvn")
+            nin = _get("applicant_nin") or _get("nin")
             partner = False
+            
+            # Priority 1: Match by Email
             if email:
                 partner = env["res.partner"].sudo().search([
                     ("email", "=", email),
                     ("is_company", "=", False)
                 ], limit=1)
+            
+            # Priority 2: Match by Phone (if email didn't match)
             if not partner and phone:
                 partner = env["res.partner"].sudo().search([
                     ("phone", "=", phone),
                     ("is_company", "=", False)
                 ], limit=1)
+            
+            # Priority 3: Match by BVN (if email and phone didn't match)
+            if not partner and bvn:
+                partner = env["res.partner"].sudo().search([
+                    ("bvn", "=", bvn),
+                    ("is_company", "=", False)
+                ], limit=1)
+            
+            # Priority 4: Match by NIN (if email, phone, and BVN didn't match)
+            if not partner and nin:
+                partner = env["res.partner"].sudo().search([
+                    ("nin", "=", nin),
+                    ("is_company", "=", False)
+                ], limit=1)
+            
+            # Only create new partner if no match found
+
+            # Get borrower_category_id from request or use default
+            borrower_category_id = _get("borrower_category_id")
+            if not borrower_category_id:
+                # Get default category
+                default_category = env["borrower.category"].sudo().search([
+                    ("is_default", "=", True)
+                ], limit=1)
+                if default_category:
+                    borrower_category_id = default_category.id
+            
+            # Only create new partner if no match found
             if not partner:
                 full_name = " ".join(filter(None, [
                     _get("applicant_first_name"),
                     _get("applicant_middle_name"),
                     _get("applicant_surname")
                 ])) or _get("reference") or "Customer"
-                partner = env["res.partner"].sudo().create({
+                
+                partner_vals = {
                     "name": full_name,
                     "is_company": False,
                     "email": email,
                     "phone": phone,
                     "street": _get("applicant_address"),
+                    "bvn": bvn,
+                    "nin": nin,
                     "is_allow_loan": True,
-                })
+                }
+                
+                # Set borrower_category_id if provided or default exists
+                if borrower_category_id:
+                    partner_vals["borrower_category_id"] = int(borrower_category_id)
+                    # loan_request will be automatically set by the create method
+                
+                partner = env["res.partner"].sudo().create(partner_vals)
+            else:
+                # Update partner details if new information is provided
+                update_vals = {}
+                full_name = " ".join(filter(None, [
+                    _get("applicant_first_name"),
+                    _get("applicant_middle_name"),
+                    _get("applicant_surname")
+                ]))
+                if full_name and partner.name != full_name:
+                    update_vals["name"] = full_name
+                if email and partner.email != email:
+                    update_vals["email"] = email
+                if phone and partner.phone != phone:
+                    update_vals["phone"] = phone
+                if bvn and not partner.bvn:
+                    update_vals["bvn"] = bvn
+                if nin and not partner.nin:
+                    update_vals["nin"] = nin
+                if _get("applicant_address") and partner.street != _get("applicant_address"):
+                    update_vals["street"] = _get("applicant_address")
+                
+                # Update borrower_category_id if provided
+                if borrower_category_id:
+                    update_vals["borrower_category_id"] = int(borrower_category_id)
+                    # loan_request will be automatically set by the write method
+                
+                if update_vals:
+                    partner.sudo().write(update_vals)
+            
             partner_id = partner.id if partner else False
         
         if partner_id:

@@ -23,9 +23,7 @@
 
         <!-- Add ALL borrower categories -->
         <field name="borrower_category_ids" eval="[(6,0,[
-            ref('dev_loan_management_caixa.borrower_category_business'),
-            ref('dev_loan_management_caixa.borrower_category_shopkeeper'),
-            ref('dev_loan_management_caixa.borrower_category_job')
+            ref('dev_loan_management_caixa.borrower_category_consumer')
         ])]"/>
 
         <!-- Accounting & journals -->
@@ -55,7 +53,7 @@
         ])]"/>
 
         <field name="borrower_category_ids" eval="[(6,0,[
-            ref('dev_loan_management_caixa.borrower_category_business')
+            ref('dev_loan_management_caixa.borrower_category_corporate')
         ])]"/>
 
         <field name="loan_account_id" ref="account.1_prepaid_expenses"/>
@@ -84,7 +82,7 @@
         ])]"/>
 
         <field name="borrower_category_ids" eval="[(6,0,[
-            ref('dev_loan_management_caixa.borrower_category_shopkeeper')
+            ref('dev_loan_management_caixa.borrower_category_corporate')
         ])]"/>
 
         <field name="loan_account_id" ref="account.1_prepaid_expenses"/>

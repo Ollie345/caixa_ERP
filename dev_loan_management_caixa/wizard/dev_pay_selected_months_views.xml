@@ -16,7 +16,7 @@
                             <field name="total_principal" readonly="1"/>
                             <field name="total_interest" readonly="1"/>
                             <field name="total_penalty" readonly="1"/>
-                            <field name="total_amount" readonly="1" class="oe_read_only"/>
+                            <field name="total_amount" readonly="1"/>
                         </group>
                     </group>
                     

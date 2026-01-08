@@ -16,16 +16,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
 		    <field name="name">Light Bill</field>
        </record>
        
-<!--       Borrower Category -->
-       <record id="borrower_category" model="borrower.category">
-		    <field name="name">Business</field>
-       </record>
-        <record id="borrower_category1" model="borrower.category">
-		    <field name="name">shopkeeper</field>
-       </record>
-       <record id="borrower_category2" model="borrower.category">
-		    <field name="name">Job</field>
-       </record>
+
        
        
 <!--       Loan Eligibility Criteria-->

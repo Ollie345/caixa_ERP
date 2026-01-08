@@ -866,6 +866,10 @@ class RestApi(http.Controller):
                     # loan_request will be automatically set by the create method
                 
                 partner = env["res.partner"].sudo().create(partner_vals)
+                # Refresh partner to ensure loan_request is set from category
+                if borrower_category_id:
+                    partner.sudo().invalidate_recordset(['loan_request'])
+                    partner.sudo().refresh()
             else:
                 # Update partner details if new information is provided
                 update_vals = {}
@@ -888,12 +892,18 @@ class RestApi(http.Controller):
                     update_vals["street"] = _get("applicant_address")
                 
                 # Update borrower_category_id if provided
+                category_updated = False
                 if borrower_category_id:
                     update_vals["borrower_category_id"] = int(borrower_category_id)
+                    category_updated = True
                     # loan_request will be automatically set by the write method
                 
                 if update_vals:
                     partner.sudo().write(update_vals)
+                    # Refresh partner to ensure loan_request is updated from category
+                    if category_updated:
+                        partner.sudo().invalidate_recordset(['loan_request'])
+                        partner.sudo().refresh()
             
             partner_id = partner.id if partner else False
         

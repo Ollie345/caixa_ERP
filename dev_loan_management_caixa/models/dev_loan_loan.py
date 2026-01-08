@@ -818,10 +818,17 @@ class dev_loan_loan(models.Model):
                 start_date = start_date.strftime('%Y-%m-%d')
                 end_date = date(date.today().year, 12, 31)
                 end_date = end_date.strftime('%Y-%m-%d')
-                loan_ids = loan.env['dev.loan.loan'].search([('request_date','<=',end_date),('request_date','>=',start_date),('state','not in',['cancel','reject']),('client_id','=',loan.client_id.id)])
+                # Exclude the current loan from the count
+                loan_ids = loan.env['dev.loan.loan'].search([
+                    ('request_date', '<=', end_date),
+                    ('request_date', '>=', start_date),
+                    ('state', 'not in', ['cancel', 'reject']),
+                    ('client_id', '=', loan.client_id.id),
+                    ('id', '!=', loan.id)  # Exclude current loan
+                ])
                 
                 if len(loan_ids) > no_of_loan_allow:
-                    raise ValidationError(_("This Borrower allow only %s Loan Request in Year !!!")%(no_of_loan_allow))
+                    raise ValidationError(_("This Borrower allow only %s Loan Request in Year !!!") % no_of_loan_allow)
             
     
     @api.onchange('loan_type_id')

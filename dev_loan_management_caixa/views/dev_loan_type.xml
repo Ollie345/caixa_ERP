@@ -25,6 +25,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                             <field name="loan_term_by_month"/>
                             <!-- <field name="proof_ids" widget="many2many_tags" options="{'no_create_edit': True}"/> -->
                             <field name="borrower_category_ids" widget="many2many_tags" options="{'no_create_edit': True}"/>
+                            <field name="loan_officer_id"/>
                         </group>
                         <group>
                             <field name="is_interest_apply"/>

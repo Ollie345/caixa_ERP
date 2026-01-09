@@ -377,10 +377,20 @@ class dev_loan_loan(models.Model):
         if template:
             template.send_mail(self.id, force_send=True)
 
-    # @api.onchange('loan_type_id')
-    # def _onchange_loan_type(self):
-    #     for rec in self:
-    #         rec.checklist_item_ids = [(5, 0, 0)]  # Clear
+    @api.onchange('loan_type_id')
+    def _onchange_loan_type(self):
+        for rec in self:
+            rec.checklist_item_ids = [(5, 0, 0)]  # Clear
+            if rec.loan_type_id and rec.loan_type_id.loan_officer_id:
+                rec.user_id = rec.loan_type_id.loan_officer_id.id
+
+    @api.model
+    def create(self, vals):
+        if vals.get('loan_type_id'):
+            loan_type = self.env['dev.loan.type'].browse(vals.get('loan_type_id'))
+            if loan_type and loan_type.loan_officer_id:
+                vals['user_id'] = loan_type.loan_officer_id.id
+        return super(dev_loan_loan, self).create(vals)
 
     def compute_loan_notice_count(self):
        for loan in self:

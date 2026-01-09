@@ -130,16 +130,16 @@
         <field name="model_id" ref="dev_loan_management_caixa.model_dev_loan_loan"/>
         <field name="subject">Loan Closed Successfully</field>
         <!-- Send to the borrower (client_id) -->
-        <field name="email_to">${object.client_id.email}</field>
+        <field name="email_to">{{ object.client_id.email }}</field>
         <field name="body_html">
             <![CDATA[
-                <p>Dear ${object.client_id.name},</p>
+                <p>Dear <t t-out="object.client_id.name"/>,</p>
 
-                <p>Your loan <strong>${object.name}</strong> has been successfully closed.</p>
+                <p>Your loan <strong><t t-out="object.name"/></strong> has been successfully closed.</p>
 
                 <p>
-                    <strong>Closure Date:</strong> ${object.closure_date}<br/>
-                    <strong>Amount Paid:</strong> ${object.closure_amount}
+                    <strong>Closure Date:</strong> <t t-out="object.closure_date"/><br/>
+                    <strong>Amount Paid:</strong> <t t-out="object.closure_amount"/>
                 </p>
 
                 <p>Thank you for your prompt repayment.</p>

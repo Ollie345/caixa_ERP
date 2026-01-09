@@ -135,4 +135,18 @@ class DevLoanClosureWizard(models.TransientModel):
             'closure_amount': wizard.closure_amount,
             'is_early_closure': True,
         })
+
+        # Mark all remaining installments as paid
+        unpaid_installments = loan.installment_ids.filtered(lambda i: i.state == 'unpaid').sorted('date')
+        if unpaid_installments:
+            # Attribute the pro-rated interest calculated in the wizard to the first unpaid installment.
+            # Subsequent installments will have 0 paid interest as they are waived/paid early.
+            total_pro_rated_interest = wizard.closure_amount - loan.balance_amount
+            for i, installment in enumerate(unpaid_installments):
+                installment.write({
+                    'state': 'paid',
+                    'payment_date': wizard.closure_date,
+                    'journal_entry_id': move.id,
+                    'paid_interest': total_pro_rated_interest if i == 0 else 0.0,
+                })
         loan._send_closure_email()

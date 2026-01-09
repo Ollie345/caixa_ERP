@@ -29,6 +29,7 @@ class dev_loan_type(models.Model):
     installment_account_id = fields.Many2one('account.account', string='Installment Account', required="1")
     disburse_journal_id = fields.Many2one('account.journal', string='Disburse Journal', required="1")
     loan_payment_journal_id = fields.Many2one('account.journal', string='Payment Journal', required="1")
+    loan_officer_id = fields.Many2one('res.users', string='Loan Officer', help="Default Loan Officer for this loan type")
     none_interest_month = fields.Integer('None Interest Month')
     borrower_category_ids = fields.Many2many('borrower.category',string="Borrower Category", required="1")
     processing_fees_product_id = fields.Many2one('product.product', string='Processing Fee')

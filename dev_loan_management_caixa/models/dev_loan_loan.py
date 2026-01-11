@@ -22,7 +22,7 @@ class dev_loan_loan(models.Model):
     
     name = fields.Char('Name', default='/', copy=False)
     client_id = fields.Many2one('res.partner', domain=[('is_allow_loan','=',True)], required="1", string='Borrower')
-    request_date =fields.Date('Request Date', default=fields.Date.today(), required="1")
+    request_date = fields.Date('Request Date', default=lambda self: fields.Date.context_today(self), required="1")    
     approve_date = fields.Date('Approve Date', copy=False)
     disbursement_date = fields.Date('Disbursement Date', copy=False)
     loan_type_id = fields.Many2one('dev.loan.type', string='Loan Type', required="1")

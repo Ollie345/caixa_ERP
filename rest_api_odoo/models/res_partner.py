@@ -139,3 +139,40 @@ class ResPartner(models.Model):
             })
         
         return result
+
+    def action_create_wallet_tier_one(self):
+        """Action method to create wallet with user feedback"""
+        self.ensure_one()
+        
+        # Check if wallet already exists
+        if self.wallet_account_number:
+            raise ValidationError(_(
+                "Wallet already exists for this partner.\n"
+                "Account Number: %s"
+            ) % self.wallet_account_number)
+        
+        # Create wallet
+        result = self.create_wallet_tier_one()
+        
+        if result['success']:
+            # Show success message
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Success'),
+                    'message': _(
+                        'Wallet created successfully!\n'
+                        'Account Number: %s'
+                    ) % result['account_number'],
+                    'type': 'success',
+                    'sticky': False,
+                }
+            }
+        else:
+            # Show error message
+            error_msg = result.get('message', 'Failed to create wallet')
+            errors = result.get('errors', [])
+            if errors:
+                error_msg += '\n' + '\n'.join(errors)
+            raise ValidationError(_('Wallet Creation Failed:\n%s') % error_msg)

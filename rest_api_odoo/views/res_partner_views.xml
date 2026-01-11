@@ -8,8 +8,9 @@
         <field name="arch" type="xml">
             <!-- Add wallet information page after internal notes -->
             <xpath expr="//page[@name='internal_notes']" position="after">
-                <page string="Wallet Information" name="wallet_info" invisible="not wallet_account_number">
-                    <group string="Wallet Details">
+                <page string="Wallet Information" name="wallet_info">
+                    <!-- Show wallet details if exists -->
+                    <group string="Wallet Details" invisible="not wallet_account_number">
                         <group>
                             <field name="wallet_account_number" readonly="1"/>
                             <field name="wallet_tier" readonly="1"/>
@@ -19,6 +20,24 @@
                             <field name="wallet_created_date" readonly="1"/>
                             <field name="baas_wallet_id" readonly="1"/>
                         </group>
+                    </group>
+                    <!-- Show create button if wallet doesn't exist -->
+                    <group string="Create Wallet" invisible="wallet_account_number">
+                        <div class="alert alert-info" role="alert">
+                            <p><strong>No wallet has been created for this partner yet.</strong></p>
+                            <p>Click the button below to create a Tier One wallet.</p>
+                            <p><strong>Requirements:</strong></p>
+                            <ul>
+                                <li>BVN (Bank Verification Number)</li>
+                                <li>First Name</li>
+                                <li>Phone Number</li>
+                            </ul>
+                        </div>
+                        <button name="action_create_wallet_tier_one" 
+                                type="object" 
+                                string="Create Tier One Wallet"
+                                class="btn-primary"
+                                icon="fa-credit-card"/>
                     </group>
                 </page>
             </xpath>

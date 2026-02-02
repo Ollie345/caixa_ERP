@@ -834,12 +834,19 @@ class RestApi(http.Controller):
             # Get borrower_category_id from request or use default
             borrower_category_id = _get("borrower_category_id")
             if not borrower_category_id:
-                # Get default category
-                default_category = env["borrower.category"].sudo().search([
-                    ("is_default", "=", True)
-                ], limit=1)
-                if default_category:
-                    borrower_category_id = default_category.id
+                # Get default category - check if model exists first
+                try:
+                    if "borrower.category" in env:
+                        default_category = env["borrower.category"].sudo().search([
+                            ("is_default", "=", True)
+                        ], limit=1)
+                        if default_category:
+                            borrower_category_id = default_category.id
+                    else:
+                        _logger.debug("Borrower category model not available in registry")
+                except Exception as e:
+                    _logger.warning("Could not fetch default borrower category: %s", str(e))
+                    borrower_category_id = None
             
             # Only create new partner if no match found
             if not partner:
@@ -863,22 +870,29 @@ class RestApi(http.Controller):
                 # Set borrower_category_id if provided or default exists
                 if borrower_category_id:
                     try:
-                        category = env["borrower.category"].sudo().browse(int(borrower_category_id))
-                        if category.exists() and category.loan_request_per_year:
-                            partner_vals["borrower_category_id"] = int(borrower_category_id)
-                            # Explicitly set loan_request to ensure it's set
-                            partner_vals["loan_request"] = category.loan_request_per_year
+                        if "borrower.category" in env:
+                            category = env["borrower.category"].sudo().browse(int(borrower_category_id))
+                            if category.exists() and category.loan_request_per_year:
+                                partner_vals["borrower_category_id"] = int(borrower_category_id)
+                                # Explicitly set loan_request to ensure it's set
+                                partner_vals["loan_request"] = category.loan_request_per_year
+                            else:
+                                _logger.warning("Borrower category %s not found or has no loan_request_per_year", borrower_category_id)
                         else:
-                            _logger.warning("Borrower category %s not found or has no loan_request_per_year", borrower_category_id)
-                    except (ValueError, TypeError) as e:
-                        _logger.error("Invalid borrower_category_id: %s", borrower_category_id)
+                            _logger.debug("Borrower category model not available in registry")
+                    except (ValueError, TypeError, AttributeError, KeyError, Exception) as e:
+                        _logger.error("Error processing borrower_category_id %s: %s", borrower_category_id, str(e))
                 
                 partner = env["res.partner"].sudo().create(partner_vals)
                 # Verify loan_request was set correctly
                 if borrower_category_id:
-                    category = env["borrower.category"].sudo().browse(int(borrower_category_id))
-                    if category.exists() and partner.loan_request != category.loan_request_per_year:
-                        partner.sudo().write({'loan_request': category.loan_request_per_year})
+                    try:
+                        if "borrower.category" in env:
+                            category = env["borrower.category"].sudo().browse(int(borrower_category_id))
+                            if category.exists() and partner.loan_request != category.loan_request_per_year:
+                                partner.sudo().write({'loan_request': category.loan_request_per_year})
+                    except Exception as e:
+                        _logger.warning("Could not verify/update loan_request from borrower category: %s", str(e))
             else:
                 # Update partner details if new information is provided
                 update_vals = {}
@@ -906,17 +920,21 @@ class RestApi(http.Controller):
                 if borrower_category_id:
                     # Verify category exists and has loan_request_per_year
                     try:
-                        category = env["borrower.category"].sudo().browse(int(borrower_category_id))
-                        if category.exists() and category.loan_request_per_year:
-                            update_vals["borrower_category_id"] = int(borrower_category_id)
-                            # Explicitly set loan_request to ensure it's updated
-                            update_vals["loan_request"] = category.loan_request_per_year
-                            category_updated = True
+                        if "borrower.category" in env:
+                            category = env["borrower.category"].sudo().browse(int(borrower_category_id))
+                            if category.exists() and category.loan_request_per_year:
+                                update_vals["borrower_category_id"] = int(borrower_category_id)
+                                # Explicitly set loan_request to ensure it's updated
+                                update_vals["loan_request"] = category.loan_request_per_year
+                                category_updated = True
+                            else:
+                                _logger.warning("Borrower category %s not found or has no loan_request_per_year", borrower_category_id)
+                                category = None  # Reset if not valid
                         else:
-                            _logger.warning("Borrower category %s not found or has no loan_request_per_year", borrower_category_id)
-                            category = None  # Reset if not valid
-                    except (ValueError, TypeError) as e:
-                        _logger.error("Invalid borrower_category_id: %s", borrower_category_id)
+                            _logger.debug("Borrower category model not available in registry")
+                            category = None
+                    except (ValueError, TypeError, AttributeError, KeyError, Exception) as e:
+                        _logger.error("Error processing borrower_category_id %s: %s", borrower_category_id, str(e))
                         category = None  # Reset on error
                 
                 if update_vals:
@@ -1021,6 +1039,173 @@ class RestApi(http.Controller):
         except Exception as e:
             _logger.error("Error fetching loan stage: %s", str(e), exc_info=True)
             return ("<html><body><h2>Error fetching loan stage</h2></body></html>")
+
+    @http.route(['/loans/<int:loan_id>/repayment-schedule'], type='http', auth='none', methods=['GET'], csrf=False)
+    def get_loan_repayment_schedule(self, loan_id, **kw):
+        """Return the repayment schedule (installments) for a specific loan.
+        
+        Query Parameters:
+        - fields: Optional comma-separated list of fields to return
+          (default: id, name, date, state, amount, interest, total_amount, 
+           opening_balance, closing_balance, payment_date, penalty_amount, days_overdue)
+        - status: Optional filter by status ('paid', 'unpaid', or 'all')
+        """
+        api_key = request.httprequest.headers.get('api-key')
+        if not api_key:
+            error_response = {
+                "success": False,
+                "message": "No API Key provided",
+                "schedule": []
+            }
+            return request.make_response(
+                data=json.dumps(error_response),
+                headers=[('Content-Type', 'application/json')],
+                status=401
+            )
+        
+        # Resolve DB from headers or session
+        db = request.httprequest.headers.get('db') or request.session.db
+        if not db:
+            db = getattr(request, 'db', None)
+        if not db:
+            error_response = {
+                "success": False,
+                "message": "Database not specified. Please provide 'db' header.",
+                "schedule": []
+            }
+            return request.make_response(
+                data=json.dumps(error_response),
+                headers=[('Content-Type', 'application/json')],
+                status=400
+            )
+        
+        try:
+            request.session.update(http.get_default_session(), db=db)
+        except Exception:
+            pass
+        
+        # Authenticate user by API key
+        user = request.env['res.users'].sudo().search([('api_key', '=', api_key)], limit=1)
+        if not user:
+            error_response = {
+                "success": False,
+                "message": "Invalid API Key",
+                "schedule": []
+            }
+            return request.make_response(
+                data=json.dumps(error_response),
+                headers=[('Content-Type', 'application/json')],
+                status=401
+            )
+        
+        env = request.env(user=user.id)
+        
+        try:
+            # Get loan
+            loan = env['dev.loan.loan'].sudo().browse(loan_id)
+            if not loan.exists():
+                error_response = {
+                    "success": False,
+                    "message": f"Loan with ID {loan_id} not found",
+                    "schedule": []
+                }
+                return request.make_response(
+                    data=json.dumps(error_response),
+                    headers=[('Content-Type', 'application/json')],
+                    status=404
+                )
+            
+            # Get optional fields parameter
+            fields_param = kw.get('fields')
+            default_fields = [
+                'id', 'name', 'date', 'state', 'amount', 'interest', 
+                'total_amount', 'opening_balance', 'closing_balance', 
+                'payment_date', 'penalty_amount', 'days_overdue'
+            ]
+            fields = [f.strip() for f in fields_param.split(',')] if fields_param else default_fields
+            
+            # Get optional status filter
+            status_filter = kw.get('status', 'all')
+            domain = [('loan_id', '=', loan_id)]
+            if status_filter == 'paid':
+                domain.append(('state', '=', 'paid'))
+            elif status_filter == 'unpaid':
+                domain.append(('state', '=', 'unpaid'))
+            # If 'all' or invalid, don't filter by status
+            
+            # Fetch installments
+            installments = env['dev.loan.installment'].sudo().search_read(
+                domain=domain,
+                fields=fields,
+                order='date asc'  # Order by due date ascending
+            )
+            
+            # Convert date/datetime fields to ISO format
+            for installment in installments:
+                for k, v in installment.items():
+                    if isinstance(v, (datetime, date)):
+                        installment[k] = v.isoformat() if v else None
+                    # Convert monetary fields to float for JSON
+                    elif isinstance(v, (int, float)) and k in ['amount', 'interest', 'total_amount', 
+                                                              'opening_balance', 'closing_balance', 
+                                                              'penalty_amount', 'days_overdue', 'paid_interest']:
+                        installment[k] = float(v) if v else 0.0
+            
+            # Calculate summary statistics
+            total_installments = len(installments)
+            paid_count = len([i for i in installments if i.get('state') == 'paid'])
+            unpaid_count = total_installments - paid_count
+            
+            # Calculate totals
+            total_principal = sum(float(i.get('amount', 0) or 0) for i in installments)
+            total_interest = sum(float(i.get('interest', 0) or 0) for i in installments)
+            total_emi = sum(float(i.get('total_amount', 0) or 0) for i in installments)
+            total_penalty = sum(float(i.get('penalty_amount', 0) or 0) for i in installments)
+            
+            # Get next due installment
+            next_due = None
+            for inst in installments:
+                if inst.get('state') == 'unpaid':
+                    next_due = inst
+                    break
+            
+            # Prepare response
+            response_data = {
+                "success": True,
+                "loan_id": loan_id,
+                "loan_name": loan.name,
+                "loan_amount": float(loan.loan_amount) if loan.loan_amount else 0.0,
+                "summary": {
+                    "total_installments": total_installments,
+                    "paid_count": paid_count,
+                    "unpaid_count": unpaid_count,
+                    "total_principal": total_principal,
+                    "total_interest": total_interest,
+                    "total_emi": total_emi,
+                    "total_penalty": total_penalty,
+                    "outstanding_balance": float(loan.remaing_amount) if hasattr(loan, 'remaing_amount') and loan.remaing_amount else 0.0
+                },
+                "next_due": next_due,
+                "schedule": installments
+            }
+            
+            return request.make_response(
+                data=json.dumps(response_data),
+                headers=[('Content-Type', 'application/json')]
+            )
+            
+        except Exception as e:
+            _logger.error("Error fetching loan repayment schedule: %s", str(e), exc_info=True)
+            error_response = {
+                "success": False,
+                "message": f"Error fetching repayment schedule: {str(e)}",
+                "schedule": []
+            }
+            return request.make_response(
+                data=json.dumps(error_response),
+                headers=[('Content-Type', 'application/json')],
+                status=500
+            )
 
     @http.route(['/wallet/create-tier-one'], type='http', auth='none', methods=['POST'], csrf=False)
     def create_wallet_tier_one(self, **kw):

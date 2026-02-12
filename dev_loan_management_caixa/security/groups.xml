@@ -24,6 +24,12 @@
         <field name="category_id" ref="category_loan_management"/>
     </record>
 
+    <!-- Managing Director -->
+    <record id="group_managing_director" model="res.groups">
+        <field name="name">Managing Director</field>
+        <field name="category_id" ref="category_loan_management"/>
+    </record>
+
     <!-- Finance -->
     <record id="group_finance_team" model="res.groups">
         <field name="name">Finance Team</field>

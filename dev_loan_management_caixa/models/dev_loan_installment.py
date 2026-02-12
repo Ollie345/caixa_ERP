@@ -28,6 +28,7 @@ class dev_loan_installment(models.Model):
     opening_balance = fields.Float('Opening')
     amount = fields.Monetary('Principal Amount', compute='_get_amount')
     interest = fields.Monetary('Interest Amount', compute='_get_interest')
+    daily_interest = fields.Monetary('Interest/Day', compute='_compute_daily_interest')
     closing_balance = fields.Float('Closing')
     total_amount = fields.Monetary('EMI')
     interest_account_id = fields.Many2one('account.account', string='Interest Account')
@@ -192,6 +193,13 @@ class dev_loan_installment(models.Model):
                 else:
                     ins.interest = ins.paid_interest
                 
+    @api.depends('interest', 'none_interest')
+    def _compute_daily_interest(self):
+        for ins in self:
+            if ins.none_interest or not ins.interest:
+                ins.daily_interest = 0.0
+            else:
+                ins.daily_interest = ins.interest / 30
     
     def loan_installment_reminder(self):
         mtp = self.env['mail.template']
@@ -307,22 +315,33 @@ class dev_loan_installment(models.Model):
         
         if self.client_id and not self.client_id.property_account_receivable_id:
             raise ValidationError(_("Select Client Receivable Account !!!"))
+        
+        # Use paid_interest (pro-rated, set by wizard) for journal entries
+        # If paid_interest was already set by the wizard, use it; otherwise fall back to computed interest
+        actual_interest = self.paid_interest if self.paid_interest else self.interest
+        actual_principal = self.total_amount - actual_interest - (self.penalty_amount or 0.0)
+        
+        # Ensure paid_interest is stored (for _get_interest to return after state='paid')
+        if not self.paid_interest:
+            self.paid_interest = self.interest
+        
         # Calculate total including penalty
-        total_with_penalty = self.total_amount + (self.penalty_amount or 0.0)
+        total_with_penalty = self.total_amount
         
         account_move_val = self.get_account_move_vals()
         account_move_id = self.env['account.move'].create(account_move_val)
         vals=[]
         if account_move_id:
-            self.paid_interest = self.interest
             val = self.get_partner_lines()
-            val['credit'] = total_with_penalty  # Update to include penalty
+            val['credit'] = total_with_penalty
             vals.append((0,0,val))
-            if self.amount:
+            if actual_principal:
                 val = self.get_installment_lines()
+                val['debit'] = actual_principal  # Use actual principal (after pro-rating)
                 vals.append((0,0,val))
-            if self.interest:
+            if actual_interest:
                 val = self.get_interest_lines()
+                val['debit'] = actual_interest  # Use pro-rated interest
                 vals.append((0,0,val))
             # Add penalty line if penalty exists
             if self.penalty_amount and self.penalty_amount > 0:

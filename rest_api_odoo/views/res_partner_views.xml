@@ -19,7 +19,15 @@
                         <group>
                             <field name="wallet_created_date" readonly="1"/>
                             <field name="baas_wallet_id" readonly="1"/>
+                            <field name="wallet_balance" readonly="1"/>
+                            <field name="wallet_currency" readonly="1"/>
+                            <field name="wallet_balance_last_updated" readonly="1"/>
                         </group>
+                        <button name="action_refresh_wallet_balance" 
+                                type="object" 
+                                string="Refresh Balance"
+                                class="btn-secondary"
+                                icon="fa-refresh"/>
                     </group>
                     <!-- Show create button if wallet doesn't exist -->
                     <group string="Create Wallet" invisible="wallet_account_number">

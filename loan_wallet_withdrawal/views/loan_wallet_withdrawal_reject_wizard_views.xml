@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_loan_wallet_withdrawal_reject_wizard_form" model="ir.ui.view">
+        <field name="name">loan.wallet.withdrawal.reject.wizard.form</field>
+        <field name="model">loan.wallet.withdrawal.reject.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reject Withdrawal Request">
+                <group>
+                    <field name="withdrawal_id" readonly="1"/>
+                    <field name="rejection_reason" placeholder="Please provide a reason for rejecting this withdrawal request..."/>
+                </group>
+                <footer>
+                    <button string="Reject" name="action_reject" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

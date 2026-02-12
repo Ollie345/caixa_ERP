@@ -21,7 +21,7 @@
 #############################################################################
 import json
 import logging
-from odoo import http
+from odoo import http, _
 from odoo.http import request
 from odoo.exceptions import ValidationError
 from datetime import datetime, date
@@ -1477,3 +1477,468 @@ class RestApi(http.Controller):
             headers=[('Content-Type', 'application/json')],
             status=status_code
         )
+
+    @http.route(['/loans/<int:loan_id>/log-agreement-email'], 
+                type='json', auth='none', methods=['POST'], csrf=False)
+    def log_agreement_email(self, loan_id, **kwargs):
+        """
+        Log email sent by frontend to loan chatter for audit purposes
+        Frontend sends: subject, body_html, recipient_email, sent_at
+        """
+        try:
+            data = request.jsonrequest
+            loan = request.env['dev.loan.loan'].sudo().browse(loan_id)
+            
+            if not loan.exists():
+                return {
+                    'success': False,
+                    'error': 'Loan not found'
+                }
+            
+            # Log email to chatter without sending
+            loan.message_post(
+                body=f"""
+                <div style="margin: 0px; padding: 0px;">
+                    <p><strong>Email Sent:</strong> {data.get('subject', 'Loan Agreement')}</p>
+                    <p><strong>To:</strong> {data.get('recipient_email', '')}</p>
+                    <p><strong>Sent At:</strong> {data.get('sent_at', '')}</p>
+                    <hr/>
+                    <div>{data.get('body_html', '')}</div>
+                </div>
+                """,
+                subject=data.get('subject', 'Loan Agreement'),
+                message_type='email',
+                email_from=data.get('sender_email', ''),
+                partner_ids=[loan.client_id.id] if loan.client_id else [],
+                subtype_xmlid='mail.mt_comment',
+            )
+            
+            return {
+                'success': True,
+                'message': 'Email logged successfully',
+                'loan_id': loan_id
+            }
+            
+        except Exception as e:
+            _logger.error(f"Error logging email: {str(e)}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    @http.route(['/loans/<int:loan_id>/customer-response'], 
+                type='json', auth='none', methods=['POST'], csrf=False)
+    def submit_customer_response(self, loan_id, **kwargs):
+        """
+        Frontend submits customer response (agree/disagree) and signed agreement
+        Expected payload:
+        {
+            "response": "agree" or "disagree",
+            "signed_agreement": "base64_encoded_file" (optional, only if agree),
+            "file_name": "signed_agreement.pdf" (optional),
+            "rejection_reason": "string" (optional, only if disagree)
+        }
+        """
+        try:
+            from odoo import fields
+            data = request.jsonrequest
+            loan = request.env['dev.loan.loan'].sudo().browse(loan_id)
+            
+            if not loan.exists():
+                return {'success': False, 'error': 'Loan not found'}
+            
+            if loan.state != 'awaiting_response':
+                return {
+                    'success': False, 
+                    'error': f'Loan is not in awaiting_response state. Current state: {loan.state}'
+                }
+            
+            response = data.get('response')
+            if response not in ['agree', 'disagree']:
+                return {
+                    'success': False,
+                    'error': 'Response must be either "agree" or "disagree"'
+                }
+            
+            # Update customer response
+            update_vals = {
+                'customer_response': response,
+                'customer_response_date': fields.Datetime.now(),
+            }
+            
+            # Add rejection reason if customer disagrees
+            if response == 'disagree':
+                rejection_reason = data.get('rejection_reason', '')
+                if rejection_reason:
+                    update_vals['customer_rejection_reason'] = rejection_reason.strip()
+            
+            loan.write(update_vals)
+            
+            # Handle signed agreement upload if customer agreed
+            if response == 'agree' and data.get('signed_agreement'):
+                # Create attachment from base64
+                attachment = request.env['ir.attachment'].sudo().create({
+                    'name': data.get('file_name', f'Signed Agreement - {loan.name}'),
+                    'type': 'binary',
+                    'datas': data.get('signed_agreement'),  # base64 encoded file
+                    'res_model': 'dev.loan.loan',
+                    'res_id': loan.id,
+                })
+                
+                loan.write({
+                    'signed_agreement_id': attachment.id,
+                })
+                
+                # Log to chatter
+                loan.message_post(
+                    body=_(
+                        "Customer has agreed to the loan terms and submitted signed agreement.\n"
+                        "Response Date: %s"
+                    ) % loan.customer_response_date,
+                    attachment_ids=[attachment.id]
+                )
+            else:
+                # Customer disagreed
+                rejection_msg = _(
+                    "Customer has disagreed with the loan terms.\n"
+                    "Response Date: %s"
+                ) % loan.customer_response_date
+                if loan.customer_rejection_reason:
+                    rejection_msg += f"\n\nReason: {loan.customer_rejection_reason}"
+                
+                loan.message_post(body=rejection_msg)
+            
+            return {
+                'success': True,
+                'message': 'Customer response recorded',
+                'loan_id': loan_id,
+                'state': loan.state,
+                'customer_response': loan.customer_response
+            }
+            
+        except Exception as e:
+            _logger.error(f"Error recording customer response: {str(e)}")
+            return {'success': False, 'error': str(e)}
+
+    @http.route(['/loans/<int:loan_id>'], type='http', auth='none', methods=['GET'], csrf=False)
+    def get_loan_details(self, loan_id, **kw):
+        """Return loan details including wallet information"""
+        api_key = request.httprequest.headers.get('api-key')
+        if not api_key:
+            error_response = {
+                "success": False,
+                "message": "No API Key provided",
+                "data": None
+            }
+            return request.make_response(
+                data=json.dumps(error_response),
+                headers=[('Content-Type', 'application/json')],
+                status=401
+            )
+        
+        # Resolve DB
+        db = request.httprequest.headers.get('db') or request.session.db
+        if not db:
+            db = getattr(request, 'db', None)
+        if not db:
+            error_response = {
+                "success": False,
+                "message": "Database not specified. Please provide 'db' header.",
+                "data": None
+            }
+            return request.make_response(
+                data=json.dumps(error_response),
+                headers=[('Content-Type', 'application/json')],
+                status=400
+            )
+        
+        try:
+            request.session.update(http.get_default_session(), db=db)
+        except Exception:
+            pass
+        
+        # Authenticate user
+        user = request.env['res.users'].sudo().search([('api_key', '=', api_key)], limit=1)
+        if not user:
+            error_response = {
+                "success": False,
+                "message": "Invalid API Key",
+                "data": None
+            }
+            return request.make_response(
+                data=json.dumps(error_response),
+                headers=[('Content-Type', 'application/json')],
+                status=401
+            )
+        
+        env = request.env(user=user.id)
+        
+        try:
+            loan = env['dev.loan.loan'].sudo().browse(loan_id)
+            if not loan.exists():
+                error_response = {
+                    "success": False,
+                    "message": f"Loan with ID {loan_id} not found",
+                    "data": None
+                }
+                return request.make_response(
+                    data=json.dumps(error_response),
+                    headers=[('Content-Type', 'application/json')],
+                    status=404
+                )
+            
+            # Get loan data
+            loan_data = {
+                'id': loan.id,
+                'name': loan.name,
+                'state': loan.state,
+                'loan_amount': float(loan.loan_amount) if loan.loan_amount else 0.0,
+                'client_id': loan.client_id.id if loan.client_id else None,
+                'client_name': loan.client_id.name if loan.client_id else None,
+                'approve_date': loan.approve_date.isoformat() if loan.approve_date else None,
+                'approve_user': loan.approve_user_id.name if loan.approve_user_id else None,
+            }
+            
+            # Add wallet information if customer exists
+            wallet_info = None
+            if loan.client_id:
+                if loan.client_id.wallet_account_number:
+                    # Fetch wallet balance
+                    balance_result = None
+                    try:
+                        baas_service = env['baas.service']
+                        balance_result = baas_service.get_wallet_balance(loan.client_id.wallet_account_number)
+                    except Exception as e:
+                        _logger.error("Error fetching wallet balance: %s", str(e))
+                    
+                    wallet_info = {
+                        'account_number': loan.client_id.wallet_account_number,
+                        'tier': loan.client_id.wallet_tier or 'tier_1',
+                        'status': loan.client_id.wallet_status or 'active',
+                        'created_date': loan.client_id.wallet_created_date.isoformat() if loan.client_id.wallet_created_date else None,
+                        'baas_wallet_id': loan.client_id.baas_wallet_id or None,
+                        'balance': balance_result.get('balance', 0.0) if balance_result and balance_result.get('success') else None,
+                        'currency': balance_result.get('currency', 'NGN') if balance_result and balance_result.get('success') else 'NGN',
+                        'balance_last_updated': loan.client_id.wallet_balance_last_updated.isoformat() if loan.client_id.wallet_balance_last_updated else None,
+                    }
+                else:
+                    wallet_info = {
+                        'account_number': None,
+                        'tier': None,
+                        'status': None,
+                        'created_date': None,
+                        'baas_wallet_id': None,
+                        'balance': None,
+                        'currency': None,
+                        'balance_last_updated': None,
+                        'message': 'Wallet not created yet'
+                    }
+            
+            loan_data['wallet'] = wallet_info
+            
+            response_data = {
+                "success": True,
+                "message": "Loan details retrieved successfully",
+                "data": loan_data
+            }
+            
+            return request.make_response(
+                data=json.dumps(response_data),
+                headers=[('Content-Type', 'application/json')]
+            )
+            
+        except Exception as e:
+            _logger.error("Error fetching loan details: %s", str(e), exc_info=True)
+            error_response = {
+                "success": False,
+                "message": f"Error fetching loan details: {str(e)}",
+                "data": None
+            }
+            return request.make_response(
+                data=json.dumps(error_response),
+                headers=[('Content-Type', 'application/json')],
+                status=500
+            )
+
+    @http.route(['/loans/<int:loan_id>/agreement-data'], 
+                type='json', auth='none', methods=['GET'], csrf=False)
+    def get_agreement_data(self, loan_id, **kwargs):
+        """
+        Get agreement data for frontend to render email
+        Called after agreement is generated
+        """
+        try:
+            loan = request.env['dev.loan.loan'].sudo().browse(loan_id)
+            
+            if not loan.exists():
+                return {'success': False, 'error': 'Loan not found'}
+            
+            if not loan.agreement_id:
+                return {'success': False, 'error': 'No agreement found for this loan'}
+            
+            agreement = loan.agreement_id
+            
+            return {
+                'success': True,
+                'data': {
+                    'loan_number': loan.name,
+                    'loan_type': loan.loan_type_id.name if loan.loan_type_id else '',
+                    'loan_amount': loan.loan_amount,
+                    'interest_rate': loan.total_interest,
+                    'customer_name': loan.client_id.name if loan.client_id else '',
+                    'customer_email': loan.client_id.email if loan.client_id else '',
+                    'agreement_id': agreement.id,
+                    'agreement_name': agreement.name,
+                    'agreement_description': agreement.description or '',
+                }
+            }
+            
+        except Exception as e:
+            _logger.error(f"Error getting agreement data: {str(e)}")
+            return {'success': False, 'error': str(e)}
+
+    @http.route(['/wallet_withdrawal'], type='http', auth='none', methods=['POST'], csrf=False)
+    def create_wallet_withdrawal(self, **kw):
+        """Dedicated endpoint for creating wallet withdrawal requests.
+        Features:
+        - Flat payload structure
+        - Automatic balance validation before creation
+        - API Key authentication
+        """
+        import json
+        
+        # 1. Authenticate using API key
+        api_key = request.httprequest.headers.get('api-key')
+        if not api_key:
+            return request.make_response(
+                data=json.dumps({"success": False, "message": "No API Key Provided"}),
+                headers=[('Content-Type', 'application/json')],
+                status=401
+            )
+        
+        # 2. Resolve DB
+        db = request.httprequest.headers.get('db') or request.session.db
+        if not db:
+            db = getattr(request, 'db', None)
+        if not db:
+            return request.make_response(
+                data=json.dumps({"success": False, "message": "Database not specified"}),
+                headers=[('Content-Type', 'application/json')],
+                status=400
+            )
+        
+        try:
+            request.session.update(http.get_default_session(), db=db)
+        except Exception:
+            pass
+        
+        # 3. Get user and environment
+        user = request.env['res.users'].sudo().search([('api_key', '=', api_key)], limit=1)
+        if not user:
+            return request.make_response(
+                data=json.dumps({"success": False, "message": "Invalid API Key"}),
+                headers=[('Content-Type', 'application/json')],
+                status=401
+            )
+        
+        env = request.env(user=user.id)
+        
+        # 4. Parse payload
+        try:
+            payload = json.loads(request.httprequest.data)
+        except Exception:
+            return request.make_response(
+                data=json.dumps({"success": False, "message": "Invalid JSON Data"}),
+                headers=[('Content-Type', 'application/json')],
+                status=400
+            )
+            
+        # 5. Extract and Validate Values
+        partner_id = payload.get('partner_id')
+        amount = payload.get('withdrawal_amount') or payload.get('amount')
+        bank_name = payload.get('bank_name')
+        account_number = payload.get('account_number')
+        account_name = payload.get('account_name')
+        
+        if not all([partner_id, amount, bank_name, account_number, account_name]):
+            return request.make_response(
+                data=json.dumps({
+                    "success": False, 
+                    "message": "Missing required fields: partner_id, amount, bank_name, account_number, account_name"
+                }),
+                headers=[('Content-Type', 'application/json')],
+                status=400
+            )
+            
+        try:
+            partner = env['res.partner'].sudo().browse(int(partner_id))
+            if not partner.exists():
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": f"Partner {partner_id} not found"}),
+                    headers=[('Content-Type', 'application/json')], status=404
+                )
+            
+            # 6. Balance Verification
+            if not partner.wallet_account_number:
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": "Partner has no wallet account number"}),
+                    headers=[('Content-Type', 'application/json')], status=400
+                )
+                
+            try:
+                baas_service = env['baas.service']
+                balance_result = baas_service.get_wallet_balance(partner.wallet_account_number)
+                if balance_result and balance_result.get('success'):
+                    current_balance = float(balance_result.get('balance', 0.0))
+                    if current_balance < float(amount):
+                        return request.make_response(
+                            data=json.dumps({
+                                "success": False, 
+                                "message": f"Insufficient balance. Available: {current_balance}, Requested: {amount}"
+                            }),
+                            headers=[('Content-Type', 'application/json')], status=400
+                        )
+                else:
+                    _logger.warning("Could not verify wallet balance for withdrawal: %s", balance_result.get('message'))
+            except Exception as e:
+                _logger.error("Error checking balance: %s", str(e))
+                # We might choose to proceed or block here depending on business rules. 
+                # For safety, let's allow but log if the service is down, OR block.
+                # Blocking is safer for financial ops.
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": "Could not verify wallet balance. Please try again later."}),
+                    headers=[('Content-Type', 'application/json')], status=503
+                )
+
+            # 7. Create Withdrawal Record
+            withdrawal_vals = {
+                'partner_id': partner.id,
+                'withdrawal_amount': float(amount),
+                'bank_name': bank_name,
+                'account_number': account_number,
+                'account_name': account_name,
+                'notes': payload.get('notes', ''),
+                'loan_id': int(payload.get('loan_id')) if payload.get('loan_id') else False,
+            }
+            
+            withdrawal = env['loan.wallet.withdrawal'].sudo().create(withdrawal_vals)
+            
+            result = json.dumps({
+                "success": True,
+                "message": "Withdrawal request created successfully",
+                "data": {
+                    "id": withdrawal.id,
+                    "name": withdrawal.name,
+                    "state": withdrawal.state,
+                    "amount": withdrawal.withdrawal_amount,
+                    "request_date": withdrawal.request_date.isoformat() if withdrawal.request_date else None
+                }
+            })
+            return request.make_response(data=result, headers=[('Content-Type', 'application/json')])
+            
+        except Exception as e:
+            _logger.error("Error creating withdrawal request: %s", str(e), exc_info=True)
+            return request.make_response(
+                data=json.dumps({"success": False, "message": str(e)}),
+                headers=[('Content-Type', 'application/json')], status=500
+            )

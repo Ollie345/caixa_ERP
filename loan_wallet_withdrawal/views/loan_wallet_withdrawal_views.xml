@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List View -->
+    <record id="view_loan_wallet_withdrawal_list" model="ir.ui.view">
+        <field name="name">loan.wallet.withdrawal.list</field>
+        <field name="model">loan.wallet.withdrawal</field>
+        <field name="arch" type="xml">
+            <list string="Withdrawal Requests" decoration-info="state=='draft'" decoration-warning="state=='submitted'" decoration-success="state=='done'">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="loan_id"/>
+                <field name="withdrawal_amount"/>
+                <field name="bank_name"/>
+                <field name="account_number"/>
+                <field name="state" widget="badge" decoration-info="state=='draft'" decoration-warning="state=='submitted'" decoration-success="state=='done'" decoration-danger="state=='rejected'"/>
+                <field name="request_date"/>
+                <field name="transaction_id"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_loan_wallet_withdrawal_form" model="ir.ui.view">
+        <field name="name">loan.wallet.withdrawal.form</field>
+        <field name="model">loan.wallet.withdrawal</field>
+        <field name="arch" type="xml">
+            <form string="Withdrawal Request">
+                <header>
+                    <button name="action_submit" string="Submit" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_approve" string="Approve" type="object" class="oe_highlight" invisible="state not in ['submitted', 'draft']"/>
+                    <button name="action_reject" string="Reject" type="object" invisible="state not in ['submitted', 'draft', 'approved']"/>
+                    <button name="action_done" string="Mark as Done" type="object" class="oe_highlight" invisible="state != 'approved'"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ['done', 'rejected']"/>
+                    <button name="action_reset_to_draft" string="Reset to Draft" type="object" invisible="state not in ['rejected', 'cancelled']"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,done"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" readonly="1"/>
+                            <field name="partner_id" options="{'no_create': True}"/>
+                            <field name="loan_id" options="{'no_create': True}"/>
+                            <field name="wallet_account_number" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="request_date"/>
+                            <field name="withdrawal_amount"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="state" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Bank Account Details">
+                        <group>
+                            <field name="bank_name"/>
+                            <field name="account_number"/>
+                            <field name="account_name"/>
+                        </group>
+                    </group>
+                    <group string="Transaction Information" invisible="state != 'approved'">
+                        <group>
+                            <field name="transaction_id" required="state == 'approved'" placeholder="Enter transaction ID from external payment system"/>
+                        </group>
+                    </group>
+                    <group string="Approval Information" invisible="state in ['draft', 'cancelled']">
+                        <group>
+                            <field name="approved_by" readonly="1"/>
+                            <field name="approval_date" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="completed_by" readonly="1" invisible="state != 'done'"/>
+                            <field name="completion_date" readonly="1" invisible="state != 'done'"/>
+                        </group>
+                    </group>
+                    <group string="Rejection Information" invisible="state != 'rejected'">
+                        <field name="rejection_reason" readonly="1"/>
+                        <field name="rejected_by" readonly="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Notes">
+                            <field name="notes" placeholder="Additional notes or comments..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_loan_wallet_withdrawal_search" model="ir.ui.view">
+        <field name="name">loan.wallet.withdrawal.search</field>
+        <field name="model">loan.wallet.withdrawal</field>
+        <field name="arch" type="xml">
+            <search string="Search Withdrawal Requests">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="loan_id"/>
+                <field name="bank_name"/>
+                <field name="account_number"/>
+                <field name="transaction_id"/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Submitted" name="submitted" domain="[('state', '=', 'submitted')]"/>
+                <filter string="Approved" name="approved" domain="[('state', '=', 'approved')]"/>
+                <filter string="Done" name="done" domain="[('state', '=', 'done')]"/>
+                <filter string="Rejected" name="rejected" domain="[('state', '=', 'rejected')]"/>
+                <separator/>
+                <filter string="My Requests" name="my_requests" domain="[('create_uid', '=', uid)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Customer" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Loan" name="group_loan" context="{'group_by': 'loan_id'}"/>
+                    <filter string="Request Date" name="group_date" context="{'group_by': 'request_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_loan_wallet_withdrawal" model="ir.actions.act_window">
+        <field name="name">Withdrawal Requests</field>
+        <field name="res_model">loan.wallet.withdrawal</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'default_state': 'draft'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new withdrawal request
+            </p>
+            <p>
+                Customers can request to withdraw money from their wallet account to their bank account.
+            </p>
+        </field>
+    </record>
+</odoo>

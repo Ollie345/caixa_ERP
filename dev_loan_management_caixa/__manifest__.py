@@ -103,6 +103,7 @@ Loan Management system in odoo for customer and supplier, Customer Loan, Supplie
         'views/res_partner_view.xml',
         'wizard/dev_loan_approve_view.xml',
         'wizard/dev_loan_reject_view.xml',
+        'wizard/dev_loan_final_reject_wizard.xml',
         'wizard/dev_installment_summary_views.xml',
         'wizard/dev_interest_certificate_views.xml',
         'wizard/create_task.xml',

@@ -61,6 +61,8 @@ class dev_loan_loan(models.Model):
     state = fields.Selection([('draft','Draft'),
                               ('review','Review'),
                               ('confirm','Confirmed'),
+                              ('final_approve','Final Approval'),
+                              ('awaiting_response','Awaiting Response'),
                               ('approve','Approved'),
                               ('disburse','Disbursed'),
                               ('open','Open'),
@@ -86,6 +88,63 @@ class dev_loan_loan(models.Model):
     approve_user_id = fields.Many2one('res.users','Approved By', copy=False)
     reject_reason = fields.Text('Reject Reason', copy=False)
     reject_user_id = fields.Many2one('res.users','Reject By', copy=False)
+    # Final Approval Fields
+    final_approve_reason = fields.Text(
+        string='Final Approval Reason',
+        copy=False,
+        help='Reason provided when submitting for final approval'
+    )
+    final_approve_user_id = fields.Many2one(
+        'res.users',
+        string='Final Approved By',
+        copy=False,
+        help='Managing Director who gave final approval'
+    )
+    final_approve_date = fields.Date(
+        string='Final Approval Date',
+        copy=False
+    )
+    final_reject_reason = fields.Text(
+        string='Final Rejection Reason',
+        copy=False,
+        help='Reason for final rejection by Managing Director'
+    )
+    final_reject_user_id = fields.Many2one(
+        'res.users',
+        string='Final Rejected By',
+        copy=False
+    )
+    final_reject_date = fields.Date(
+        string='Final Rejection Date',
+        copy=False
+    )
+    # Customer Response & Agreement Fields
+    customer_response = fields.Selection([
+        ('pending', 'Pending'),
+        ('agree', 'Agreed'),
+        ('disagree', 'Disagreed')
+    ], string='Customer Response', default='pending', copy=False, tracking=True)
+    customer_response_date = fields.Datetime(
+        string='Customer Response Date',
+        copy=False
+    )
+    customer_rejection_reason = fields.Text(
+        string='Customer Rejection Reason',
+        copy=False,
+        help='Reason provided by customer for rejecting the loan'
+    )
+    signed_agreement_id = fields.Many2one(
+        'ir.attachment',
+        string='Signed Agreement',
+        copy=False,
+        help='Signed agreement document uploaded by customer'
+    )
+    agreement_id = fields.Many2one(
+        'ln.agreement',
+        string='Loan Agreement',
+        copy=False,
+        help='Agreement generated for this loan'
+    )
     company_id = fields.Many2one('res.company', string='Company', default=lambda self:self.env.user.company_id.id)
     currency_id = fields.Many2one('res.currency', string='Currency', default=lambda self:self.env.user.company_id.currency_id.id)
     proof_ids = fields.Many2many('dev.loan.proof', string='Loan Proof') 
@@ -991,7 +1050,18 @@ class dev_loan_loan(models.Model):
         self.write({'state': 'review'})
 
     def action_confirm_loan(self):
+        """Confirm loan and move to final approval stage"""
+        self.ensure_one()
+        
+        # Validate documents if required
+        if self.loan_type_id and self.loan_type_id.is_required_documents:
+            if self.percentage != 100.0:
+                raise ValidationError(_("not submitted 100% Document so please submit "))
+        
+        # Compute installment schedule
         self.compute_installment()
+        
+        # Send notification to loan managers
         ir_model_data = self.env['ir.model.data']
         template_id = ir_model_data._xmlid_lookup('dev_loan_management_caixa.dev_loan_loan_request')[1]
         mtp = self.env['mail.template']
@@ -999,25 +1069,273 @@ class dev_loan_loan(models.Model):
         email = self.get_loan_manager_mail()
         template_id.write({'email_to': email})
         template_id.send_mail(self.ids[0], True)
-        if self.loan_type_id and self.loan_type_id.is_required_documents:
-            if self.percentage != 100.0:
-                raise ValidationError(_("not submitted 100% Document so please submit "))
-        self.state = 'confirm'
+        
+        # Move directly to final approval stage
+        self.write({'state': 'confirm'})
+        
+        self.message_post(
+            body=_(
+                "Loan confirmed and submitted for final approval.\n"
+                "Submitted by: %s"
+            ) % self.env.user.name
+        )
+        
+        # Notify Managing Director
+        self._notify_managing_director()
 
     def action_approve_loan(self, reason=None):
         """Approve the loan directly or via wizard.
         If `reason` is provided, it sets approve_reason; otherwise it stays empty."""
         for loan in self:
-            loan.state = 'approve'
+            loan.state = 'final_approve'
             loan.approve_user_id = self.env.user
             loan.approve_date = date.today()
             if reason:
                 loan.approve_reason = reason
 
             # Set account and journal if loan type is defined
-            if loan.loan_type_id:
-                loan.loan_account_id = loan.loan_type_id.loan_account_id.id if loan.loan_type_id.loan_account_id else False
-                loan.disburse_journal_id = loan.loan_type_id.disburse_journal_id.id if loan.loan_type_id.disburse_journal_id else False
+            # if loan.loan_type_id:
+            #     loan.loan_account_id = loan.loan_type_id.loan_account_id.id if loan.loan_type_id.loan_account_id else False
+            #     loan.disburse_journal_id = loan.loan_type_id.disburse_journal_id.id if loan.loan_type_id.disburse_journal_id else False
+
+
+    def action_final_approve_approve(self):
+        """Open agreement wizard for final approval"""
+        self.ensure_one()
+        
+        # Check if user has Managing Director or System Admin permissions
+        if not (self.env.user.has_group('dev_loan_management_caixa.group_managing_director') or 
+                self.env.user.has_group('base.group_system')):
+            raise ValidationError(_(
+                "Only Managing Director or System Administrator can give final approval."
+            ))
+        
+        if self.state != 'final_approve':
+            raise ValidationError(_(
+                "Loan must be in 'Final Approval' state."
+            ))
+        
+        # Open agreement generation wizard
+        return {
+            'name': 'Generate Agreement',
+            'type': 'ir.actions.act_window',
+            'res_model': 'generate.agreement.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_loan_id': self.id,
+                'active_ids': [self.id],
+                'active_id': self.id,
+            }
+        }
+
+    def action_final_approve_reject(self, reason=None):
+        """Managing Director or Admin rejects the loan (reason required)"""
+        self.ensure_one()
+        
+        # Check if user has Managing Director or System Admin permissions
+        if not (self.env.user.has_group('dev_loan_management_caixa.group_managing_director') or 
+                self.env.user.has_group('base.group_system')):
+            raise ValidationError(_(
+                "Only Managing Director or System Administrator can reject loans at final approval stage."
+            ))
+        
+        if self.state != 'final_approve':
+            raise ValidationError(_(
+                "Loan must be in 'Final Approval' state to be rejected."
+            ))
+        
+        if not reason or not reason.strip():
+            raise ValidationError(_("Rejection reason is required"))
+        
+        # Move to rejected state
+        self.write({
+            'state': 'reject',
+            'final_reject_reason': reason.strip(),
+            'final_reject_user_id': self.env.user.id,
+            'final_reject_date': date.today(),
+            'reject_reason': reason.strip(),
+            'reject_user_id': self.env.user.id,
+        })
+        
+        self.message_post(
+            body=_(
+                "❌ Loan rejected by Managing Director.\n"
+                "Rejection Date: %s\n"
+                "Rejected By: %s\n"
+                "Reason: %s"
+            ) % (
+                self.final_reject_date,
+                self.env.user.name,
+                reason
+            )
+        )
+        
+        return True
+
+    def action_review_and_approve(self):
+        """Review signed agreement and approve loan"""
+        self.ensure_one()
+        
+        if self.state != 'awaiting_response':
+            raise ValidationError(_("Loan must be in 'Awaiting Response' state."))
+        
+        if self.customer_response != 'agree':
+            raise ValidationError(_("Customer must agree before approval."))
+        
+        if not self.signed_agreement_id:
+            raise ValidationError(_("Signed agreement is required for approval."))
+        
+        # Create wallet for customer if it doesn't exist
+        wallet_result = None
+        if self.client_id:
+            if not self.client_id.wallet_account_number:
+                try:
+                    wallet_result = self.client_id.create_wallet_tier_one()
+                    if wallet_result.get('success'):
+                        self.message_post(
+                            body=_(
+                                "Wallet created successfully for customer.\n"
+                                "Account Number: %s\n"
+                                "Tier: %s"
+                            ) % (
+                                wallet_result.get('account_number'),
+                                'Tier 1'
+                            )
+                        )
+                    else:
+                        # Log warning but don't fail approval
+                        self.message_post(
+                            body=_(
+                                "Warning: Could not create wallet for customer.\n"
+                                "Reason: %s"
+                            ) % wallet_result.get('message', 'Unknown error')
+                        )
+                except Exception as e:
+                    # Log error but don't fail approval
+                    self.message_post(
+                        body=_(
+                            "Warning: Error creating wallet: %s"
+                        ) % str(e)
+                    )
+            else:
+                # Wallet already exists
+                wallet_result = {
+                    'success': True,
+                    'account_number': self.client_id.wallet_account_number,
+                    'message': 'Wallet already exists'
+                }
+        
+        # Move to approved state
+        self.write({
+            'state': 'approve',
+            'final_approve_user_id': self.env.user.id,
+            'final_approve_date': date.today(),
+            'approve_user_id': self.env.user.id,
+            'approve_date': date.today(),
+        })
+        
+        # Set account and journal if loan type is defined
+        if self.loan_type_id:
+            self.loan_account_id = self.loan_type_id.loan_account_id.id if self.loan_type_id.loan_account_id else False
+            self.disburse_journal_id = self.loan_type_id.disburse_journal_id.id if self.loan_type_id.disburse_journal_id else False
+        
+        # Build approval message
+        approval_msg = _(
+            "Signed agreement reviewed and approved by %s.\n"
+            "Loan moved to approved state.\n"
+            "Approval Date: %s"
+        ) % (
+            self.env.user.name,
+            self.final_approve_date
+        )
+        
+        # Add wallet information if created or exists
+        if wallet_result and wallet_result.get('success') and self.client_id:
+            approval_msg += _(
+                "\n\nWallet Information:\n"
+                "Account Number: %s\n"
+                "Tier: %s\n"
+                "Status: %s"
+            ) % (
+                wallet_result.get('account_number'),
+                self.client_id.wallet_tier or 'Tier 1',
+                self.client_id.wallet_status or 'Active'
+            )
+        
+        self.message_post(body=approval_msg)
+        
+        return True
+
+    def action_decline_loan(self):
+        """Decline loan in awaiting_response state"""
+        self.ensure_one()
+        
+        if self.state != 'awaiting_response':
+            raise ValidationError(_("Loan must be in 'Awaiting Response' state."))
+        
+        if self.customer_response == 'pending':
+            raise ValidationError(_("Cannot decline loan. Customer has not responded yet."))
+        
+        # Build rejection reason
+        reject_reason_parts = [f"Declined after customer response: {dict(self._fields['customer_response'].selection).get(self.customer_response)}"]
+        if self.customer_rejection_reason:
+            reject_reason_parts.append(f"Customer rejection reason: {self.customer_rejection_reason}")
+        
+        # Move to rejected state
+        self.write({
+            'state': 'reject',
+            'reject_user_id': self.env.user.id,
+            'reject_reason': ". ".join(reject_reason_parts)
+        })
+        
+        # Build message body
+        message_parts = [
+            f"Loan declined by {self.env.user.name}.",
+            f"Customer Response: {dict(self._fields['customer_response'].selection).get(self.customer_response)}"
+        ]
+        if self.customer_rejection_reason:
+            message_parts.append(f"Customer Rejection Reason: {self.customer_rejection_reason}")
+        
+        self.message_post(
+            body=_("\n".join(message_parts))
+        )
+        
+        return True
+
+    def _notify_managing_director(self):
+        """Notify Managing Director of loan pending final approval"""
+        self.ensure_one()
+        
+        # Get Managing Director group users
+        md_group = self.env.ref(
+            'dev_loan_management_caixa.group_managing_director',
+            raise_if_not_found=False
+        )
+        
+        if not md_group:
+            import logging
+            _logger = logging.getLogger(__name__)
+            _logger.warning("Managing Director group not found")
+            return
+        
+        # Notify all Managing Directors
+        for user in md_group.users:
+            if user.email:
+                self.message_post(
+                    body=_(
+                        "Loan %s is pending your final approval.\n"
+                        "Client: %s\n"
+                        "Amount: %s\n"
+                        "Please review and approve or reject."
+                    ) % (
+                        self.name,
+                        self.client_id.name,
+                        self.loan_amount
+                    ),
+                    partner_ids=[user.partner_id.id],
+                    email_from=self.env.user.email_formatted
+                )
 
     def action_set_to_draft(self):
         if self.installment_ids:

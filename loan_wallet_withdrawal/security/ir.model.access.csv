@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_loan_wallet_withdrawal_user,loan.wallet.withdrawal.user,model_loan_wallet_withdrawal,base.group_user,1,1,1,0
+access_loan_wallet_withdrawal_accountant,loan.wallet.withdrawal.accountant,model_loan_wallet_withdrawal,account.group_account_user,1,1,1,1
+access_loan_wallet_withdrawal_manager,loan.wallet.withdrawal.manager,model_loan_wallet_withdrawal,account.group_account_manager,1,1,1,1
+access_loan_wallet_withdrawal_admin,loan.wallet.withdrawal.admin,model_loan_wallet_withdrawal,base.group_system,1,1,1,1
+access_loan_wallet_withdrawal_reject_wizard_user,loan.wallet.withdrawal.reject.wizard.user,model_loan_wallet_withdrawal_reject_wizard,base.group_user,1,1,1,1
+access_loan_wallet_withdrawal_reject_wizard_admin,loan.wallet.withdrawal.reject.wizard.admin,model_loan_wallet_withdrawal_reject_wizard,base.group_system,1,1,1,1

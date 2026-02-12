@@ -21,6 +21,9 @@
 #############################################################################
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class ResPartner(models.Model):
@@ -64,6 +67,22 @@ class ResPartner(models.Model):
         string='BaaS Wallet ID',
         copy=False,
         help='Additional BaaS wallet identifier if provided'
+    )
+    wallet_balance = fields.Monetary(
+        string='Wallet Balance',
+        compute='_compute_wallet_balance',
+        currency_field='wallet_currency',
+        help='Current wallet balance (fetched from BaaS API)',
+        store=False
+    )
+    wallet_currency = fields.Char(
+        string='Wallet Currency',
+        default='NGN',
+        help='Currency code for wallet balance'
+    )
+    wallet_balance_last_updated = fields.Datetime(
+        string='Balance Last Updated',
+        help='Last time wallet balance was fetched'
     )
 
     def create_wallet_tier_one(self, bvn=None):
@@ -176,3 +195,57 @@ class ResPartner(models.Model):
             if errors:
                 error_msg += '\n' + '\n'.join(errors)
             raise ValidationError(_('Wallet Creation Failed:\n%s') % error_msg)
+
+    @api.depends('wallet_account_number')
+    def _compute_wallet_balance(self):
+        """Compute wallet balance by fetching from BaaS API"""
+        for partner in self:
+            if partner.wallet_account_number:
+                try:
+                    baas_service = self.env['baas.service']
+                    result = baas_service.get_wallet_balance(partner.wallet_account_number)
+                    
+                    if result.get('success'):
+                        partner.wallet_balance = result.get('balance', 0.0)
+                        partner.wallet_currency = result.get('currency', 'NGN')
+                        partner.wallet_balance_last_updated = fields.Datetime.now()
+                    else:
+                        partner.wallet_balance = 0.0
+                        partner.wallet_currency = 'NGN'
+                except Exception as e:
+                    _logger.error("Error fetching wallet balance for partner %s: %s", partner.id, str(e))
+                    partner.wallet_balance = 0.0
+                    partner.wallet_currency = 'NGN'
+            else:
+                partner.wallet_balance = 0.0
+                partner.wallet_currency = 'NGN'
+
+    def action_refresh_wallet_balance(self):
+        """Action method to manually refresh wallet balance"""
+        self.ensure_one()
+        
+        if not self.wallet_account_number:
+            raise ValidationError(_("No wallet account number found for this partner."))
+        
+        baas_service = self.env['baas.service']
+        result = baas_service.get_wallet_balance(self.wallet_account_number)
+        
+        if result.get('success'):
+            # Trigger recomputation
+            self._compute_wallet_balance()
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Success'),
+                    'message': _(
+                        'Wallet balance refreshed successfully!\n'
+                        'Balance: %s %s'
+                    ) % (result.get('balance', 0.0), result.get('currency', 'NGN')),
+                    'type': 'success',
+                    'sticky': False,
+                }
+            }
+        else:
+            error_msg = result.get('message', 'Failed to refresh wallet balance')
+            raise ValidationError(_('Failed to refresh wallet balance:\n%s') % error_msg)

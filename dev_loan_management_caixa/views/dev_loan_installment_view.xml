@@ -41,6 +41,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                             <field name="payment_date" readonly="1" invisible="state != 'paid'"/>
                             <field name="amount" readonly="1"/>
                             <field name="interest" readonly="1"/>
+                            <field name="daily_interest" readonly="1"/>
                             <field name="total_amount" readonly="1"/>
                             <field name="days_overdue"/>
                             <field name="penalty_amount"/>
@@ -78,6 +79,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                 <field name="date"/>
                 <field name="amount"/>
                 <field name="interest"/>
+                <field name="daily_interest" string="Interest/Day"/>
                 <field name="total_amount"/>
                 <field name="state"/>
                 <field name="days_overdue"/>

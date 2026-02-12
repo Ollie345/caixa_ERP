@@ -26,6 +26,7 @@ access_dev_checklist_template_line_manager,dev.checklist.template.line.manager,m
 
 access_dev_loan_approve_wizard_manager,dev.loan.approve.wizard_manager,model_dev_loan_approve_wizard,group_loan_manager,1,1,1,1
 access_dev_loan_reject_manager,dev.loan.reject.manager,model_dev_loan_reject,group_loan_manager,1,1,1,1
+access_dev_loan_final_reject_wizard,dev.loan.final.reject.wizard,model_dev_loan_final_reject_wizard,,1,1,1,1
 
 access_user_dev_loan_installment,dev.loan.installment,model_dev_loan_installment,group_loan_user,1,1,1,1
 access_manager_dev_loan_installment,dev.loan.installment,model_dev_loan_installment,group_loan_manager,1,1,1,1

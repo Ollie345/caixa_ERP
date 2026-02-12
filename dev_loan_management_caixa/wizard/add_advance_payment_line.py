@@ -10,12 +10,7 @@
 
 from odoo import api, fields, models, _
 from datetime import datetime
-import calendar
-import itertools
-from operator import itemgetter
-import operator
 from odoo.exceptions import ValidationError
-import calendar
 
 class dev_add_advance_payment(models.TransientModel):
     _name = "dev.add.advance.payment"
@@ -50,7 +45,7 @@ class dev_add_advance_payment(models.TransientModel):
                 if installment_id:
                     last_payment_date = installment_id.date
                 
-                current_month_days = calendar.monthrange(payment.date.year, payment.date.month)[1]
+                current_month_days = 30  # Standardized 30-day tenure period
                 
                 if not last_payment_date:
                     last_payment_date = payment.loan_id.disbursement_date

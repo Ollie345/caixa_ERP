@@ -293,3 +293,122 @@ class BaasService(models.AbstractModel):
                 'errors': ['Invalid response format'],
                 'full_response': None
             }
+
+    def get_wallet_balance(self, account_number):
+        """Get wallet balance/summary from BaaS API
+        
+        :param account_number: Wallet account number
+        :return: dict with success, balance, currency, and other wallet details
+        """
+        if not account_number:
+            return {
+                'success': False,
+                'balance': None,
+                'currency': None,
+                'message': 'Account number is required',
+                'errors': ['Account number is required']
+            }
+        
+        config = self._get_baas_config()
+        
+        try:
+            access_token = self._get_access_token()
+        except ValidationError as e:
+            return {
+                'success': False,
+                'balance': None,
+                'currency': None,
+                'message': str(e),
+                'errors': [str(e)]
+            }
+        
+        url = f"{config['base_url']}/wallet/{account_number}/summary"
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Authorization': f'Bearer {access_token}'
+        }
+        
+        try:
+            response = requests.get(
+                url,
+                headers=headers,
+                timeout=30
+            )
+            
+            response.raise_for_status()
+            result = response.json()
+            
+            if result.get('status') == 'SUCCESS':
+                data = result.get('data', {})
+                balance = data.get('balance', 0.0)
+                currency = data.get('currency', 'NGN')
+                
+                return {
+                    'success': True,
+                    'balance': float(balance) if balance else 0.0,
+                    'currency': currency,
+                    'account_number': account_number,
+                    'data': data,
+                    'message': result.get('message', 'Balance retrieved successfully'),
+                    'errors': []
+                }
+            else:
+                errors = result.get('errors', [])
+                messages = result.get('messages', [])
+                error_msg = '; '.join(messages) if messages else result.get('message', 'Failed to get wallet balance')
+                
+                return {
+                    'success': False,
+                    'balance': None,
+                    'currency': None,
+                    'message': error_msg,
+                    'errors': errors if errors else [error_msg]
+                }
+                
+        except requests.exceptions.Timeout:
+            _logger.error("BaaS Wallet Balance Error: Request timeout")
+            return {
+                'success': False,
+                'balance': None,
+                'currency': None,
+                'message': 'Request to BaaS API timed out',
+                'errors': ['Request timeout']
+            }
+        except requests.exceptions.ConnectionError as e:
+            _logger.error("BaaS Wallet Balance Error: Connection failed - %s", str(e))
+            return {
+                'success': False,
+                'balance': None,
+                'currency': None,
+                'message': 'Failed to connect to BaaS API',
+                'errors': ['Connection error']
+            }
+        except requests.exceptions.HTTPError as e:
+            error_msg = f"HTTP {e.response.status_code}"
+            try:
+                error_data = e.response.json()
+                error_msg = error_data.get('message', error_msg)
+                errors = error_data.get('errors', [])
+            except (ValueError, KeyError):
+                errors = [error_msg]
+            
+            _logger.error("BaaS Wallet Balance Error: %s", error_msg)
+            
+            return {
+                'success': False,
+                'balance': None,
+                'currency': None,
+                'message': error_msg,
+                'errors': errors
+            }
+        except Exception as e:
+            _logger.error("BaaS Wallet Balance Error: %s", str(e))
+            return {
+                'success': False,
+                'balance': None,
+                'currency': None,
+                'message': f"Error: {str(e)}",
+                'errors': [str(e)]
+            }

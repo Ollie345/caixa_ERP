@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Users can only see their own withdrawal requests -->
+        <record id="loan_wallet_withdrawal_user_rule" model="ir.rule">
+            <field name="name">Withdrawal: User Access</field>
+            <field name="model_id" ref="model_loan_wallet_withdrawal"/>
+            <field name="domain_force">['|', ('partner_id.user_id', '=', user.id), ('partner_id', '=', user.partner_id.id)]</field>
+        </record>
+    </data>
+</odoo>

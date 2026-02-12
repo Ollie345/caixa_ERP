@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_withdrawal" model="ir.ui.view">
+        <field name="name">res.partner.form.withdrawal</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="dev_loan_management_caixa.view_dev_res_partner_allow_loan_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='loan_ids']" position="after">
+                <field name="withdrawal_count" widget="statinfo" string="Withdrawals"/>
+            </xpath>
+            <xpath expr="//button[@name='action_view_loan']" position="after">
+                <button name="action_view_withdrawals" type="object" class="oe_stat_button" icon="fa-money" context="{'search_default_partner_id': id}">
+                    <field name="withdrawal_count" widget="statinfo" string="Withdrawals"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

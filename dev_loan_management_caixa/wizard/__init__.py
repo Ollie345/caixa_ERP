@@ -21,6 +21,7 @@ from . import create_task
 from . import generate_notice
 from . import dev_loan_restructure_wizard
 from . import dev_loan_approve_wizard
+from . import dev_loan_final_reject_wizard
 from . import dev_loan_closure
 from . import dev_pay_selected_months
 

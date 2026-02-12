@@ -1118,9 +1118,10 @@ class RestApi(http.Controller):
             # Get optional fields parameter
             fields_param = kw.get('fields')
             default_fields = [
-                'id', 'name', 'date', 'state', 'amount', 'interest', 
-                'total_amount', 'opening_balance', 'closing_balance', 
-                'payment_date', 'penalty_amount', 'days_overdue'
+                'id', 'name', 'date', 'state', 'amount', 'interest',
+                'daily_interest', 'total_amount', 'opening_balance',
+                'closing_balance', 'payment_date', 'penalty_amount',
+                'days_overdue'
             ]
             fields = [f.strip() for f in fields_param.split(',')] if fields_param else default_fields
             
@@ -1146,8 +1147,8 @@ class RestApi(http.Controller):
                     if isinstance(v, (datetime, date)):
                         installment[k] = v.isoformat() if v else None
                     # Convert monetary fields to float for JSON
-                    elif isinstance(v, (int, float)) and k in ['amount', 'interest', 'total_amount', 
-                                                              'opening_balance', 'closing_balance', 
+                    elif isinstance(v, (int, float)) and k in ['amount', 'interest', 'daily_interest',
+                                                              'total_amount', 'opening_balance', 'closing_balance', 
                                                               'penalty_amount', 'days_overdue', 'paid_interest']:
                         installment[k] = float(v) if v else 0.0
             
@@ -1938,6 +1939,114 @@ class RestApi(http.Controller):
             
         except Exception as e:
             _logger.error("Error creating withdrawal request: %s", str(e), exc_info=True)
+            return request.make_response(
+                data=json.dumps({"success": False, "message": str(e)}),
+                headers=[('Content-Type', 'application/json')], status=500
+            )
+
+    @http.route(['/loans/<int:loan_id>/pay-installment'], type='http', auth='none', methods=['POST'], csrf=False)
+    def pay_loan_installment(self, loan_id, **kw):
+        """Manual repayment triggered from frontend.
+        Uses pro-rated daily interest.
+        """
+        import json
+        
+        # 1. Authenticate using API key
+        api_key = request.httprequest.headers.get('api-key')
+        if not api_key:
+            return request.make_response(
+                data=json.dumps({"success": False, "message": "No API Key Provided"}),
+                headers=[('Content-Type', 'application/json')], status=401
+            )
+        
+        db = request.httprequest.headers.get('db') or request.session.db
+        if not db:
+            db = getattr(request, 'db', None)
+        
+        try:
+            request.session.update(http.get_default_session(), db=db)
+        except Exception:
+            pass
+        
+        user = request.env['res.users'].sudo().search([('api_key', '=', api_key)], limit=1)
+        if not user:
+            return request.make_response(
+                data=json.dumps({"success": False, "message": "Invalid API Key"}),
+                headers=[('Content-Type', 'application/json')], status=401
+            )
+        
+        env = request.env(user=user.id)
+        
+        try:
+            # 2. Find the loan and its oldest unpaid installment
+            loan = env['dev.loan.loan'].sudo().browse(loan_id)
+            if not loan.exists() or loan.state != 'open':
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": "Active loan not found"}),
+                    headers=[('Content-Type', 'application/json')], status=404
+                )
+            
+            installment = env['dev.loan.installment'].sudo().search([
+                ('loan_id', '=', loan.id),
+                ('state', '=', 'unpaid')
+            ], order='date', limit=1)
+            
+            if not installment:
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": "No unpaid installments found for this loan"}),
+                    headers=[('Content-Type', 'application/json')], status=400
+                )
+            
+            # 3. Verify customer has a wallet
+            if not loan.client_id.wallet_account_number:
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": "Customer has no wallet account number"}),
+                    headers=[('Content-Type', 'application/json')], status=400
+                )
+
+            # 4. Calculate pro-rated amount (Daily Interest)
+            calc = installment.sudo().get_pro_rated_calculations()
+            total_amount = calc['total_amount']
+            
+            # 5. Execute BaaS Debit
+            reference = f"REPAY-MANUAL-{installment.id}-{datetime.now().strftime('%Y%m%d%H%M')}"
+            debit_res = env['baas.service'].sudo().debit_wallet(
+                account_number=loan.client_id.wallet_account_number,
+                amount=total_amount,
+                reference=reference
+            )
+            
+            if not debit_res.get('success'):
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": f"BaaS Debit Failed: {debit_res.get('message')}"}),
+                    headers=[('Content-Type', 'application/json')], status=400
+                )
+            
+            # 6. Settle in Odoo
+            installment.sudo().write({
+                'baas_transaction_id': debit_res.get('transaction_id'),
+                'paid_interest': calc['pro_rated_interest'],
+                'total_amount': total_amount
+            })
+            installment.sudo().action_paid_installment()
+            
+            return request.make_response(
+                data=json.dumps({
+                    "success": True,
+                    "message": "Repayment successful",
+                    "data": {
+                        "installment_id": installment.id,
+                        "amount_paid": total_amount,
+                        "pro_rated_interest": calc['pro_rated_interest'],
+                        "penalty": calc['penalty'],
+                        "transaction_id": debit_res.get('transaction_id')
+                    }
+                }),
+                headers=[('Content-Type', 'application/json')]
+            )
+
+        except Exception as e:
+            _logger.error("Error in pay_loan_installment: %s", str(e), exc_info=True)
             return request.make_response(
                 data=json.dumps({"success": False, "message": str(e)}),
                 headers=[('Content-Type', 'application/json')], status=500

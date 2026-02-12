@@ -412,3 +412,104 @@ class BaasService(models.AbstractModel):
                 'message': f"Error: {str(e)}",
                 'errors': [str(e)]
             }
+    def debit_wallet(self, account_number, amount, reference):
+        """Debit a wallet via BaaS API
+        
+        :param account_number: Wallet account number
+        :param amount: Amount to debit
+        :param reference: Transaction reference
+        :return: dict with success, transaction_id, message, and errors
+        """
+        if not all([account_number, amount, reference]):
+            return {
+                'success': False,
+                'transaction_id': None,
+                'message': 'Missing required parameters',
+                'errors': ['Account number, amount, and reference are required']
+            }
+        
+        config = self._get_baas_config()
+        
+        try:
+            access_token = self._get_access_token()
+        except ValidationError as e:
+            return {
+                'success': False,
+                'transaction_id': None,
+                'message': str(e),
+                'errors': [str(e)]
+            }
+        
+        # NOTE: Endpoint /wallet/debit is assumed based on common BaaS patterns
+        # Adjust if the actual API uses a different endpoint or method
+        url = f"{config['base_url']}/wallet/debit"
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Authorization': f'Bearer {access_token}'
+        }
+        
+        payload = {
+            'accountNumber': account_number,
+            'amount': amount,
+            'reference': reference,
+            'channel': 'LOAN_REPAYMENT'
+        }
+        
+        try:
+            response = requests.post(
+                url,
+                json=payload,
+                headers=headers,
+                timeout=30
+            )
+            
+            _logger.info(
+                "BaaS Wallet Debit Response: Status %s, Body: %s",
+                response.status_code,
+                response.text[:500]
+            )
+            
+            response.raise_for_status()
+            result = response.json()
+            
+            if result.get('status') == 'SUCCESS':
+                data = result.get('data', {})
+                transaction_id = data.get('transactionId') or data.get('id')
+                
+                return {
+                    'success': True,
+                    'transaction_id': transaction_id,
+                    'message': result.get('message', 'Debit successful'),
+                    'errors': [],
+                    'full_response': result
+                }
+            else:
+                messages = result.get('messages', [])
+                error_msg = '; '.join(messages) if messages else result.get('message', 'Failed to debit wallet')
+                return {
+                    'success': False,
+                    'transaction_id': None,
+                    'message': error_msg,
+                    'errors': result.get('errors', [error_msg]),
+                    'full_response': result
+                }
+                
+        except requests.exceptions.RequestException as e:
+            _logger.error("BaaS Wallet Debit Error: %s", str(e))
+            return {
+                'success': False,
+                'transaction_id': None,
+                'message': f"API request failed: {str(e)}",
+                'errors': [str(e)]
+            }
+        except Exception as e:
+            _logger.error("BaaS Wallet Debit Error: Unexpected error - %s", str(e))
+            return {
+                'success': False,
+                'transaction_id': None,
+                'message': f"Unexpected error: {str(e)}",
+                'errors': [str(e)]
+            }
+

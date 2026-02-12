@@ -59,6 +59,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                                 <group>
                                     <field name="loan_payment_journal_id"/>
                                     <field name="journal_entry_id" readonly="1"/>
+                                    <field name="baas_transaction_id" readonly="1" invisible="not baas_transaction_id"/>
                                 </group>
                             </group>
                         </page>

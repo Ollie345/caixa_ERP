@@ -46,6 +46,7 @@ class dev_loan_installment(models.Model):
     
     mobile = fields.Char(string="Mobile",related="client_id.mobile",readonly=False)
     email = fields.Char(string="Email",related="client_id.email",readonly=False)
+    baas_transaction_id = fields.Char(string="BaaS Transaction ID", copy=False, help="Transaction reference from the BaaS provider")
 
     days_overdue = fields.Integer(string="Days Overdue", readonly=True)
     penalty_amount = fields.Float(string="Penalty Amount", readonly=True)
@@ -200,6 +201,47 @@ class dev_loan_installment(models.Model):
                 ins.daily_interest = 0.0
             else:
                 ins.daily_interest = ins.interest / 30
+    
+    def get_pro_rated_calculations(self):
+        """
+        Calculate pro-rated interest based on days elapsed since last payment.
+        Returns a dict with pro_rated_interest, penalty, and total_to_pay.
+        This is used for MANUAL payments from the frontend.
+        """
+        self.ensure_one()
+        today = date.today()
+        loan = self.loan_id
+        
+        # 1. Find last payment date
+        paid_installments = self.env['dev.loan.installment'].search([
+            ('loan_id', '=', loan.id),
+            ('state', '=', 'paid')
+        ], order='date desc', limit=1)
+        
+        # We use the SCHEDULED date of the last installment to maintain the 30-day buckets
+        last_date = paid_installments.date if paid_installments else loan.disbursement_date
+        
+        # 2. Calculate days elapsed (capped at 1-30 for interest calculation)
+        days_elapsed = 30
+        if last_date:
+            days_elapsed = (today - last_date).days
+            # Cap at 1-30 days for a single bucket
+            days_elapsed = min(max(days_elapsed, 1), 30)
+            
+        # 3. Pro-rate the interest
+        daily_rate = (self.interest or 0.0) / 30
+        pro_rated_interest = round(daily_rate * days_elapsed, 2)
+        
+        # 4. Total = scheduled principal + pro-rated interest + penalty
+        penalty = self.penalty_amount or 0.0
+        total = self.amount + pro_rated_interest + penalty
+        
+        return {
+            'pro_rated_interest': pro_rated_interest,
+            'penalty': penalty,
+            'total_amount': round(total, 2),
+            'days_elapsed': days_elapsed
+        }
     
     def loan_installment_reminder(self):
         mtp = self.env['mail.template']
@@ -358,5 +400,68 @@ class dev_loan_installment(models.Model):
             
             
 
+
+    @api.model
+    def cron_automated_repayment(self):
+        """Daily cron job to automatically debit customer wallets for due installments."""
+        today = date.today()
+        # Find all unpaid installments due today or earlier for open loans
+        due_installments = self.search([
+            ('state', '=', 'unpaid'),
+            ('date', '<=', today),
+            ('loan_id.state', '=', 'open')
+        ])
+        
+        _logger = logging.getLogger(__name__)
+        _logger.info("Found %s installments for automated repayment", len(due_installments))
+
+        for inst in due_installments:
+            wallet_acc = inst.client_id.wallet_account_number
+            if not wallet_acc:
+                inst.loan_id.message_post(
+                    body=_("Skipping automated repayment for installment %s: Customer has no wallet account number.") % inst.name
+                )
+                continue
+
+            try:
+                # 1. Attempt to debit the BaaS wallet
+                # Using unique reference to prevent duplicate debits if cron is re-run
+                reference = f"REPAY-{inst.id}-{today.strftime('%Y%m%d')}"
+                result = self.env['baas.service'].debit_wallet(
+                    account_number=wallet_acc,
+                    amount=inst.total_amount,
+                    reference=reference
+                )
+
+                if result.get('success'):
+                    # 2. If debit succeeded, record the transaction ID and mark as paid
+                    inst.write({
+                        'baas_transaction_id': result.get('transaction_id')
+                    })
+                    inst.action_paid_installment()
+                    
+                    inst.loan_id.message_post(
+                        body=_("Automated repayment successful for installment %s.\nAmount: %s\nTransaction ID: %s") % (
+                            inst.name,
+                            inst.total_amount,
+                            result.get('transaction_id')
+                        )
+                    )
+                else:
+                    # 3. If debit failed, log the error in the loan chatter
+                    error_msg = result.get('message', 'Unknown error')
+                    inst.loan_id.message_post(
+                        body=_("Automated repayment FAILED for installment %s.\nAmount: %s\nReason: %s") % (
+                            inst.name,
+                            inst.total_amount,
+                            error_msg
+                        )
+                    )
+
+            except Exception as e:
+                _logger.error("Error in automated repayment for installment %s: %s", inst.id, str(e))
+                inst.loan_id.message_post(
+                    body=_("Error during automated repayment for installment %s: %s") % (inst.name, str(e))
+                )
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

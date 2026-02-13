@@ -70,7 +70,14 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                             confirm="Are you sure you want to decline this loan?"
                             groups="dev_loan_management_caixa.group_loan_manager,base.group_system"/>
 
-                    <button name="action_disburse_loan" invisible="state != 'approve'" string="Disburse Loan"
+                    <button name="action_verify_disbursement"
+                            invisible="state != 'approve' or is_disbursement_verified == True"
+                            string="Verify Disbursement"
+                            class="btn-info" type="object" groups="account.group_account_invoice"/>
+
+                    <button name="action_disburse_loan"
+                            invisible="state != 'approve' or is_disbursement_verified == False"
+                            string="Disburse Loan"
                             class="btn-primary" type="object" groups="account.group_account_invoice"/>
 
                     <button name="create_processing_fees_invoice"
@@ -178,6 +185,14 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                             <field name="disbursement_date"
                                    invisible="state not in ['approve','disburse','open','close']"
                                    readonly="state != 'approve'"/>
+                            <field name="disbursement_transaction_id"
+                                   placeholder="e.g. TXN-12345"
+                                   invisible="state not in ['approve','disburse','open','close']"
+                                   readonly="is_disbursement_verified == True"/>
+                            <field name="is_disbursement_verified" widget="boolean_button"
+                                   options="{'terminology': {'string_true': 'Verified', 'string_false': 'Not Verified'}}"
+                                   invisible="state not in ['approve','disburse','open','close']"
+                                   readonly="1"/>
                             <!-- Early Closure Fields -->
 <!--                            <field name="closure_date"-->
 <!--                                   string="Closure Date"-->

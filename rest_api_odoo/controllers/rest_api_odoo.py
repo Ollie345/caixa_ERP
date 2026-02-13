@@ -2051,3 +2051,524 @@ class RestApi(http.Controller):
                 data=json.dumps({"success": False, "message": str(e)}),
                 headers=[('Content-Type', 'application/json')], status=500
             )
+
+    @http.route(['/loans/<int:loan_id>/pay-multi-installments'], type='http', auth='none', methods=['POST'], csrf=False)
+    def pay_multi_installments(self, loan_id, **kw):
+        """Manual repayment for multiple installments.
+        Oldest in batch is pro-rated; others use full scheduled amount.
+        Expects JSON body: {"installment_ids": [id1, id2, ...]}
+        """
+        import json
+        
+        # 1. Authenticate using API key
+        api_key = request.httprequest.headers.get('api-key')
+        if not api_key:
+            return request.make_response(
+                data=json.dumps({"success": False, "message": "No API Key Provided"}),
+                headers=[('Content-Type', 'application/json')], status=401
+            )
+        
+        db = request.httprequest.headers.get('db') or request.session.db
+        if not db:
+            db = getattr(request, 'db', None)
+        
+        try:
+            request.session.update(http.get_default_session(), db=db)
+        except Exception:
+            pass
+        
+        user = request.env['res.users'].sudo().search([('api_key', '=', api_key)], limit=1)
+        if not user:
+            return request.make_response(
+                data=json.dumps({"success": False, "message": "Invalid API Key"}),
+                headers=[('Content-Type', 'application/json')], status=401
+            )
+        
+        env = request.env(user=user.id)
+        
+        try:
+            # 2. Parse Payload
+            payload = json.loads(request.httprequest.data)
+            installment_ids = payload.get('installment_ids', [])
+            if not installment_ids or not isinstance(installment_ids, list):
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": "Invalid or missing installment_ids list"}),
+                    headers=[('Content-Type', 'application/json')], status=400
+                )
+            
+            # 3. Load and Validate
+            loan = env['dev.loan.loan'].sudo().browse(loan_id)
+            if not loan.exists() or loan.state != 'open':
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": "Active loan not found"}),
+                    headers=[('Content-Type', 'application/json')], status=404
+                )
+            
+            installments = env['dev.loan.installment'].sudo().search([
+                ('id', 'in', installment_ids),
+                ('loan_id', '=', loan.id),
+                ('state', '=', 'unpaid')
+            ], order='date')
+            
+            if len(installments) != len(installment_ids):
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": "One or more installments are invalid, already paid, or belong to another loan"}),
+                    headers=[('Content-Type', 'application/json')], status=400
+                )
+            
+            if not loan.client_id.wallet_account_number:
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": "Customer has no wallet account number"}),
+                    headers=[('Content-Type', 'application/json')], status=400
+                )
+
+            # 4. Calculate Grand Total
+            total_principal = 0.0
+            total_interest = 0.0
+            total_penalty = 0.0
+            
+            details = []
+            for i, inst in enumerate(installments):
+                if i == 0:
+                    # PRO-RATE only the oldest one in the batch
+                    calc = inst.sudo().get_pro_rated_calculations()
+                    inst_interest = calc['pro_rated_interest']
+                    inst_total = calc['total_amount']
+                    penalty = calc['penalty']
+                else:
+                    # FULL scheduled amount for others
+                    inst_interest = inst.interest
+                    penalty = inst.penalty_amount or 0.0
+                    inst_total = inst.amount + inst_interest + penalty
+                
+                total_principal += inst.amount
+                total_interest += inst_interest
+                total_penalty += penalty
+                
+                # Pre-store values (sudo) for accounting lines
+                inst.sudo().write({
+                    'paid_interest': inst_interest,
+                    'total_amount': inst_total
+                })
+                
+                details.append({
+                    "id": inst.id,
+                    "name": inst.name,
+                    "amount_paid": inst_total,
+                    "interest": inst_interest,
+                    "penalty": penalty
+                })
+            
+            grand_total = round(total_principal + total_interest + total_penalty, 2)
+            
+            # 5. BaaS Debit
+            reference = f"REPAY-MULTI-{loan.id}-{datetime.now().strftime('%Y%m%d%H%M')}"
+            debit_res = env['baas.service'].sudo().debit_wallet(
+                account_number=loan.client_id.wallet_account_number,
+                amount=grand_total,
+                reference=reference
+            )
+            
+            if not debit_res.get('success'):
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": f"BaaS Debit Failed: {debit_res.get('message')}"}),
+                    headers=[('Content-Type', 'application/json')], status=400
+                )
+            
+            # 6. Accounting Move (Single Entry for Batch)
+            loan_type = loan.loan_type_id
+            move = env['account.move'].sudo().create({
+                'journal_id': loan_type.loan_payment_journal_id.id,
+                'date': date.today(),
+                'ref': f"Multi-Repayment - {loan.name} ({len(installments)} items)",
+                'company_id': loan.company_id.id if loan.company_id else False,
+            })
+            
+            lines = []
+            # Partner Credit
+            lines.append((0, 0, {
+                'partner_id': loan.client_id.id,
+                'account_id': loan.client_id.property_account_receivable_id.id,
+                'credit': grand_total,
+                'debit': 0.0,
+                'name': f"Bulk Payment for {len(installments)} installments",
+            }))
+            # Principal Debit
+            if total_principal:
+                 lines.append((0, 0, {
+                    'partner_id': loan.client_id.id,
+                    'account_id': loan_type.installment_account_id.id,
+                    'debit': total_principal,
+                    'credit': 0.0,
+                    'name': f"Principal Repayment",
+                }))
+            # Interest Debit
+            if total_interest:
+                 lines.append((0, 0, {
+                    'partner_id': loan.client_id.id,
+                    'account_id': loan_type.interest_account_id.id,
+                    'debit': total_interest,
+                    'credit': 0.0,
+                    'name': f"Interest Repayment",
+                }))
+            # Penalty Debit
+            if total_penalty:
+                 penalty_account = loan_type.interest_account_id.id
+                 lines.append((0, 0, {
+                    'partner_id': loan.client_id.id,
+                    'account_id': penalty_account,
+                    'debit': total_penalty,
+                    'credit': 0.0,
+                    'name': f"Penalty Repayment",
+                }))
+            
+            move.line_ids = lines
+            move.action_post()
+            
+            # 7. Settle Installments & Chain Balances
+            env['dev.loan.installment'].sudo().batch_settle_installments(
+                installment_ids=installments.ids,
+                move_id=move.id
+            )
+            
+            # Record BaaS TX ID on all
+            installments.sudo().write({'baas_transaction_id': debit_res.get('transaction_id')})
+            
+            return request.make_response(
+                data=json.dumps({
+                    "success": True,
+                    "message": "Multi-repayment successful",
+                    "data": {
+                        "total_paid": grand_total,
+                        "transaction_id": debit_res.get('transaction_id'),
+                        "items": details
+                    }
+                }),
+                headers=[('Content-Type', 'application/json')]
+            )
+            
+        except Exception as e:
+            _logger.error("Error in pay_multi_installments: %s", str(e), exc_info=True)
+            return request.make_response(
+                data=json.dumps({"success": False, "message": str(e)}),
+                headers=[('Content-Type', 'application/json')], status=500
+            )
+
+    @http.route(['/loans/<int:loan_id>/clear-loan'], type='http', auth='none', methods=['POST'], csrf=False)
+    def clear_loan(self, loan_id, **kw):
+        """Full loan payoff.
+        Principal balance + pro-rated interest.
+        Waives all future interest.
+        """
+        import json
+        
+        # 1. Authenticate using API key
+        api_key = request.httprequest.headers.get('api-key')
+        if not api_key:
+            return request.make_response(
+                data=json.dumps({"success": False, "message": "No API Key Provided"}),
+                headers=[('Content-Type', 'application/json')], status=401
+            )
+        
+        db = request.httprequest.headers.get('db') or request.session.db
+        if not db:
+            db = getattr(request, 'db', None)
+        
+        try:
+            request.session.update(http.get_default_session(), db=db)
+        except Exception:
+            pass
+        
+        user = request.env['res.users'].sudo().search([('api_key', '=', api_key)], limit=1)
+        if not user:
+            return request.make_response(
+                data=json.dumps({"success": False, "message": "Invalid API Key"}),
+                headers=[('Content-Type', 'application/json')], status=401
+            )
+        
+        env = request.env(user=user.id)
+        
+        try:
+            # 2. Get Loan
+            loan = env['dev.loan.loan'].sudo().browse(loan_id)
+            if not loan.exists() or loan.state != 'open':
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": "Active loan not found"}),
+                    headers=[('Content-Type', 'application/json')], status=404
+                )
+            
+            if loan.balance_amount <= 0:
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": "Loan already has zero balance"}),
+                    headers=[('Content-Type', 'application/json')], status=400
+                )
+            
+            if not loan.client_id.wallet_account_number:
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": "Customer has no wallet account number"}),
+                    headers=[('Content-Type', 'application/json')], status=400
+                )
+
+            # 3. Calculate Payoff Amount (Logic from dev_loan_closure.py)
+            today = date.today()
+            paid_installments = loan.installment_ids.filtered(lambda ins: ins.state == 'paid')
+            
+            if paid_installments:
+                last_installment = max(paid_installments, key=lambda ins: ins.date)
+                start_date = last_installment.date
+            else:
+                start_date = loan.disbursement_date or loan.request_date
+            
+            days_elapsed = (today - start_date).days
+            days_elapsed = min(max(days_elapsed, 0), 30)
+            
+            daily_rate = (loan.interest_rate / 100) / 30
+            interest = loan.balance_amount * daily_rate * days_elapsed
+            payoff_amount = round(loan.balance_amount + interest, 2)
+            
+            # 4. BaaS Debit
+            reference = f"REPAY-PAYOFF-{loan.id}-{datetime.now().strftime('%Y%m%d%H%M')}"
+            debit_res = env['baas.service'].sudo().debit_wallet(
+                account_number=loan.client_id.wallet_account_number,
+                amount=payoff_amount,
+                reference=reference
+            )
+            
+            if not debit_res.get('success'):
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": f"BaaS Debit Failed: {debit_res.get('message')}"}),
+                    headers=[('Content-Type', 'application/json')], status=400
+                )
+
+            # 5. Settlement (Logic adapted from dev_loan_closure.py)
+            journal = loan.disburse_journal_id or (loan.loan_type_id and loan.loan_type_id.loan_payment_journal_id)
+            if not journal:
+                 return request.make_response(
+                    data=json.dumps({"success": False, "message": "Loan journal not configured"}),
+                    headers=[('Content-Type', 'application/json')], status=500
+                )
+            
+            move = env['account.move'].sudo().create({
+                'journal_id': journal.id,
+                'date': today,
+                'ref': f"Early Closure (API) - {loan.name}",
+                'line_ids': [
+                    (0, 0, {
+                        'account_id': loan.client_id.property_account_receivable_id.id,
+                        'debit': payoff_amount,
+                        'credit': 0.0,
+                        'partner_id': loan.client_id.id,
+                    }),
+                    (0, 0, {
+                        'account_id': loan.loan_account_id.id,
+                        'credit': payoff_amount,
+                        'debit': 0.0,
+                        'partner_id': loan.client_id.id,
+                    }),
+                ]
+            })
+            move.action_post()
+            
+            # Close loan and mark installments
+            loan.sudo().write({
+                'state': 'close',
+                'closure_date': today,
+                'closure_amount': payoff_amount,
+                'is_early_closure': True,
+            })
+            
+            unpaid_installments = loan.installment_ids.filtered(lambda i: i.state == 'unpaid').sorted('date')
+            if unpaid_installments:
+                for i, installment in enumerate(unpaid_installments):
+                    installment.write({
+                        'state': 'paid',
+                        'payment_date': today,
+                        'journal_entry_id': move.id,
+                        'paid_interest': interest if i == 0 else 0.0,
+                        'baas_transaction_id': debit_res.get('transaction_id') if i == 0 else False
+                    })
+            
+            return request.make_response(
+                data=json.dumps({
+                    "success": True,
+                    "message": "Loan cleared successfully",
+                    "data": {
+                        "payoff_amount": payoff_amount,
+                        "pro_rated_interest": round(interest, 2),
+                        "transaction_id": debit_res.get('transaction_id')
+                    }
+                }),
+                headers=[('Content-Type', 'application/json')]
+            )
+
+        except Exception as e:
+            _logger.error("Error in clear_loan: %s", str(e), exc_info=True)
+            return request.make_response(
+                data=json.dumps({"success": False, "message": str(e)}),
+                headers=[('Content-Type', 'application/json')], status=500
+            )
+
+    @http.route('/withdrawals/<int:withdrawal_id>/status', type='http', auth='none', methods=['GET'], csrf=False)
+    def get_withdrawal_status(self, withdrawal_id, **kw):
+        """Return the current status of a withdrawal request."""
+        try:
+            api_key = request.httprequest.headers.get('api-key')
+            db = request.httprequest.headers.get('db')
+            if not api_key or not db:
+                return request.make_response(
+                    data=json.dumps({"error": "API Key and Database name are required in headers"}),
+                    headers=[('Content-Type', 'application/json')], status=401
+                )
+            
+            if self.auth_api_key(api_key) == False:
+                return request.make_response(
+                    data=json.dumps({"error": "Invalid API Key"}),
+                    headers=[('Content-Type', 'application/json')], status=401
+                )
+            
+            request.session.db = db
+            env = request.env(user=1)
+            withdrawal = env['loan.wallet.withdrawal'].sudo().browse(withdrawal_id)
+            
+            if not withdrawal.exists():
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": "Withdrawal request not found"}),
+                    headers=[('Content-Type', 'application/json')], status=404
+                )
+                
+            return request.make_response(
+                data=json.dumps({
+                    "success": True,
+                    "id": withdrawal.id,
+                    "name": withdrawal.name,
+                    "state": withdrawal.state,
+                    "is_verified": withdrawal.is_verified,
+                }),
+                headers=[('Content-Type', 'application/json')]
+            )
+            
+        except Exception as e:
+            _logger.error("Error in get_withdrawal_status: %s", str(e))
+            return request.make_response(
+                data=json.dumps({"success": False, "message": str(e)}),
+                headers=[('Content-Type', 'application/json')], status=500
+            )
+
+    @http.route('/loans/<int:loan_id>/status', type='http', auth='none', methods=['GET'], csrf=False)
+    def get_loan_status(self, loan_id, **kw):
+        """Alias for get_loan_stage - returns the current status of a loan."""
+        return self.get_loan_stage(loan_id, **kw)
+    @http.route('/api/baas/webhook', type='http', auth='none', methods=['POST'], csrf=False)
+    def baas_webhook(self, **kw):
+        """
+        Webhook listener for BaaS transactions (Credits/Debits).
+        Verifies signature and creates Payments in Odoo.
+        """
+        import hmac
+        import hashlib
+        
+        # 1. Get Security Config
+        webhook_secret = request.env['ir.config_parameter'].sudo().get_param('baas.webhook_secret')
+
+        # 2. Verify Signature
+        # Using exact header name from BaaS docs or standard practice
+        signature = request.httprequest.headers.get('X-BaaS-Signature') 
+        # Fallback for some providers using different headers
+        if not signature:
+             signature = request.httprequest.headers.get('X-Webhook-Secret')
+
+        payload_bytes = request.httprequest.data
+        
+        # Verify (HMAC SHA256)
+        if webhook_secret:
+            computed_hash = hmac.new(
+                webhook_secret.encode('utf-8'), 
+                payload_bytes, 
+                hashlib.sha256
+            ).hexdigest()
+            
+            is_valid = hmac.compare_digest(computed_hash, signature or "") or (signature == webhook_secret)
+            
+            if not is_valid:
+                _logger.warning("BaaS Webhook: Invalid Signature. Received: %s", signature)
+                return request.make_response("Invalid Signature", status=403)
+        else:
+             _logger.warning("BaaS Webhook: Secret not configured, skipping signature check (INSECURE)")
+
+        # 3. Process Payload
+        try:
+            payload = json.loads(payload_bytes)
+            _logger.info("BaaS Webhook Received: %s", payload)
+            
+            event_type = payload.get('type') # CREDIT / DEBIT (or similar from BaaS)
+            status = payload.get('status')
+            
+            if status not in ['SUCCESSFUL', 'SUCCESS', 'success', 'successful']:
+                _logger.info("BaaS Webhook: Ignoring non-successful transaction status: %s", status)
+                return request.make_response("Ignored", status=200)
+
+            tx_ref = payload.get('transaction_id') or payload.get('reference')
+            account_number = payload.get('account_number') or payload.get('accountNumber')
+            amount_val = payload.get('amount', 0.0)
+            try:
+                amount = float(amount_val)
+            except:
+                amount = 0.0
+            
+            if not account_number or amount <= 0:
+                 return request.make_response("Invalid Payload Data", status=400)
+
+            env = request.env(user=1) # Superuser for processing
+            
+            # 4. Find Customer by Wallet Account
+            partner = env['res.partner'].sudo().search([('wallet_account_number', '=', account_number)], limit=1)
+            if not partner:
+                _logger.error("BaaS Webhook: No partner found for wallet %s", account_number)
+                return request.make_response("Partner not found", status=200)
+
+            # 5. Check Duplicates
+            existing_payment = env['account.payment'].sudo().search([
+                ('ref', 'ilike', tx_ref),
+                ('partner_id', '=', partner.id),
+                ('amount', '=', amount)
+            ], limit=1)
+            
+            if existing_payment:
+                _logger.info("BaaS Webhook: Payment already exists for ref %s", tx_ref)
+                return request.make_response("Duplicate", status=200)
+
+            # 6. Create Payment
+            journal = env['account.journal'].sudo().search([('type', '=', 'bank')], limit=1) 
+            
+            if not journal:
+                 _logger.error("BaaS Webhook: No Bank Journal found")
+                 return request.make_response("Configuration Error: No Journal", status=500)
+
+            payment_type = 'inbound' if (event_type == 'CREDIT' or event_type == 'credit') else 'outbound'
+            
+            if payment_type == 'inbound':
+                payment_method_line_id = journal.inbound_payment_method_line_ids[0].id if journal.inbound_payment_method_line_ids else False
+            else:
+                payment_method_line_id = journal.outbound_payment_method_line_ids[0].id if journal.outbound_payment_method_line_ids else False
+
+            payment_vals = {
+                'partner_id': partner.id,
+                'amount': amount,
+                'date': date.today(),
+                'ref': f"Wallet Tx: {tx_ref}",
+                'journal_id': journal.id,
+                'payment_type': payment_type,
+                'partner_type': 'customer',
+                'payment_method_line_id': payment_method_line_id,
+            }
+            
+            payment = env['account.payment'].sudo().create(payment_vals)
+            payment.action_post()
+            
+            _logger.info("BaaS Webhook: Created Payment %s for %s", payment.name, partner.name)
+            
+            return request.make_response("Processed", status=200)
+
+        except Exception as e:
+            _logger.error("BaaS Webhook Error: %s", str(e), exc_info=True)
+            return request.make_response(f"Server Error: {str(e)}", status=500)

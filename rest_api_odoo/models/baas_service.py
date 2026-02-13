@@ -42,6 +42,7 @@ class BaasService(models.AbstractModel):
             'base_url': ir_config.get_param('baas.base_url', 'https://baas.dev.getrova.co.uk'),
             'client_id': ir_config.get_param('baas.client_id', ''),
             'client_secret': ir_config.get_param('baas.client_secret', ''),
+            'webhook_secret': ir_config.get_param('baas.webhook_secret', ''),
         }
 
     def _get_access_token(self):
@@ -512,4 +513,55 @@ class BaasService(models.AbstractModel):
                 'message': f"Unexpected error: {str(e)}",
                 'errors': [str(e)]
             }
+
+    def get_transaction_details(self, transaction_id):
+        """Get transaction details from BaaS API for verification
+        
+        :param transaction_id: The transaction ID/reference to check
+        :return: dict with success, amount, account_number, status, message
+        """
+        if not transaction_id:
+            return {'success': False, 'message': 'Transaction ID is required'}
+            
+        config = self._get_baas_config()
+        try:
+            access_token = self._get_access_token()
+        except ValidationError as e:
+            return {'success': False, 'message': str(e)}
+
+        # Using the receipt/status endpoint pattern from Postman
+        url = f"{config['base_url']}/wallet/transaction/{transaction_id}"
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Authorization': f'Bearer {access_token}'
+        }
+        
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            _logger.info("BaaS Transaction Status Response [%s]: %s", transaction_id, response.text[:500])
+            
+            # If 404, transaction might not exist yet or wrong endpoint
+            if response.status_code == 404:
+                return {'success': False, 'message': 'Transaction not found'}
+                
+            response.raise_for_status()
+            result = response.json()
+            
+            if result.get('status') == 'SUCCESS':
+                data = result.get('data', {})
+                return {
+                    'success': True,
+                    'amount': float(data.get('amount') or 0.0),
+                    'account_number': data.get('accountNumber') or data.get('toAccountNumber'),
+                    'status': data.get('status'), # e.g. 'SUCCESSFUL', 'PENDING'
+                    'message': 'Transaction details retrieved'
+                }
+            else:
+                return {'success': False, 'message': result.get('message', 'Failed to retrieve transaction')}
+                
+        except Exception as e:
+            _logger.error("BaaS Transaction Detail Error [%s]: %s", transaction_id, str(e))
+            return {'success': False, 'message': f"Request failed: {str(e)}"}
 

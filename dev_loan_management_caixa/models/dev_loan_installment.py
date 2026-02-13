@@ -242,6 +242,85 @@ class dev_loan_installment(models.Model):
             'total_amount': round(total, 2),
             'days_elapsed': days_elapsed
         }
+
+    @api.model
+    def batch_settle_installments(self, installment_ids, move_id, payment_date=None):
+        """
+        Settle multiple installments at once.
+        - installment_ids: list of dev.loan.installment IDs
+        - move_id: ID of the account.move record
+        - payment_date: date of payment (default today)
+        """
+        if not installment_ids:
+            return
+            
+        pdate = payment_date or date.today()
+        installments = self.browse(installment_ids).sorted('date')
+        if not installments:
+            return
+            
+        loan = installments[0].loan_id
+        
+        # 1. Get current opening balance from last paid installment (before this batch)
+        # We need to ensure we are looking at installments NOT in this batch
+        last_paid = self.search([
+            ('loan_id', '=', loan.id),
+            ('state', '=', 'paid'),
+            ('id', 'not in', installments.ids)
+        ], order='date desc', limit=1)
+        
+        opening_balance = last_paid.closing_balance if last_paid else loan.loan_amount
+        
+        # 2. Process each installment in the batch
+        for inst in installments:
+            # Note: For multi-payment, the first one might be pro-rated, others are full interest.
+            # We assume total_amount and paid_interest have been updated on the records 
+            # by the caller before calling this method, OR they use scheduled values.
+            
+            closing_balance = opening_balance - inst.amount
+            if closing_balance < 0:
+                closing_balance = 0.0
+                
+            inst.write({
+                'state': 'paid',
+                'payment_date': pdate,
+                'journal_entry_id': move_id,
+                'opening_balance': opening_balance,
+                'closing_balance': closing_balance,
+            })
+            # If paid_interest wasn't set (by caller), default to scheduled interest
+            if not inst.paid_interest:
+                inst.paid_interest = inst.interest
+                
+            opening_balance = closing_balance
+            
+        # 3. Update remaining unpaid installments' balances in the chain
+        remaining_unpaid = self.search([
+            ('loan_id', '=', loan.id),
+            ('state', '=', 'unpaid'),
+            ('date', '>', installments[-1].date)
+        ], order='date')
+        
+        for inst in remaining_unpaid:
+            closing_balance = opening_balance - inst.amount
+            if closing_balance < 0:
+                closing_balance = 0.0
+                
+            inst.write({
+                'opening_balance': opening_balance,
+                'closing_balance': closing_balance,
+            })
+            opening_balance = closing_balance
+            
+        # 4. Check if loan should be closed
+        unpaid_count = self.search_count([
+            ('loan_id', '=', loan.id),
+            ('state', '=', 'unpaid')
+        ])
+        if unpaid_count == 0:
+            loan.write({'state': 'close'})
+            
+        return True
     
     def loan_installment_reminder(self):
         mtp = self.env['mail.template']
@@ -394,11 +473,7 @@ class dev_loan_installment(models.Model):
             self.state = 'paid'
             self.payment_date = date.today()
             self.set_loan_close()
-            
-    
-        
-            
-            
+                     
 
 
     @api.model

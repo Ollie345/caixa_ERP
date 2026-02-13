@@ -147,7 +147,20 @@ class dev_loan_loan(models.Model):
     )
     company_id = fields.Many2one('res.company', string='Company', default=lambda self:self.env.user.company_id.id)
     currency_id = fields.Many2one('res.currency', string='Currency', default=lambda self:self.env.user.company_id.currency_id.id)
-    proof_ids = fields.Many2many('dev.loan.proof', string='Loan Proof') 
+    proof_ids = fields.Many2many('dev.loan.proof', string='Loan Proof')
+    
+    # Disbursement Verification Fields
+    disbursement_transaction_id = fields.Char(
+        string='Disbursement Transaction ID',
+        copy=False,
+        help='BaaS Transaction ID for the manual disbursement'
+    )
+    is_disbursement_verified = fields.Boolean(
+        string='Disbursement Verified',
+        copy=False,
+        default=False,
+        help='Confirmed by BaaS verification logic'
+    )
     loan_account_id = fields.Many2one('account.account', string='Disburse Account')
     disburse_journal_id = fields.Many2one('account.journal', string='Disburse Journal')
     disburse_journal_entry_id = fields.Many2one('account.move', string='Disburse Account Entry', copy=False)
@@ -1204,20 +1217,16 @@ class dev_loan_loan(models.Model):
                             )
                         )
                     else:
-                        # Log warning but don't fail approval
-                        self.message_post(
-                            body=_(
-                                "Warning: Could not create wallet for customer.\n"
-                                "Reason: %s"
-                            ) % wallet_result.get('message', 'Unknown error')
-                        )
+                        # Fail approval if wallet creation fails
+                        raise ValidationError(_(
+                            "Cannot Approve Loan: Wallet creation failed for customer.\n"
+                            "Result: %s"
+                        ) % wallet_result.get('message', 'Unknown error'))
                 except Exception as e:
-                    # Log error but don't fail approval
-                    self.message_post(
-                        body=_(
-                            "Warning: Error creating wallet: %s"
-                        ) % str(e)
-                    )
+                    # Fail approval on exception
+                    raise ValidationError(_(
+                        "Cannot Approve Loan: Error creating wallet: %s"
+                    ) % str(e))
             else:
                 # Wallet already exists
                 wallet_result = {
@@ -1383,7 +1392,38 @@ class dev_loan_loan(models.Model):
         
         
     
+    def action_verify_disbursement(self):
+        """Verify the disbursement transaction against BaaS API."""
+        self.ensure_one()
+        if not self.disbursement_transaction_id:
+            raise UserError(_("Please enter a Transaction ID first."))
+            
+        res = self.env['baas.service'].get_transaction_details(self.disbursement_transaction_id)
+        
+        if not res.get('success'):
+            raise UserError(_("Verification Failed: %s") % res.get('message'))
+            
+        # Amount Validation
+        if round(res.get('amount'), 2) != round(self.loan_amount, 2):
+            raise UserError(_("Amount Mismatch! BaaS shows %s, but Loan is %s") % (res.get('amount'), self.loan_amount))
+            
+        # Account Validation
+        expected_wallet = self.client_id.wallet_account_number
+        if res.get('account_number') != expected_wallet:
+            raise UserError(_("Account Mismatch! BaaS shows recipient %s, but Customer wallet is %s") % (res.get('account_number'), expected_wallet))
+            
+        # Status Validation
+        if res.get('status') not in ['SUCCESSFUL', 'SUCCESS']:
+             raise UserError(_("Transaction is not successful according to BaaS (Status: %s)") % res.get('status'))
+
+        self.is_disbursement_verified = True
+        return True
+
     def action_disburse_loan(self):
+        # SECURITY CHECK: Must be verified first
+        if not self.is_disbursement_verified:
+            raise UserError(_("The disbursement transaction has not been verified yet. Please click 'Verify Disbursement' first."))
+
         # Only set to today if not already set (allows manual date selection for testing)
         if not self.disbursement_date:
             self.disbursement_date = date.today()

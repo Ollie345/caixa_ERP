@@ -103,6 +103,13 @@ class LoanWalletWithdrawal(models.Model):
         help='Transaction ID from external payment system (required before completion)'
     )
     
+    is_verified = fields.Boolean(
+        string='Withdrawal Verified',
+        copy=False,
+        default=False,
+        help='Confirmed by BaaS verification logic'
+    )
+    
     request_date = fields.Date(
         string='Request Date',
         default=fields.Date.context_today,
@@ -233,11 +240,40 @@ class LoanWalletWithdrawal(models.Model):
                 body=_('Withdrawal request rejected by %s.\nReason: %s') % (self.env.user.name, reason)
             )
     
+    def action_verify_withdrawal(self):
+        """Verify the withdrawal transaction against BaaS API."""
+        self.ensure_one()
+        if not self.transaction_id:
+            raise ValidationError(_("Please enter a Transaction ID first."))
+            
+        res = self.env['baas.service'].get_transaction_details(self.transaction_id)
+        
+        if not res.get('success'):
+            raise ValidationError(_("Verification Failed: %s") % res.get('message'))
+            
+        # Amount Validation
+        if round(res.get('amount'), 2) != round(self.withdrawal_amount, 2):
+            raise ValidationError(_("Amount Mismatch! BaaS shows %s, but Withdrawal is %s") % (res.get('amount'), self.withdrawal_amount))
+            
+        # Bank Account Validation
+        if res.get('account_number') != self.account_number:
+            raise ValidationError(_("Account Number Mismatch! BaaS shows recipient %s, but Withdrawal bank account is %s") % (res.get('account_number'), self.account_number))
+            
+        # Status Validation
+        if res.get('status') not in ['SUCCESSFUL', 'SUCCESS']:
+             raise ValidationError(_("Transaction is not successful according to BaaS (Status: %s)") % res.get('status'))
+
+        self.is_verified = True
+        return True
+
     def action_done(self):
-        """Mark withdrawal as done (requires transaction ID)"""
+        """Mark withdrawal as done (requires verified transaction ID)"""
         for record in self:
             if record.state != 'approved':
                 raise ValidationError(_('Only approved withdrawals can be marked as done.'))
+            
+            if not record.is_verified:
+                raise ValidationError(_("The withdrawal transaction has not been verified yet. Please click 'Verify Withdrawal' first."))
             
             if not record.transaction_id:
                 raise ValidationError(_('Transaction ID is required before marking withdrawal as Done.'))

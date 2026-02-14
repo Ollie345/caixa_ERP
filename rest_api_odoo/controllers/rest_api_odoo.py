@@ -942,7 +942,6 @@ class RestApi(http.Controller):
                     # Force refresh to ensure loan_request is updated
                     if category_updated and category:
                         partner.sudo().invalidate_recordset(['loan_request', 'borrower_category_id'])
-                        partner.sudo().refresh()
                         # Double-check loan_request was updated
                         if partner.loan_request != category.loan_request_per_year:
                             # Force update if refresh didn't work

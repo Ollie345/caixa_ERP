@@ -1761,24 +1761,33 @@ class RestApi(http.Controller):
             )
 
     @http.route(['/loans/<int:loan_id>/agreement-data'], 
-                type='json', auth='none', methods=['GET'], csrf=False)
+                type='http', auth='none', methods=['GET'], csrf=False)
     def get_agreement_data(self, loan_id, **kwargs):
         """
         Get agreement data for frontend to render email
         Called after agreement is generated
         """
+        import json
         try:
             loan = request.env['dev.loan.loan'].sudo().browse(loan_id)
             
             if not loan.exists():
-                return {'success': False, 'error': 'Loan not found'}
+                return request.make_response(
+                    data=json.dumps({'success': False, 'error': 'Loan not found'}),
+                    headers=[('Content-Type', 'application/json')],
+                    status=404
+                )
             
             if not loan.agreement_id:
-                return {'success': False, 'error': 'No agreement found for this loan'}
+                return request.make_response(
+                    data=json.dumps({'success': False, 'error': 'No agreement found for this loan'}),
+                    headers=[('Content-Type', 'application/json')],
+                    status=404
+                )
             
             agreement = loan.agreement_id
             
-            return {
+            response_data = {
                 'success': True,
                 'data': {
                     'loan_number': loan.name,
@@ -1793,9 +1802,18 @@ class RestApi(http.Controller):
                 }
             }
             
+            return request.make_response(
+                data=json.dumps(response_data),
+                headers=[('Content-Type', 'application/json')]
+            )
+            
         except Exception as e:
             _logger.error(f"Error getting agreement data: {str(e)}")
-            return {'success': False, 'error': str(e)}
+            return request.make_response(
+                data=json.dumps({'success': False, 'error': str(e)}),
+                headers=[('Content-Type', 'application/json')],
+                status=500
+            )
 
     @http.route(['/wallet_withdrawal'], type='http', auth='none', methods=['POST'], csrf=False)
     def create_wallet_withdrawal(self, **kw):

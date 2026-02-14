@@ -819,7 +819,8 @@ class dev_loan_loan(models.Model):
         if self.state == 'review':
             date = self.request_date
         else:
-            date = date
+            if not date:
+                date = self.request_date or date.today()
         vals = []
         interest_account_id,installment_account_id,loan_payment_journal_id = self.get_loan_account_journal()
         

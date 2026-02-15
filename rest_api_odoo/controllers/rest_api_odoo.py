@@ -1486,14 +1486,17 @@ class RestApi(http.Controller):
         Frontend sends: subject, body_html, recipient_email, sent_at
         """
         try:
-            data = request.jsonrequest
+            from odoo.http import Response
+            import json
+            
+            data = request.get_json_data()
             loan = request.env['dev.loan.loan'].sudo().browse(loan_id)
             
             if not loan.exists():
-                return {
-                    'success': False,
-                    'error': 'Loan not found'
-                }
+                return request.make_response(
+                    json.dumps({'success': False, 'error': 'Loan not found'}),
+                    headers=[('Content-Type', 'application/json')]
+                )
             
             # Log email to chatter without sending
             loan.message_post(
@@ -1510,19 +1513,22 @@ class RestApi(http.Controller):
                 subtype_xmlid='mail.mt_comment',
             )
             
-            return {
-                'success': True,
-                'message': 'Email logged successfully',
-                'loan_id': loan_id
-            }
+            return request.make_response(
+                json.dumps({
+                    'success': True,
+                    'message': 'Email logged successfully',
+                    'loan_id': loan_id
+                }),
+                headers=[('Content-Type', 'application/json')]
+            )
             
         except Exception as e:
+            import json
             _logger.error(f"Error logging email: {str(e)}")
-            return {
-                'success': False,
-                'error': str(e)
-            }
-
+            return request.make_response(
+                json.dumps({'success': False, 'error': str(e)}),
+                headers=[('Content-Type', 'application/json')]
+            )
     @http.route(['/loans/<int:loan_id>/customer-response'], 
                 type='http', auth='none', methods=['POST'], csrf=False)
     def submit_customer_response(self, loan_id, **kwargs):

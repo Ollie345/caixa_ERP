@@ -1489,7 +1489,18 @@ class RestApi(http.Controller):
             from odoo.http import Response
             import json
             
-            data = request.get_json_data()
+            # Try to parse JSON body first
+            try:
+                data = request.get_json_data()
+            except (ValueError, Exception):
+                # Fallback to form data/query params if JSON parsing fails
+                # This handles multipart/form-data requests
+                data = kwargs
+            
+            # Ensure data is a dictionary
+            if not data:
+                data = kwargs or {}
+
             loan = request.env['dev.loan.loan'].sudo().browse(loan_id)
             
             if not loan.exists():

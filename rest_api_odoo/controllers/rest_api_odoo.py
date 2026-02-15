@@ -1499,14 +1499,13 @@ class RestApi(http.Controller):
             loan.message_post(
                 body=f"""
                 <div style="margin: 0px; padding: 0px;">
-                    <p><strong>Email Sent:</strong> {data.get('subject', 'Loan Agreement')}</p>
-                    <p><strong>To:</strong> {data.get('recipient_email', '')}</p>
+                    <p><strong>Subject:</strong> {data.get('subject', 'Loan Agreement')}</p>
+                    <p><strong>Email Sent To:</strong> {data.get('recipient_email', '')}</p>
                     <p><strong>Sent At:</strong> {data.get('sent_at', '')}</p>
                     <hr/>
                     <div>{data.get('body_html', '')}</div>
                 </div>
                 """,
-                subject=data.get('subject', 'Loan Agreement'),
                 message_type='comment',
                 subtype_xmlid='mail.mt_comment',
             )

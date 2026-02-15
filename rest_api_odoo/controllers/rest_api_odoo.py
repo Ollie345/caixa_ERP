@@ -1479,7 +1479,7 @@ class RestApi(http.Controller):
         )
 
     @http.route(['/loans/<int:loan_id>/log-agreement-email'], 
-                type='json', auth='none', methods=['POST'], csrf=False)
+                type='http', auth='none', methods=['POST'], csrf=False)
     def log_agreement_email(self, loan_id, **kwargs):
         """
         Log email sent by frontend to loan chatter for audit purposes

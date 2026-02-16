@@ -269,7 +269,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                     </group>
 
                     <!-- Final Approval Information -->
-                    <group string="Final Approval" invisible="state not in ['final_approve', 'approve', 'reject']">
+                    <group string="Final Approval" invisible="state not in ['awaiting_response ','final_approve', 'approve', 'reject']">
                         <group>
                             <field name="final_approve_reason" readonly="1"/>
                             <field name="final_approve_user_id" readonly="1"/>

@@ -9,7 +9,7 @@
 #    You can modify it under the terms of the GNU LESSER
 #    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
-#    This program is distributed in the hope that it will be useful,
+#    This program is distributed ine the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
@@ -98,45 +98,60 @@ class ResPartner(models.Model):
         if self.wallet_account_number:
             return {
                 'success': False,
-                'account_number': self.wallet_account_number,
+                'account_numbeaccount_numberr': self.wallet_account_number,
                 'message': 'Wallet already exists for this partner',
                 'errors': ['Wallet already created'],
                 'full_response': None
             }
         
-        # Use provided BVN or try to get from partner
-        wallet_bvn = bvn
+        # ====================e====================================================
+        # TEST DATA FOR BAAS TESTING (COMMENT OUT FOR PRODUCTION)
+        # ========================================================================
+        # Use hardcoded test data that BaaS test environment accepts
+        wallet_bvn = "22200011111"  # test BVN
+        firstname = "John"           # test first name
+        lastname = "Doe"             # test last name
+        phone = "7060514527"     # test phone number
+        dob = "1990-01-15"           # test date of birth
+        # ========================================================================
         
-        # Try to get BVN from partner if available
-        if not wallet_bvn and hasattr(self, 'bvn'):
-            wallet_bvn = self.bvn
-        
-        if not wallet_bvn:
-            raise ValidationError(_("BVN is required to create a wallet."))
-        
-        # Extract firstname and lastname
-        if self.name:
-            name_parts = self.name.split(' ', 1)
-            firstname = name_parts[0] if name_parts else self.name
-            lastname = name_parts[1] if len(name_parts) > 1 else ''
-        else:
-            firstname = getattr(self, 'firstname', '') or ''
-            lastname = getattr(self, 'lastname', '') or ''
-        
-        if not firstname:
-            raise ValidationError(_("First name is required to create a wallet."))
-        
-        phone = self.phone or self.mobile
-        if not phone:
-            raise ValidationError(_("Phone number is required to create a wallet."))
-        
-        # Get date of birth (default if not available)
-        dob = '1990-01-01'  # Default
-        if hasattr(self, 'birthdate') and self.birthdate:
-            if isinstance(self.birthdate, fields.Date):
-                dob = self.birthdate.strftime('%Y-%m-%d')
-            else:
-                dob = str(self.birthdate)
+        # ========================================================================
+        # PRODUCTION CODE (UNCOMMENT FOR PRODUCTION, COMMENT OUT TEST DATA ABOVE)
+        # ========================================================================
+        # # Use provided BVN or try to get from partner
+        # wallet_bvn = bvn
+        # 
+        # # Try to get BVN from partner if available
+        # if not wallet_bvn and hasattr(self, 'bvn'):
+        #     wallet_bvn = self.bvn
+        # 
+        # if not wallet_bvn:
+        #     raise ValidationError(_("BVN is required to create a wallet."))
+        # 
+        # # Extract firstname and lastname
+        # if self.name:
+        #     name_parts = self.name.split(' ', 1)
+        #     firstname = name_parts[0] if name_parts else self.name
+        #     lastname = name_parts[1] if len(name_parts) > 1 else ''
+        # else:
+        #     firstname = getattr(self, 'firstname', '') or ''
+        #     lastname = getattr(self, 'lastname', '') or ''
+        # 
+        # if not firstname:
+        #     raise ValidationError(_("First name is required to create a wallet."))
+        # 
+        # phone = self.phone or self.mobile
+        # if not phone:
+        #     raise ValidationError(_("Phone number is required to create a wallet."))
+        # 
+        # # Get date of birth (default if not available)
+        # dob = '1990-01-01'  # Default
+        # if hasattr(self, 'birthdate') and self.birthdate:
+        #     if isinstance(self.birthdate, fields.Date):
+        #         dob = self.birthdate.strftime('%Y-%m-%d')
+        #     else:
+        #         dob = str(self.birthdate)
+        # ========================================================================
         
         # Call BaaS service
         baas_service = self.env['baas.service']
@@ -183,7 +198,7 @@ class ResPartner(models.Model):
                     'message': _(
                         'Wallet created successfully!\n'
                         'Account Number: %s'
-                    ) % result['account_number'],
+                    ) % result['account_number'],account_number
                     'type': 'success',
                     'sticky': False,
                 }
@@ -195,7 +210,7 @@ class ResPartner(models.Model):
             if errors:
                 error_msg += '\n' + '\n'.join(errors)
             raise ValidationError(_('Wallet Creation Failed:\n%s') % error_msg)
-
+account_number
     @api.depends('wallet_account_number')
     def _compute_wallet_balance(self):
         """Compute wallet balance by fetching from BaaS API"""

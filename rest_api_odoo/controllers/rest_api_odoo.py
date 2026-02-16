@@ -21,7 +21,7 @@
 #############################################################################
 import json
 import logging
-from odoo import http, _
+from odoo import http,create_wallet_t _
 from odoo.http import request
 from odoo.exceptions import ValidationError
 from datetime import datetime, date
@@ -969,6 +969,7 @@ class RestApi(http.Controller):
         except Exception as e:
             _logger.error("Error creating loan request: %s", str(e), exc_info=True)
             return ("<html><body><h2>Error creating loan request: %s</h2><p>Check Odoo logs for details.</p></body></html>" % str(e))
+        
     @http.route(['/loans'], type='http', auth='none', methods=['GET'], csrf=False)
     def get_all_loans(self, **kw):
         """Return all loans with optional fields filter via query param:
@@ -1347,7 +1348,7 @@ class RestApi(http.Controller):
         if not bvn:
             missing_fields.append("bvn")
         if not firstname:
-            missing_fields.append("firstname")
+            missing_fields.appendcreate_wallet_t("firstname")
         if not lastname:
             missing_fields.append("lastname")
         if not phone:
@@ -1510,10 +1511,9 @@ class RestApi(http.Controller):
                 )
             
             # Log email to chatter without sending
-            # Explicitly set author_id to OdooBot (base.partner_root) to avoid "Expected singleton: res.users()"
-            # error which happens because auth='none' leaves request.env.user empty/invalid.
+            # Use sudo() to avoid singleton errors in auth='none' context
             from markupsafe import Markup
-            author_id = request.env.ref('base.partner_root').id
+            author_id = request.env['res.partner'].sudo().browse(2).id  # OdooBot partner ID is typically 2
             
             # Wrap body in Markup() to indicate it's safe HTML and should be rendered
             body_html = Markup(f"""
@@ -1651,8 +1651,9 @@ class RestApi(http.Controller):
                 })
                 
                 # Log to chatter with explicit author_id
+                # Use sudo() to avoid singleton errors in auth='none' context
                 from markupsafe import Markup
-                author_id = request.env.ref('base.partner_root').id
+                author_id = request.env['res.partner'].sudo().browse(2).id  # OdooBot partner ID is typically 2
                 loan.message_post(
                     body=Markup(_(
                         "Customer has agreed to the loan terms and submitted signed agreement.<br/>"
@@ -1663,8 +1664,9 @@ class RestApi(http.Controller):
                 )
             else:
                 # Customer disagreed
+                # Use sudo() to avoid singleton errors in auth='none' context
                 from markupsafe import Markup
-                author_id = request.env.ref('base.partner_root').id
+                author_id = request.env['res.partner'].sudo().browse(2).id  # OdooBot partner ID is typically 2
                 rejection_msg = _(
                     "Customer has disagreed with the loan terms.<br/>"
                     "Response Date: %s"

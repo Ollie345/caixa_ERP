@@ -1512,10 +1512,11 @@ class RestApi(http.Controller):
             # Log email to chatter without sending
             # Explicitly set author_id to OdooBot (base.partner_root) to avoid "Expected singleton: res.users()"
             # error which happens because auth='none' leaves request.env.user empty/invalid.
+            from markupsafe import Markup
             author_id = request.env.ref('base.partner_root').id
             
-            loan.message_post(
-                body=f"""
+            # Wrap body in Markup() to indicate it's safe HTML and should be rendered
+            body_html = Markup(f"""
                 <div style="margin: 0px; padding: 0px;">
                     <p><strong>Subject:</strong> {data.get('subject', 'Loan Agreement')}</p>
                     <p><strong>Email Sent To:</strong> {data.get('recipient_email', '')}</p>
@@ -1523,7 +1524,10 @@ class RestApi(http.Controller):
                     <hr/>
                     <div>{data.get('body_html', '')}</div>
                 </div>
-                """,
+                """)
+            
+            loan.message_post(
+                body=body_html,
                 message_type='comment',
                 subtype_xmlid='mail.mt_comment',
                 author_id=author_id,

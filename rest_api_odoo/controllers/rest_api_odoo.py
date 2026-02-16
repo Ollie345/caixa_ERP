@@ -1564,24 +1564,44 @@ class RestApi(http.Controller):
         """
         try:
             from odoo import fields
-            data = request.jsonrequest
+            from odoo.http import Response
+            import json
+            
+            # Try to parse JSON body first, fallback to form data
+            try:
+                data = request.get_json_data()
+            except (ValueError, Exception):
+                data = kwargs
+            
+            if not data:
+                data = kwargs or {}
+            
             loan = request.env['dev.loan.loan'].sudo().browse(loan_id)
             
             if not loan.exists():
-                return {'success': False, 'error': 'Loan not found'}
+                return request.make_response(
+                    json.dumps({'success': False, 'error': 'Loan not found'}),
+                    headers=[('Content-Type', 'application/json')]
+                )
             
             if loan.state != 'awaiting_response':
-                return {
-                    'success': False, 
-                    'error': f'Loan is not in awaiting_response state. Current state: {loan.state}'
-                }
+                return request.make_response(
+                    json.dumps({
+                        'success': False, 
+                        'error': f'Loan is not in awaiting_response state. Current state: {loan.state}'
+                    }),
+                    headers=[('Content-Type', 'application/json')]
+                )
             
             response = data.get('response')
             if response not in ['agree', 'disagree']:
-                return {
-                    'success': False,
-                    'error': 'Response must be either "agree" or "disagree"'
-                }
+                return request.make_response(
+                    json.dumps({
+                        'success': False,
+                        'error': 'Response must be either "agree" or "disagree"'
+                    }),
+                    headers=[('Content-Type', 'application/json')]
+                )
             
             # Update customer response
             update_vals = {
@@ -1612,36 +1632,51 @@ class RestApi(http.Controller):
                     'signed_agreement_id': attachment.id,
                 })
                 
-                # Log to chatter
+                # Log to chatter with explicit author_id
+                from markupsafe import Markup
+                author_id = request.env.ref('base.partner_root').id
                 loan.message_post(
-                    body=_(
-                        "Customer has agreed to the loan terms and submitted signed agreement.\n"
+                    body=Markup(_(
+                        "Customer has agreed to the loan terms and submitted signed agreement.<br/>"
                         "Response Date: %s"
-                    ) % loan.customer_response_date,
-                    attachment_ids=[attachment.id]
+                    ) % loan.customer_response_date),
+                    attachment_ids=[attachment.id],
+                    author_id=author_id,
                 )
             else:
                 # Customer disagreed
+                from markupsafe import Markup
+                author_id = request.env.ref('base.partner_root').id
                 rejection_msg = _(
-                    "Customer has disagreed with the loan terms.\n"
+                    "Customer has disagreed with the loan terms.<br/>"
                     "Response Date: %s"
                 ) % loan.customer_response_date
                 if loan.customer_rejection_reason:
-                    rejection_msg += f"\n\nReason: {loan.customer_rejection_reason}"
+                    rejection_msg += f"<br/><br/>Reason: {loan.customer_rejection_reason}"
                 
-                loan.message_post(body=rejection_msg)
+                loan.message_post(
+                    body=Markup(rejection_msg),
+                    author_id=author_id,
+                )
             
-            return {
-                'success': True,
-                'message': 'Customer response recorded',
-                'loan_id': loan_id,
-                'state': loan.state,
-                'customer_response': loan.customer_response
-            }
+            return request.make_response(
+                json.dumps({
+                    'success': True,
+                    'message': 'Customer response recorded',
+                    'loan_id': loan_id,
+                    'state': loan.state,
+                    'customer_response': loan.customer_response
+                }),
+                headers=[('Content-Type', 'application/json')]
+            )
             
         except Exception as e:
+            import json
             _logger.error(f"Error recording customer response: {str(e)}")
-            return {'success': False, 'error': str(e)}
+            return request.make_response(
+                json.dumps({'success': False, 'error': str(e)}),
+                headers=[('Content-Type', 'application/json')]
+            )
 
     @http.route(['/loans/<int:loan_id>'], type='http', auth='none', methods=['GET'], csrf=False)
     def get_loan_details(self, loan_id, **kw):

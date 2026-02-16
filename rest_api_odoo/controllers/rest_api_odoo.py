@@ -5,9 +5,11 @@
 #
 #    Copyright (C) 2024-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
 #    Author: Ayana KP (odoo@cybrosys.com)
-#
+##
+
 #    You can modify it under the terms of the GNU LESSER
-#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.#
+
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -21,7 +23,7 @@
 #############################################################################
 import json
 import logging
-from odoo import http,create_wallet_t _
+from odoo import http, _
 from odoo.http import request
 from odoo.exceptions import ValidationError
 from datetime import datetime, date
@@ -1348,7 +1350,7 @@ class RestApi(http.Controller):
         if not bvn:
             missing_fields.append("bvn")
         if not firstname:
-            missing_fields.appendcreate_wallet_t("firstname")
+            missing_fields.append("firstname")
         if not lastname:
             missing_fields.append("lastname")
         if not phone:

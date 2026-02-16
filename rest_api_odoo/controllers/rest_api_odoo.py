@@ -1619,11 +1619,29 @@ class RestApi(http.Controller):
             
             # Handle signed agreement upload if customer agreed
             if response == 'agree' and data.get('signed_agreement'):
+                # Handle both FileStorage (multipart/form-data) and base64 string (JSON)
+                import base64
+                from werkzeug.datastructures import FileStorage
+                
+                signed_agreement = data.get('signed_agreement')
+                file_name = data.get('file_name', f'Signed Agreement - {loan.name}')
+                
+                # Check if it's a FileStorage object (multipart upload)
+                if isinstance(signed_agreement, FileStorage):
+                    # Read the file content and encode to base64
+                    file_content = signed_agreement.read()
+                    datas = base64.b64encode(file_content)
+                    if not file_name or file_name == f'Signed Agreement - {loan.name}':
+                        file_name = signed_agreement.filename or file_name
+                else:
+                    # It's already a base64 string (JSON upload)
+                    datas = signed_agreement
+                
                 # Create attachment from base64
                 attachment = request.env['ir.attachment'].sudo().create({
-                    'name': data.get('file_name', f'Signed Agreement - {loan.name}'),
+                    'name': file_name,
                     'type': 'binary',
-                    'datas': data.get('signed_agreement'),  # base64 encoded file
+                    'datas': datas,  # base64 encoded file
                     'res_model': 'dev.loan.loan',
                     'res_id': loan.id,
                 })

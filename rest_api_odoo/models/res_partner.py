@@ -98,13 +98,13 @@ class ResPartner(models.Model):
         if self.wallet_account_number:
             return {
                 'success': False,
-                'account_numbeaccount_numberr': self.wallet_account_number,
+                'account_number': self.wallet_account_number,
                 'message': 'Wallet already exists for this partner',
                 'errors': ['Wallet already created'],
                 'full_response': None
             }
         
-        # ====================e====================================================
+        # ========================================================================
         # TEST DATA FOR BAAS TESTING (COMMENT OUT FOR PRODUCTION)
         # ========================================================================
         # Use hardcoded test data that BaaS test environment accepts
@@ -198,7 +198,7 @@ class ResPartner(models.Model):
                     'message': _(
                         'Wallet created successfully!\n'
                         'Account Number: %s'
-                    ) % result['account_number'],account_number
+                    ) % result['account_number'],
                     'type': 'success',
                     'sticky': False,
                 }
@@ -210,7 +210,6 @@ class ResPartner(models.Model):
             if errors:
                 error_msg += '\n' + '\n'.join(errors)
             raise ValidationError(_('Wallet Creation Failed:\n%s') % error_msg)
-account_number
     @api.depends('wallet_account_number')
     def _compute_wallet_balance(self):
         """Compute wallet balance by fetching from BaaS API"""

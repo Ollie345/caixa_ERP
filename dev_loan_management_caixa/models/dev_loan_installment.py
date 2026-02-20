@@ -41,8 +41,8 @@ class dev_loan_installment(models.Model):
     none_interest = fields.Boolean('None Interest')
     paid_interest = fields.Float('Paid Interest')
     
-    company_id = fields.Many2one('res.company', string='Company', default=lambda self:self.env.user.company_id.id)
-    currency_id = fields.Many2one('res.currency', string='Currency', default=lambda self:self.env.user.company_id.currency_id.id)
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
+    currency_id = fields.Many2one('res.currency', string='Currency', default=lambda self: self.env.company.currency_id)
     
     mobile = fields.Char(string="Mobile",related="client_id.mobile",readonly=False)
     email = fields.Char(string="Email",related="client_id.email",readonly=False)

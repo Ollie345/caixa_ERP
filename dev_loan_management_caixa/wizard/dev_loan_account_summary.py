@@ -35,8 +35,7 @@ class LOANACCOUNTSUMMARY(models.TransientModel):
 
     customer_ids = fields.Many2many('res.partner' ,string='Select Customer')
 
-    company_id = fields.Many2one('res.company', string='Company', default=lambda self:self.env.user.company_id.id)
-
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
 
     @api.constrains('customer_select', 'customer_ids')
     def _check_customer_ids(self):

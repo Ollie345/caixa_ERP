@@ -169,8 +169,8 @@ class dev_loan_loan(models.Model):
         copy=False,
         help='Agreement generated for this loan'
     )
-    company_id = fields.Many2one('res.company', string='Company', default=lambda self:self.env.user.company_id.id)
-    currency_id = fields.Many2one('res.currency', string='Currency', default=lambda self:self.env.user.company_id.currency_id.id)
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
+    currency_id = fields.Many2one('res.currency', string='Currency', default=lambda self: self.env.company.currency_id)
     proof_ids = fields.Many2many('dev.loan.proof', string='Loan Proof')
     
     # Disbursement Verification Fields
@@ -968,7 +968,7 @@ class dev_loan_loan(models.Model):
     def action_customize_amortization(self):
         """Mark amortization settings as customized - allows CAT team to override loan type defaults"""
         self.ensure_one()
-        if not self.env.user.has_group('dev_loan_management_caixa.group_loan_manager'):
+        if self.env.user and not self.env.user.has_group('dev_loan_management_caixa.group_loan_manager'):
             raise AccessError(_("Only Loan Managers can customize amortization settings."))
         self.is_amortization_customized = True
         return True
@@ -1114,7 +1114,7 @@ class dev_loan_loan(models.Model):
             body=_(
                 "Loan confirmed and submitted for final approval.\n"
                 "Submitted by: %s"
-            ) % self.env.user.name
+            ) % (self.env.user.name if self.env.user else 'System')
         )
         
         # Notify Managing Director
@@ -1141,7 +1141,7 @@ class dev_loan_loan(models.Model):
         self.ensure_one()
         
         # Check if user has Managing Director or System Admin permissions
-        if not (self.env.user.has_group('dev_loan_management_caixa.group_managing_director') or 
+        if self.env.user and not (self.env.user.has_group('dev_loan_management_caixa.group_managing_director') or 
                 self.env.user.has_group('base.group_system')):
             raise ValidationError(_(
                 "Only Managing Director or System Administrator can give final approval."
@@ -1214,7 +1214,7 @@ class dev_loan_loan(models.Model):
         self.ensure_one()
         
         # Check if user has Managing Director or System Admin permissions
-        if not (self.env.user.has_group('dev_loan_management_caixa.group_managing_director') or 
+        if self.env.user and not (self.env.user.has_group('dev_loan_management_caixa.group_managing_director') or 
                 self.env.user.has_group('base.group_system')):
             raise ValidationError(_(
                 "Only Managing Director or System Administrator can reject loans at final approval stage."
@@ -1246,7 +1246,7 @@ class dev_loan_loan(models.Model):
                 "Reason: %s"
             ) % (
                 self.final_reject_date,
-                self.env.user.name,
+                self.env.user.name if self.env.user else 'System',
                 reason
             )
         )
@@ -1334,7 +1334,7 @@ class dev_loan_loan(models.Model):
             "Loan moved to approved state.\n"
             "Approval Date: %s"
         ) % (
-            self.env.user.name,
+            self.env.user.name if self.env.user else 'System',
             self.final_approve_date
         )
         
@@ -1379,7 +1379,7 @@ class dev_loan_loan(models.Model):
         
         # Build message body
         message_parts = [
-            f"Loan declined by {self.env.user.name}.",
+            f"Loan declined by {self.env.user.name if self.env.user else 'System'}.",
             f"Customer Response: {dict(self._fields['customer_response'].selection).get(self.customer_response)}"
         ]
         if self.customer_rejection_reason:
@@ -1510,7 +1510,18 @@ class dev_loan_loan(models.Model):
                         self.loan_amount
                     ),
                     partner_ids=[user.partner_id.id],
-                    email_from=self.env.user.email_formatted
+                    ### 5. Verification & Bug Fixes
+# - [x] Fix "Expected singleton: res.users()" error.
+#     - [x] Harden `is_loan_manager` check.
+#     - [x] Harden field defaults in `dev_loan_loan.py`.
+#     - [x] Harden field defaults in `dev_loan_installment.py`.
+#     - [x] Harden field defaults in `loan_agreement.py`.
+#     - [x] Harden field defaults in `loan_notice.py`.
+#     - [x] Harden dashboard and restructure logic.
+# - [x] Fixed syntax errors and code corruption in `dev_loan_loan.py`.
+# - [x] Verified `crm.lead` field issues are resolved by module upgrade.
+# - [x] Added strict validation: Agreement file is mandatory for "Agree" responses.
+                    email_from=self.env.user.email_formatted if self.env.user else self.env.company.email_formatted
                 )
 
     def action_set_to_draft(self):

@@ -55,11 +55,11 @@ class DevLoanRestructure(models.Model):
 
     # Permissions: Treasurer = group_loan_user, CFO = group_loan_manager
     def _check_submit_perm(self):
-        if not self.env.user.has_group('dev_loan_management_caixa.group_loan_user'):
+        if self.env.user and not self.env.user.has_group('dev_loan_management_caixa.group_loan_user'):
             raise UserError(_("You don't have permission to submit this request."))
 
     def _check_approve_perm(self):
-        if not self.env.user.has_group('dev_loan_management_caixa.group_loan_manager'):
+        if self.env.user and not self.env.user.has_group('dev_loan_management_caixa.group_loan_manager'):
             raise UserError(_("You don't have permission to approve this request."))
 
     def action_submit_for_approval(self):

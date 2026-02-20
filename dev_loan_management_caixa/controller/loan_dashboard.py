@@ -192,9 +192,9 @@ class LoanDashboard(http.Controller):
         for invoice_id in invoice_ids:
             invoice_price_lst.append(invoice_id.invoice_line_ids.price_total)
         invoice_process_fees=sum(invoice_price_lst)
-        company_currency = request.env.user.company_id.currency_id.name
-        user_name = request.env.user.name
-        user_img = request.env.user.image_1920
+        company_currency = request.env.company.currency_id.name
+        user_name = request.env.user.name if request.env.user else 'System'
+        user_img = request.env.user.image_1920 if request.env.user else False
 
 
         return {

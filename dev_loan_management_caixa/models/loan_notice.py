@@ -25,8 +25,8 @@ class LoanNotice(models.Model):
     description=fields.Html('Description')                          
     color=fields.Integer('Color')
     header = fields.Char(string="Header")
-    company_id = fields.Many2one('res.company', string='Company', default=lambda self:self.env.user.company_id.id)
-    currency_id = fields.Many2one('res.currency', string='Currency', default=lambda self:self.env.user.company_id.currency_id.id)
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
+    currency_id = fields.Many2one('res.currency', string='Currency', default=lambda self: self.env.company.currency_id)
 
     def _compute_access_url(self):
         super(LoanNotice, self)._compute_access_url()

@@ -1565,9 +1565,14 @@ class RestApi(http.Controller):
         }
         """
         try:
-            from odoo import fields
+            from odoo import fields, SUPERUSER_ID
             from odoo.http import Response
             import json
+            
+            # Use an environment with a concrete user to avoid singleton errors in tracked fields/compute logic
+            # This is necessary because auth='none' runs with an empty env.user recordset
+            # request.env(user=SUPERUSER_ID) ensures env.user is the Superuser record
+            env = request.env(user=SUPERUSER_ID)
             
             # Try to parse JSON body first, fallback to form data
             try:
@@ -1578,7 +1583,7 @@ class RestApi(http.Controller):
             if not data:
                 data = kwargs or {}
             
-            loan = request.env['dev.loan.loan'].sudo().browse(loan_id)
+            loan = env['dev.loan.loan'].browse(loan_id)
             
             if not loan.exists():
                 return request.make_response(
@@ -1667,7 +1672,7 @@ class RestApi(http.Controller):
                     datas = signed_agreement
                 
                 # Create attachment from base64
-                attachment = request.env['ir.attachment'].sudo().create({
+                attachment = env['ir.attachment'].create({
                     'name': file_name,
                     'type': 'binary',
                     'datas': datas,  # base64 encoded file
@@ -1680,9 +1685,9 @@ class RestApi(http.Controller):
                 })
                 
                 # Log to chatter with explicit author_id
-                # Use sudo() to avoid singleton errors in auth='none' context
+                # Use env to avoid singleton errors in auth='none' context
                 from markupsafe import Markup
-                author_id = request.env['res.partner'].sudo().browse(2).id  # OdooBot partner ID is typically 2
+                author_id = env['res.partner'].browse(2).id  # OdooBot partner ID is typically 2
                 loan.message_post(
                     body=Markup(_(
                         "Customer has agreed to the loan terms and submitted signed agreement.<br/>"
@@ -1695,7 +1700,7 @@ class RestApi(http.Controller):
                 # Customer disagreed
                 # Use sudo() to avoid singleton errors in auth='none' context
                 from markupsafe import Markup
-                author_id = request.env['res.partner'].sudo().browse(2).id  # OdooBot partner ID is typically 2
+                author_id = env['res.partner'].browse(2).id  # OdooBot partner ID is typically 2
                 rejection_msg = _(
                     "Customer has disagreed with the loan terms.<br/>"
                     "Response Date: %s"

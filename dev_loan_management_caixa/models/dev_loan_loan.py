@@ -1510,17 +1510,6 @@ class dev_loan_loan(models.Model):
                         self.loan_amount
                     ),
                     partner_ids=[user.partner_id.id],
-                    ### 5. Verification & Bug Fixes
-# - [x] Fix "Expected singleton: res.users()" error.
-#     - [x] Harden `is_loan_manager` check.
-#     - [x] Harden field defaults in `dev_loan_loan.py`.
-#     - [x] Harden field defaults in `dev_loan_installment.py`.
-#     - [x] Harden field defaults in `loan_agreement.py`.
-#     - [x] Harden field defaults in `loan_notice.py`.
-#     - [x] Harden dashboard and restructure logic.
-# - [x] Fixed syntax errors and code corruption in `dev_loan_loan.py`.
-# - [x] Verified `crm.lead` field issues are resolved by module upgrade.
-# - [x] Added strict validation: Agreement file is mandatory for "Agree" responses.
                     email_from=self.env.user.email_formatted if self.env.user else self.env.company.email_formatted
                 )
 

@@ -59,8 +59,18 @@ class dev_loan_loan(models.Model):
     @api.depends()
     def _compute_is_loan_manager(self):
         """Check if current user has loan manager group"""
+        # In some contexts (like auth='none' APIs), env.user might be an empty recordset
+        is_manager = False
+        if self.env.user:
+            try:
+                # Grant access if user is Loan Manager OR System Administrator
+                is_manager = self.env.user.has_group('dev_loan_management_caixa.group_loan_manager') or \
+                             self.env.user.has_group('base.group_system')
+            except Exception:
+                is_manager = False
+                
         for record in self:
-            record.is_loan_manager = self.env.user.has_group('dev_loan_management_caixa.group_loan_manager')
+            record.is_loan_manager = is_manager
     
     state = fields.Selection([('draft','Draft'),
                               ('review','Review'),

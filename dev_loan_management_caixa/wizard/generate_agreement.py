@@ -73,8 +73,8 @@ class generate_agreement(models.TransientModel):
         if not loan_id:
             loan_id = self.loan_id
             
-        if not loan_id:
-            raise ValidationError(_("No loan selected"))
+        if not loan_id or not loan_id.exists():
+            raise ValidationError(_("No loan selected or loan record not found."))
         
         if loan_id.state not in ['final_approve', 'under_review']:
             raise ValidationError(_("Loan must be in 'Final Approval' or 'Under Review' state to generate an agreement."))

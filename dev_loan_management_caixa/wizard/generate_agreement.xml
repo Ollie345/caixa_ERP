@@ -12,12 +12,14 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
             <form string="Generate Agreement">
                 <sheet>
                     <group>
-		        <group>
-		         	<field name="agreement_type_id" />
-		        </group> 
-		        <group>
-		        </group>	
-		    </group>    
+                        <group>
+                            <field name="agreement_type_id" />
+                            <field name="agreement_template_id" options="{'no_create': True}" />
+                        </group> 
+                    </group>
+                    <group string="Agreement Content">
+                        <field name="description" nolabel="1" placeholder="Agreement content will appear here after selecting a template..."/>
+                    </group>
                 <footer>
                     <button string="Generate Agreement" name="generate_agreement" type="object" class="oe_highlight"/>&#160;&#160;or&#160;&#160;
                     <button string="Close Window" class="oe_link" special="cancel" />

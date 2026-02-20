@@ -121,6 +121,28 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
 <!--                            class="btn-success"-->
 <!--                            invisible="closure_amount == 0"/>-->
 
+                    <button name="action_recalculate_installments"
+                            string="Recalculate Installments"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'under_review'"
+                            groups="dev_loan_management_caixa.group_loan_manager,base.group_system"/>
+
+                    <button name="action_approve_revised_terms"
+                            string="Approve Changes"
+                            type="object"
+                            class="btn-success"
+                            invisible="state != 'under_review'"
+                            groups="dev_loan_management_caixa.group_loan_manager,base.group_system"/>
+
+                    <button name="action_reject_from_review"
+                            string="Reject Loan"
+                            type="object"
+                            class="btn-danger"
+                            invisible="state != 'under_review'"
+                            confirm="Are you sure you want to reject this loan after review?"
+                            groups="dev_loan_management_caixa.group_loan_manager,base.group_system"/>
+
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,review,confirm,final_approve,approve,disburse,open,close"/>
                 </header>
@@ -168,10 +190,10 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                             <field name="loan_type_id" readonly="state != 'draft'"
                                    domain="[('id', 'in', domain_loan_type_ids)]"
                                    options="{'no_create': True, 'no_quick_create': True, 'no_create_edit':True}"/>
-                            <field name="loan_amount" readonly="state != 'draft'"/>
+                            <field name="loan_amount" readonly="state not in ['draft', 'under_review']"/>
                             <field name="is_loan_manager" invisible="1"/>
                             <field name="loan_term"
-                                   readonly="state != 'draft' and (not is_amortization_customized or not is_loan_manager)"/>
+                                   readonly="state not in ['draft', 'under_review'] and (not is_amortization_customized or not is_loan_manager)"/>
                             <field name="loan_purpose" readonly="state != 'draft'"/>
                             <field name="collateral" readonly="state != 'draft'"/>
                             <field name="source_of_repayment" readonly="state != 'draft'"/>
@@ -231,7 +253,7 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                             <label for="interest_rate"/>
                             <div>
                                 <field name="interest_rate"
-                                       readonly="state != 'draft' and (not is_amortization_customized or not is_loan_manager)"
+                                       readonly="state not in ['draft', 'under_review'] and (not is_amortization_customized or not is_loan_manager)"
                                        force_save="1"/>
                                 <button name="action_customize_amortization"
                                         type="object"
@@ -283,17 +305,33 @@ For Module Support : devintelle@gmail.com  or Skype : devintelle
                     </group>
 
                     <!-- Customer Response -->
-                    <group string="Customer Response" invisible="state not in ['awaiting_response', 'approve', 'reject']">
-                        <group>
+                    <group string="Customer Response" invisible="state not in ['awaiting_response', 'under_review', 'approve', 'reject']">
+                        <group name="response_details">
                             <field name="customer_response" readonly="1"/>
                             <field name="customer_response_date" readonly="1"/>
                         </group>
-                        <group>
+                        <group name="agreement_details">
                             <field name="signed_agreement_id" readonly="1" invisible="customer_response != 'agree'"/>
                             <field name="agreement_id" readonly="1"/>
                         </group>
-                        <group invisible="customer_response != 'disagree'">
+                        <group name="rejection_details" invisible="customer_response != 'disagree'">
                             <field name="customer_rejection_reason" readonly="1" string="Customer Rejection Reason"/>
+                        </group>
+                    </group>
+
+                    <!-- Revision History -->
+                    <group string="Revision History" invisible="revision_count == 0">
+                        <group name="revision_stats">
+                            <field name="revision_count" readonly="1"/>
+                            <field name="last_revised_date" readonly="1"/>
+                        </group>
+                        <group name="original_terms">
+                            <field name="original_loan_amount" readonly="1"/>
+                            <field name="original_interest_rate" readonly="1"/>
+                            <field name="original_loan_term" readonly="1"/>
+                        </group>
+                        <group name="revision_notes_group" colspan="2">
+                            <field name="revision_notes" placeholder="Notes about why the terms were revised..."/>
                         </group>
                     </group>
 

@@ -1616,11 +1616,38 @@ class RestApi(http.Controller):
                 rejection_reason = data.get('rejection_reason', '')
                 if rejection_reason:
                     update_vals['customer_rejection_reason'] = rejection_reason.strip()
+                
+                # Capture original terms if this is the first revision
+                if not loan.original_loan_amount:
+                    update_vals.update({
+                        'original_loan_amount': loan.loan_amount,
+                        'original_interest_rate': loan.interest_rate,
+                        'original_loan_term': loan.loan_term,
+                    })
+                
+                # Move to under_review state
+                update_vals['state'] = 'under_review'
             
             loan.write(update_vals)
             
+            # Send notification if customer disagreed
+            if response == 'disagree':
+                loan._notify_frontend(
+                    "Under Review", 
+                    "Loan Terms Revised", 
+                    _("Your customer response was received. We are reviewing the loan terms for %s.") % (loan.name)
+                )
+            
             # Handle signed agreement upload if customer agreed
-            if response == 'agree' and data.get('signed_agreement'):
+            if response == 'agree':
+                if not data.get('signed_agreement'):
+                    return request.make_response(
+                        json.dumps({
+                            'success': False,
+                            'error': 'Signed agreement file is required when responding with "agree"'
+                        }),
+                        headers=[('Content-Type', 'application/json')]
+                    )
                 # Handle both FileStorage (multipart/form-data) and base64 string (JSON)
                 import base64
                 from werkzeug.datastructures import FileStorage

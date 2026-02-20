@@ -12,6 +12,10 @@ from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, AccessError, RedirectWarning,UserError
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
+import logging
+import requests
+
+_logger = logging.getLogger(__name__)
 
 
 class dev_loan_loan(models.Model):
@@ -63,6 +67,7 @@ class dev_loan_loan(models.Model):
                               ('confirm','Confirmed'),
                               ('final_approve','Final Approval'),
                               ('awaiting_response','Awaiting Response'),
+                              ('under_review', 'Under Review'),
                               ('approve','Approved'),
                               ('disburse','Disbursed'),
                               ('open','Open'),
@@ -128,6 +133,15 @@ class dev_loan_loan(models.Model):
         string='Customer Response Date',
         copy=False
     )
+    
+    # Revision Tracking Fields
+    original_loan_amount = fields.Monetary('Original Loan Amount', currency_field='currency_id', copy=False)
+    original_interest_rate = fields.Float('Original Interest Rate', copy=False)
+    original_loan_term = fields.Integer('Original Loan Term', copy=False)
+    
+    revision_count = fields.Integer('Revision Count', default=0, copy=False)
+    revision_notes = fields.Text('Revision Notes', copy=False)
+    last_revised_date = fields.Datetime('Last Revised Date', copy=False)
     customer_rejection_reason = fields.Text(
         string='Customer Rejection Reason',
         copy=False,
@@ -440,7 +454,7 @@ class dev_loan_loan(models.Model):
         #         'context': self.env.context,
         #     }
 
-    # send closure email
+    # send closure email        
     def _send_closure_email(self):
         template = self.env.ref(
             'dev_loan_management_caixa.mail_template_early_loan_closure',
@@ -525,7 +539,6 @@ class dev_loan_loan(models.Model):
     
     #    PORTAL
     def _compute_access_url(self):
-        super(dev_loan_loan, self)._compute_access_url()
         for loan in self:
             loan.access_url = '/my/loan/%s' % (loan.id)
 
@@ -1143,6 +1156,49 @@ class dev_loan_loan(models.Model):
             }
         }
 
+    def _notify_frontend(self, action, subject, content):
+        """
+        Sends a POST request to the frontend notification endpoint.
+        Includes timeout and error handling to ensure Odoo remains responsive.
+        """
+        _logger = logging.getLogger(__name__)
+        params = self.env['ir.config_parameter'].sudo()
+        base_url = params.get_param('caixa.frontend_notify_url')
+        api_key = params.get_param('caixa.frontend_api_key')
+        
+        if not base_url:
+            _logger.warning("Frontend Notify URL not configured.")
+            return
+            
+        _logger.info("Sending notification: %s (Endpoint: %s)", action, base_url)
+            
+        payload = {
+            "action": action,
+            "subject": subject,
+            "client_id": self.client_id.id,
+            "content": content,
+            "loan_id": self.id,
+            "loan_name": self.name
+        }
+        
+        headers = {
+            "Content-Type": "application/json",
+            "X-API-KEY": api_key if api_key else ""
+        }
+        
+        try:
+            # We use a 5-second timeout to prevent Odoo from hanging
+            endpoint = f"{base_url.rstrip('/')}/api/erp/notifications"
+            response = requests.post(
+                endpoint, 
+                json=payload, 
+                headers=headers,
+                timeout=5
+            )
+            _logger.info("Notification response for loan %s: %s", self.name, response.status_code)
+        except Exception as e:
+            _logger.error("Frontend notification failed for loan %s: %s", self.name, str(e))
+
     def action_final_approve_reject(self, reason=None):
         """Managing Director or Admin rejects the loan (reason required)"""
         self.ensure_one()
@@ -1183,6 +1239,12 @@ class dev_loan_loan(models.Model):
                 self.env.user.name,
                 reason
             )
+        )
+        
+        self._notify_frontend(
+            "Loan Rejected", 
+            "Loan Application Status", 
+            _("We regret to inform you that your loan application %s was not successful.") % (self.name)
         )
         
         return True
@@ -1244,6 +1306,12 @@ class dev_loan_loan(models.Model):
             'approve_user_id': self.env.user.id,
             'approve_date': date.today(),
         })
+        
+        self._notify_frontend(
+            "Loan Approved", 
+            "Loan Approved!", 
+            _("Great news! Your loan application %s for %s has been approved.") % (self.name, self.loan_amount)
+        )
         
         # Set account and journal if loan type is defined
         if self.loan_type_id:
@@ -1311,7 +1379,95 @@ class dev_loan_loan(models.Model):
             body=_("\n".join(message_parts))
         )
         
+        self._notify_frontend(
+            "Loan Rejected", 
+            "Loan Application Status", 
+            _("We regret to inform you that your loan application %s was not successful.") % (self.name)
+        )
+        
         return True
+
+    def action_recalculate_installments(self):
+        """Recalculate installments based on updated terms in Under Review state"""
+        self.ensure_one()
+        if self.state != 'under_review':
+            raise ValidationError(_("Can only recalculate installments in 'Under Review' state."))
+        
+        # Delete existing installments
+        self.installment_ids.unlink()
+        
+        # Regenerate installments using the existing compute_installment method
+        if hasattr(self, 'compute_installment'):
+            self.compute_installment()
+        
+        self.message_post(body=_("Installments recalculated based on updated loan terms."))
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Success'),
+                'message': _('Installments have been recalculated.'),
+                'type': 'success',
+                'sticky': False,
+            }
+        }
+
+    def action_approve_revised_terms(self):
+        """Approve revised terms and open agreement wizard to resend to customer"""
+        self.ensure_one()
+        if self.state != 'under_review':
+            raise ValidationError(_("Can only approve revised terms in 'Under Review' state."))
+        
+        # Increment revision count
+        self.write({
+            'revision_count': self.revision_count + 1,
+            'last_revised_date': fields.Datetime.now(),
+        })
+        
+        # Open the loan agreement wizard
+        action = self.env.ref('dev_loan_management_caixa.action_generate_agreement').read()[0]
+        action['context'] = {
+            'default_loan_id': self.id,
+            'is_revision': True,  # Pass flag to indicate this is a revision
+        }
+        return action
+
+    def action_reject_from_review(self):
+        """Reject loan after reviewing customer disagreement"""
+        self.ensure_one()
+        if self.state != 'under_review':
+            raise ValidationError(_("Can only reject from 'Under Review' state."))
+        
+        # Use existing rejection logic
+        reject_reason = _("Loan rejected by Caixa after reviewing customer disagreement.")
+        if self.customer_rejection_reason:
+            reject_reason += _("\nCustomer's reason: %s") % self.customer_rejection_reason
+            
+        self.write({
+            'state': 'reject',
+            'reject_user_id': self.env.user.id,
+            'reject_reason': reject_reason,
+        })
+        
+        self.message_post(body=reject_reason)
+        
+        self._notify_frontend(
+            "Loan Rejected", 
+            "Loan Application Status", 
+            _("We regret to inform you that your loan application %s was not successful.") % (self.name)
+        )
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Rejected'),
+                'message': _('Loan has been rejected following review.'),
+                'type': 'danger',
+                'sticky': False,
+            }
+        }
 
     def _notify_managing_director(self):
         """Notify Managing Director of loan pending final approval"""
@@ -1367,6 +1523,16 @@ class dev_loan_loan(models.Model):
         return vals
     
     
+    def action_confirm_loan(self):
+        if not self.comment:
+            raise ValidationError(_("Please Add Comment !!!"))
+        self.state = 'confirm'
+        self._notify_frontend(
+            "Loan Confirmed", 
+            "Loan Review in Progress", 
+            _("Your loan application %s has been confirmed and is progressing to final approval.") % (self.name)
+        )
+
     def get_credit_lines(self):
         if not self.loan_account_id:
             raise ValidationError(_("Select Disburse Account !!!"))
@@ -1442,11 +1608,25 @@ class dev_loan_loan(models.Model):
         if self.disburse_journal_entry_id:
             self.state = 'disburse'
         self.compute_installment(self.disbursement_date)
+        self._notify_frontend(
+            "Funds Disbursed", 
+            "Funds Disbursed", 
+            _("Your loan funds for %s have been successfully disbursed.") % (self.name)
+        )
         
     
     
     def action_open_loan(self):
         self.state = 'open'
+        
+    
+    def action_submit_loan(self):
+        self.state = 'review'
+        self._notify_frontend(
+            "Loan Submitted", 
+            "Loan Request Received", 
+            _("Your loan request %s for %s has been received and is under review.") % (self.name, self.loan_amount)
+        )
         
     
     def action_cancel(self):

@@ -75,10 +75,11 @@ class ResPartner(models.Model):
         help='Current wallet balance (fetched from BaaS API)',
         store=False
     )
-    wallet_currency = fields.Char(
+    wallet_currency = fields.Many2one(
+        'res.currency',
         string='Wallet Currency',
-        default='NGN',
-        help='Currency code for wallet balance'
+        default=lambda self: self.env.ref('base.NGN', raise_if_not_found=False) or self.env.company.currency_id,
+        help='Currency for wallet balance'
     )
     wallet_balance_last_updated = fields.Datetime(
         string='Balance Last Updated',
@@ -221,18 +222,23 @@ class ResPartner(models.Model):
                     
                     if result.get('success'):
                         partner.wallet_balance = result.get('balance', 0.0)
-                        partner.wallet_currency = result.get('currency', 'NGN')
+                        
+                        # Find currency by name/code
+                        currency_code = result.get('currency', 'NGN')
+                        currency = self.env['res.currency'].sudo().search([
+                            '|', ('name', '=', currency_code), ('symbol', '=', currency_code)
+                        ], limit=1)
+                        if currency:
+                            partner.wallet_currency = currency.id
+                            
                         partner.wallet_balance_last_updated = fields.Datetime.now()
                     else:
                         partner.wallet_balance = 0.0
-                        partner.wallet_currency = 'NGN'
                 except Exception as e:
                     _logger.error("Error fetching wallet balance for partner %s: %s", partner.id, str(e))
                     partner.wallet_balance = 0.0
-                    partner.wallet_currency = 'NGN'
             else:
                 partner.wallet_balance = 0.0
-                partner.wallet_currency = 'NGN'
 
     def action_refresh_wallet_balance(self):
         """Action method to manually refresh wallet balance"""
@@ -258,6 +264,7 @@ class ResPartner(models.Model):
                     ) % (result.get('balance', 0.0), result.get('currency', 'NGN')),
                     'type': 'success',
                     'sticky': False,
+                    'next': {'type': 'ir.actions.client', 'tag': 'reload'},
                 }
             }
         else:

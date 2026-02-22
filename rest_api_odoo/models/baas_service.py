@@ -323,7 +323,8 @@ class BaasService(models.AbstractModel):
                 'errors': [str(e)]
             }
         
-        url = f"{config['base_url']}/wallet/{account_number}/summary"
+        # Using the account details endpoint for absolute ledger balance accuracy
+        url = f"{config['base_url']}/wallet/account?walletAccountId={account_number}&details=true"
         
         headers = {
             'Content-Type': 'application/json',
@@ -343,12 +344,13 @@ class BaasService(models.AbstractModel):
             
             if result.get('status') == 'SUCCESS':
                 data = result.get('data', {})
-                balance = data.get('balance', 0.0)
+                # Use availableBalance or accountBalance which shows the true ledger status
+                balance = data.get('availableBalance') or data.get('accountBalance', 0.0)
                 currency = data.get('currency', 'NGN')
                 
                 return {
                     'success': True,
-                    'balance': float(balance) if balance else 0.0,
+                    'balance': float(balance) if balance is not None else 0.0,
                     'currency': currency,
                     'account_number': account_number,
                     'data': data,

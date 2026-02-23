@@ -6,12 +6,12 @@
 
         <!-- Required numeric fields -->
         <field name="rate">5</field>
-        <field name="loan_amount">50000</field>
-        <field name="loan_term_by_month">1</field>
+        <field name="loan_amount">5000000</field>
+        <field name="loan_term_by_month">5</field>
 
         <!-- Interest Settings -->
         <field name="is_interest_apply">True</field>
-        <field name="interest_mode">flat</field>
+        <field name="interest_mode">reducing</field>
         <field name="none_interest_month">0</field>
 
         <!-- Add ALL required proofs -->
@@ -40,7 +40,7 @@
     <record id="loan_type_sme" model="dev.loan.type">
         <field name="name">SME Loan</field>
         <field name="rate">10</field>
-        <field name="loan_amount">200000</field>
+        <field name="loan_amount">20000000</field>
         <field name="loan_term_by_month">6</field>
 
         <field name="is_interest_apply">True</field>
@@ -69,11 +69,11 @@
     <record id="loan_type_lpo" model="dev.loan.type">
         <field name="name">LPO Financing</field>
         <field name="rate">8</field>
-        <field name="loan_amount">1000000</field>
+        <field name="loan_amount">100000000</field>
         <field name="loan_term_by_month">3</field>
 
         <field name="is_interest_apply">True</field>
-        <field name="interest_mode">flat</field>
+        <field name="interest_mode">reducing</field>
 
         <field name="proof_ids" eval="[(6,0,[
             ref('dev_loan_management_caixa.dev_loan_proof_aadhar'),

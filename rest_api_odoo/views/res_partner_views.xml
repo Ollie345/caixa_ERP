@@ -20,7 +20,7 @@
                             <field name="wallet_created_date" readonly="1"/>
                             <field name="baas_wallet_id" readonly="1"/>
                             <field name="wallet_balance" readonly="1"/>
-                            <field name="wallet_currency" readonly="1"/>
+                            <field name="wallet_currency_id" readonly="1"/>
                             <field name="wallet_balance_last_updated" readonly="1"/>
                         </group>
                         <button name="action_refresh_wallet_balance" 

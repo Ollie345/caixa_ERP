@@ -71,11 +71,11 @@ class ResPartner(models.Model):
     wallet_balance = fields.Monetary(
         string='Wallet Balance',
         compute='_compute_wallet_balance',
-        currency_field='wallet_currency',
+        currency_field='wallet_currency_id',
         help='Current wallet balance (fetched from BaaS API)',
         store=False
     )
-    wallet_currency = fields.Many2one(
+    wallet_currency_id = fields.Many2one(
         'res.currency',
         string='Wallet Currency',
         default=lambda self: self.env.ref('base.NGN', raise_if_not_found=False) or self.env.company.currency_id,
@@ -229,7 +229,7 @@ class ResPartner(models.Model):
                             '|', ('name', '=', currency_code), ('symbol', '=', currency_code)
                         ], limit=1)
                         if currency:
-                            partner.wallet_currency = currency.id
+                            partner.wallet_currency_id = currency.id
                             
                         partner.wallet_balance_last_updated = fields.Datetime.now()
                     else:

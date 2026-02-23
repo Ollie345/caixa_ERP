@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_image_export_wizard_form" model="ir.ui.view">
+        <field name="name">image.export.wizard.form</field>
+        <field name="model">image.export.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Export Images">
+                <group>
+                    <group>
+                        <field name="model_name" readonly="1"/>
+                        <field name="record_count" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="state" invisible="1"/>
+                    </group>
+                </group>
+                
+                <group string="Export Options" invisible="state == 'done'">
+                    <field name="image_fields" widget="many2many_tags" 
+                           options="{'no_create': True}"
+                           placeholder="Leave empty to export all image fields"/>
+                    <field name="include_attachments"/>
+                </group>
+                
+                <group string="Export File" invisible="state != 'done'">
+                    <field name="filename" readonly="1"/>
+                    <field name="export_file" filename="filename" readonly="1"/>
+                </group>
+                
+                <footer>
+                    <button name="action_export" string="Export Images" 
+                            type="object" class="btn-primary" 
+                            invisible="state == 'done'"/>
+                    <button string="Download" type="object" 
+                            name="action_download" 
+                            class="btn-primary" 
+                            invisible="state != 'done'"/>
+                    <button string="Close" class="btn-secondary" 
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_image_export_wizard" model="ir.actions.act_window">
+        <field name="name">Export Images</field>
+        <field name="res_model">image.export.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

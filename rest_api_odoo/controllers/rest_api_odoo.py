@@ -1576,9 +1576,15 @@ class RestApi(http.Controller):
             
             # Try to parse JSON body first, fallback to form data
             try:
-                data = request.get_json_data()
+                data = request.get_json_data() or {}
             except (ValueError, Exception):
-                data = kwargs
+                data = kwargs or {}
+            
+            # For multipart/form-data, files are in request.httprequest.files
+            # Merge them into data so they can be processed below
+            if request.httprequest.files:
+                for file_key, file_obj in request.httprequest.files.items():
+                    data[file_key] = file_obj
             
             if not data:
                 data = kwargs or {}

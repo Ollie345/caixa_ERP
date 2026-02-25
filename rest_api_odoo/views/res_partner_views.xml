@@ -32,7 +32,21 @@
                         </group>
                     </group>
                     
+                    <!-- Show Tier 1 create button if wallet doesn't exist -->
+                    <group string="Create Wallet" invisible="wallet_account_number">
+                        <div class="alert alert-info" role="alert">
+                            <p><strong>Create a Tier One wallet for this partner.</strong></p>
+                            <p>Requirements: BVN and Phone Number.</p>
+                        </div>
+                        <button name="action_create_wallet_tier_one" 
+                                type="object" 
+                                string="Create Tier One Wallet"
+                                class="btn-primary"
+                                icon="fa-credit-card"/>
+                    </group>
+
                     <!-- KYC Information for Tier 3 -->
+                    <!-- 
                     <group string="KYC Information (Tier 3)" invisible="wallet_account_number">
                         <group>
                             <field name="bvn" required="not wallet_account_number"/>
@@ -44,8 +58,10 @@
                             <field name="utility_bill_name" invisible="1"/>
                         </group>
                     </group>
+                    -->
 
                     <!-- Show creation status if pending -->
+                    <!--
                     <group string="Creation Status" invisible="wallet_account_number or not wallet_creation_reference">
                         <field name="wallet_creation_reference" readonly="1"/>
                         <field name="wallet_creation_status" readonly="1" 
@@ -59,8 +75,10 @@
                                 icon="fa-refresh"
                                 invisible="wallet_creation_status != 'PENDING'"/>
                     </group>
+                    -->
 
                     <!-- Show create button if wallet doesn't exist and not pending -->
+                    <!--
                     <group string="Create Wallet" invisible="wallet_account_number or wallet_creation_status == 'PENDING'">
                         <div class="alert alert-info" role="alert">
                             <p><strong>Create a Tier Three wallet for this partner.</strong></p>
@@ -78,6 +96,7 @@
                                 class="btn-primary"
                                 icon="fa-credit-card"/>
                     </group>
+                    -->
                 </page>
             </xpath>
         </field>

@@ -1227,6 +1227,113 @@ class RestApi(http.Controller):
             )
 
 
+    @http.route(['/wallet/create-tier-one'], type='http', auth='none', methods=['POST'], csrf=False)
+    def create_wallet_tier_one(self, **kw):
+        """Create Tier One wallet using BaaS API
+        
+        Required headers:
+        - api-key: API key for authentication
+        - db: Database name
+        
+        Request body (JSON):
+        - firstname, lastname, phone, dob, bvn
+        - partner_id (optional)
+        
+        Returns JSON response with success status and account number
+        """
+        import json
+        from odoo import http
+        from odoo.http import request
+        
+        api_key = request.httprequest.headers.get('api-key')
+        db = request.httprequest.headers.get('db') or request.session.db
+        
+        if not api_key:
+            return request.make_response(
+                data=json.dumps({"success": False, "message": "No API Key provided"}),
+                headers=[('Content-Type', 'application/json')],
+                status=401
+            )
+        
+        if not db:
+            return request.make_response(
+                data=json.dumps({"success": False, "message": "Database not specified"}),
+                headers=[('Content-Type', 'application/json')],
+                status=400
+            )
+            
+        # Get user from API key
+        user = request.env['res.users'].sudo().search([('api_key', '=', api_key)], limit=1)
+        if not user:
+             return request.make_response(
+                 data=json.dumps({"success": False, "message": "Invalid API Key"}),
+                 headers=[('Content-Type', 'application/json')],
+                 status=401
+             )
+             
+        env = request.env(user=user.id)
+        
+        # Get data from request
+        try:
+            data = json.loads(request.httprequest.data)
+        except:
+            data = kw
+            
+        partner_id = data.get('partner_id')
+        if partner_id:
+            try:
+                partner = env['res.partner'].sudo().browse(int(partner_id))
+                if not partner.exists():
+                    return request.make_response(
+                        data=json.dumps({"success": False, "message": "Partner not found"}),
+                        headers=[('Content-Type', 'application/json')],
+                        status=404
+                    )
+                
+                # Update partner BVN if provided
+                if data.get('bvn'):
+                    partner.sudo().write({'bvn': data.get('bvn')})
+                
+                result = partner.create_wallet_tier_one()
+            except Exception as e:
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": str(e)}),
+                    headers=[('Content-Type', 'application/json')],
+                    status=500
+                )
+        else:
+            # Direct service call
+            try:
+                baas_service = env['baas.service']
+                result = baas_service.create_tier_one_wallet(
+                    firstname=data.get('firstname', ''),
+                    lastname=data.get('lastname', ''),
+                    phone=data.get('phone', ''),
+                    dob=data.get('dob', ''),
+                    bvn=data.get('bvn', '')
+                )
+            except Exception as e:
+                return request.make_response(
+                    data=json.dumps({"success": False, "message": str(e)}),
+                    headers=[('Content-Type', 'application/json')],
+                    status=500
+                )
+
+        status_code = 200 if result.get('success') else 400
+        response_data = {
+            "success": result.get('success', False),
+            "account_number": result.get('account_number'),
+            "message": result.get('message', ''),
+            "wallet_tier": "tier_1",
+            "errors": result.get('errors', [])
+        }
+        
+        return request.make_response(
+            data=json.dumps(response_data),
+            headers=[('Content-Type', 'application/json')],
+            status=status_code
+        )
+
     @http.route(['/wallet/create-tier-three'], type='http', auth='none', methods=['POST'], csrf=False)
     def create_wallet_tier_three(self, **kw):
         """Create Tier Three wallet with full KYC documentation using BaaS API

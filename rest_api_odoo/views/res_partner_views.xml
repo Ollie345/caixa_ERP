@@ -11,39 +11,70 @@
                 <page string="Wallet Information" name="wallet_info">
                     <!-- Show wallet details if exists -->
                     <group string="Wallet Details" invisible="not wallet_account_number">
-                        <group>
+                        <group name="wallet_left">
                             <field name="wallet_account_number" readonly="1"/>
                             <field name="wallet_tier" readonly="1"/>
                             <field name="wallet_status" readonly="1"/>
                         </group>
-                        <group>
+                        <group name="wallet_right">
                             <field name="wallet_created_date" readonly="1"/>
                             <field name="baas_wallet_id" readonly="1"/>
                             <field name="wallet_balance" readonly="1"/>
-                            <field name="wallet_currency_id" readonly="1"/>
-                            <field name="wallet_balance_last_updated" readonly="1"/>
+                            <field name="wallet_currency_id" readonly="1" groups="base.group_no_one"/>
                         </group>
-                        <button name="action_refresh_wallet_balance" 
-                                type="object" 
-                                string="Refresh Balance"
-                                class="btn-secondary"
-                                icon="fa-refresh"/>
+                        <group name="wallet_sync">
+                            <field name="wallet_balance_last_updated" readonly="1"/>
+                            <button name="action_refresh_wallet_balance" 
+                                    type="object" 
+                                    string="Refresh Balance"
+                                    class="oe_link"
+                                    icon="fa-refresh"/>
+                        </group>
                     </group>
-                    <!-- Show create button if wallet doesn't exist -->
-                    <group string="Create Wallet" invisible="wallet_account_number">
+                    
+                    <!-- KYC Information for Tier 3 -->
+                    <group string="KYC Information (Tier 3)" invisible="wallet_account_number">
+                        <group>
+                            <field name="bvn" required="not wallet_account_number"/>
+                            <field name="nin"/>
+                            <field name="lga" required="not wallet_account_number"/>
+                        </group>
+                        <group>
+                            <field name="utility_bill" widget="image" required="not wallet_account_number"/>
+                            <field name="utility_bill_name" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <!-- Show creation status if pending -->
+                    <group string="Creation Status" invisible="wallet_account_number or not wallet_creation_reference">
+                        <field name="wallet_creation_reference" readonly="1"/>
+                        <field name="wallet_creation_status" readonly="1" 
+                               decoration-info="wallet_creation_status == 'PENDING'"
+                               decoration-success="wallet_creation_status == 'COMPLETED'"
+                               decoration-danger="wallet_creation_status in ['FAILED', 'REJECTED']"/>
+                        <button name="action_check_wallet_tier_three_status" 
+                                type="object" 
+                                string="Check Creation Status" 
+                                class="btn-secondary"
+                                icon="fa-refresh"
+                                invisible="wallet_creation_status != 'PENDING'"/>
+                    </group>
+
+                    <!-- Show create button if wallet doesn't exist and not pending -->
+                    <group string="Create Wallet" invisible="wallet_account_number or wallet_creation_status == 'PENDING'">
                         <div class="alert alert-info" role="alert">
-                            <p><strong>No wallet has been created for this partner yet.</strong></p>
-                            <p>Click the button below to create a Tier One wallet.</p>
+                            <p><strong>Create a Tier Three wallet for this partner.</strong></p>
                             <p><strong>Requirements:</strong></p>
                             <ul>
-                                <li>BVN (Bank Verification Number)</li>
-                                <li>First Name</li>
-                                <li>Phone Number</li>
+                                <li>BVN &amp; NIN</li>
+                                <li>Full Address (Street, City, State)</li>
+                                <li>LGA (Local Government Area)</li>
+                                <li>Utility Bill Image</li>
                             </ul>
                         </div>
-                        <button name="action_create_wallet_tier_one" 
+                        <button name="action_create_wallet_tier_three" 
                                 type="object" 
-                                string="Create Tier One Wallet"
+                                string="Create Tier Three Wallet"
                                 class="btn-primary"
                                 icon="fa-credit-card"/>
                     </group>

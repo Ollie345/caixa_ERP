@@ -35,6 +35,7 @@
     "data": [
         'security/ir.model.access.csv',
         'data/system_parameters.xml',
+        'data/baas_cron_data.xml',
         'views/res_users_views.xml',
         'views/res_partner_views.xml',
         'views/connection_api_views.xml'

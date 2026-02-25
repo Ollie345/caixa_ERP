@@ -118,41 +118,47 @@ class BaasService(models.AbstractModel):
                 "Invalid response from BaaS API. Please check the API endpoint."
             ))
 
-    def create_tier_one_wallet(self, firstname, lastname, phone, dob, bvn):
-        """Create a Tier One wallet with BVN
+    def create_tier_three_wallet(self, firstname, lastname, phone, dob, bvn, nin, address, city, state, country, postal_code, lga, utility_bill, utility_bill_name):
+        """Create a Tier Three wallet with full KYC documentation
         
         :param firstname: Customer first name
         :param lastname: Customer last name
         :param phone: Phone number
         :param dob: Date of birth (YYYY-MM-DD format)
         :param bvn: Bank Verification Number
+        :param nin: National Identification Number
+        :param address: Physical address
+        :param city: City
+        :param state: State
+        :param country: Country
+        :param postal_code: Postal code
+        :param lga: Local Government Area
+        :param utility_bill: Utility bill file content (bytes or base64)
+        :param utility_bill_name: Utility bill filename
         :return: dict with success, account_number, message, errors, full_response
         """
-        # Validate input parameters
-        if not all([firstname, lastname, phone, dob, bvn]):
+        if not all([firstname, lastname, phone, dob, bvn, address, city, state, lga, utility_bill]):
             return {
                 'success': False,
                 'account_number': None,
-                'message': 'Missing required parameters',
-                'errors': ['All parameters (firstname, lastname, phone, dob, bvn) are required'],
+                'message': 'Missing required parameters for Tier 3 wallet',
+                'errors': ['All KYC parameters and utility bill are required'],
                 'full_response': None
             }
+            
+        import base64
+        import io
         
-        # Validate date format
-        try:
-            from datetime import datetime
-            datetime.strptime(dob, '%Y-%m-%d')
-        except ValueError:
-            return {
-                'success': False,
-                'account_number': None,
-                'message': 'Invalid date format. Expected YYYY-MM-DD',
-                'errors': ['Date of birth must be in YYYY-MM-DD format'],
-                'full_response': None
-            }
-        
+        # Ensure utility_bill is bytes
+        if isinstance(utility_bill, str):
+            try:
+                utility_bill_bytes = base64.b64decode(utility_bill)
+            except Exception:
+                utility_bill_bytes = utility_bill.encode('utf-8')
+        else:
+            utility_bill_bytes = utility_bill
+
         config = self._get_baas_config()
-        
         try:
             access_token = self._get_access_token()
         except ValidationError as e:
@@ -163,121 +169,77 @@ class BaasService(models.AbstractModel):
                 'errors': [str(e)],
                 'full_response': None
             }
-        
-        url = f"{config['base_url']}/wallet/create-tier-1"
+
+        url = f"{config['base_url']}/wallet/create-tier-3"
         
         headers = {
-            'Content-Type': 'application/json',
             'Accept': '*/*',
             'Authorization': f'Bearer {access_token}'
         }
         
+        # For multipart/form-data, we use 'data' for fields and 'files' for files
         payload = {
             'firstname': firstname.strip(),
             'lastname': lastname.strip(),
             'phone': phone.strip(),
             'dob': dob.strip(),
-            'id': {
-                'idNumber': str(bvn).strip(),
-                'type': 'BVN'
-            }
+            'bvn': str(bvn).strip(),
+            'nin': str(nin or '').strip(),
+            'address': address.strip(),
+            'city': city.strip(),
+            'state': state.strip(),
+            'country': country.strip(),
+            'postalCode': str(postal_code or '').strip(),
+            'lga': lga.strip()
+        }
+        
+        files = {
+            'utilityBillImage': (utility_bill_name or 'utility_bill.jpg', utility_bill_bytes, 'image/jpeg')
         }
         
         try:
             response = requests.post(
                 url,
-                json=payload,
+                data=payload,
+                files=files,
                 headers=headers,
-                timeout=30
+                timeout=60  # Increased timeout for file upload
             )
             
-            # Log response for debugging
             _logger.info(
-                "BaaS Wallet Creation Response: Status %s, Body: %s",
+                "BaaS Tier 3 Wallet Creation Response: Status %s, Body: %s",
                 response.status_code,
-                response.text[:500]  # Limit log size
+                response.text[:500]
             )
             
             response.raise_for_status()
             result = response.json()
             
             if result.get('status') == 'SUCCESS':
-                account_number = result.get('data', {}).get('accountNumber')
-                if not account_number:
-                    _logger.warning(
-                        "BaaS returned SUCCESS but no accountNumber in response: %s",
-                        result
-                    )
-                    return {
-                        'success': False,
-                        'account_number': None,
-                        'message': 'Wallet creation succeeded but no account number returned',
-                        'errors': ['Invalid response format from BaaS API'],
-                        'full_response': result
-                    }
-                
+                data = result.get('data', {})
+                account_number = data.get('accountNumber')
+                reference = data.get('reference')
                 return {
                     'success': True,
                     'account_number': account_number,
-                    'message': result.get('message', 'Wallet created successfully'),
+                    'reference': reference,
+                    'message': result.get('message', 'Tier 3 wallet request submitted successfully'),
                     'errors': [],
                     'full_response': result
                 }
             else:
-                errors = result.get('errors', [])
                 messages = result.get('messages', [])
-                error_msg = '; '.join(messages) if messages else result.get('message', 'Failed to create wallet')
-                
+                error_msg = '; '.join(messages) if messages else result.get('message', 'Failed to create Tier 3 wallet')
                 return {
                     'success': False,
                     'account_number': None,
                     'message': error_msg,
-                    'errors': errors if errors else [error_msg],
+                    'errors': result.get('errors', [error_msg]),
                     'full_response': result
                 }
                 
-        except requests.exceptions.Timeout:
-            _logger.error("BaaS Wallet Creation Error: Request timeout")
-            return {
-                'success': False,
-                'account_number': None,
-                'message': 'Request to BaaS API timed out',
-                'errors': ['Request timeout'],
-                'full_response': None
-            }
-        except requests.exceptions.ConnectionError as e:
-            _logger.error("BaaS Wallet Creation Error: Connection failed - %s", str(e))
-            return {
-                'success': False,
-                'account_number': None,
-                'message': 'Failed to connect to BaaS API',
-                'errors': ['Connection error'],
-                'full_response': None
-            }
-        except requests.exceptions.HTTPError as e:
-            error_msg = f"HTTP {e.response.status_code}"
-            try:
-                error_data = e.response.json()
-                error_msg = error_data.get('message', error_msg)
-                errors = error_data.get('errors', [])
-            except (ValueError, KeyError):
-                errors = [error_msg]
-            
-            _logger.error(
-                "BaaS Wallet Creation Error: %s - %s",
-                error_msg,
-                e.response.text[:500]
-            )
-            
-            return {
-                'success': False,
-                'account_number': None,
-                'message': error_msg,
-                'errors': errors,
-                'full_response': None
-            }
         except requests.exceptions.RequestException as e:
-            _logger.error("BaaS Wallet Creation Error: %s", str(e))
+            _logger.error("BaaS Tier 3 Wallet Creation Error: %s", str(e))
             return {
                 'success': False,
                 'account_number': None,
@@ -285,13 +247,13 @@ class BaasService(models.AbstractModel):
                 'errors': [str(e)],
                 'full_response': None
             }
-        except (ValueError, KeyError) as e:
-            _logger.error("BaaS Wallet Creation Error: Invalid response - %s", str(e))
+        except Exception as e:
+            _logger.error("BaaS Tier 3 Wallet Creation Unexpected Error: %s", str(e))
             return {
                 'success': False,
                 'account_number': None,
-                'message': 'Invalid response from BaaS API',
-                'errors': ['Invalid response format'],
+                'message': f"Unexpected error: {str(e)}",
+                'errors': [str(e)],
                 'full_response': None
             }
 
@@ -566,4 +528,143 @@ class BaasService(models.AbstractModel):
         except Exception as e:
             _logger.error("BaaS Transaction Detail Error [%s]: %s", transaction_id, str(e))
             return {'success': False, 'message': f"Request failed: {str(e)}"}
+
+    def get_tier_three_status(self, reference):
+        """Check the status of a Tier Three wallet creation request
+        
+        :param reference: Submission reference from creation request
+        :return: dict with success, status, account_number, message, errors
+        """
+        if not reference:
+            return {
+                'success': False,
+                'status': 'FAILED',
+                'message': 'Reference is required',
+                'errors': ['Reference is required']
+            }
+
+        config = self._get_baas_config()
+        try:
+            access_token = self._get_access_token()
+        except ValidationError as e:
+            return {
+                'success': False,
+                'status': 'ERROR',
+                'message': str(e),
+                'errors': [str(e)]
+            }
+
+        url = f"{config['base_url']}/wallet/tier-3-status"
+        params = {'reference': reference}
+        
+        headers = {
+            'Accept': '*/*',
+            'Authorization': f'Bearer {access_token}'
+        }
+
+        try:
+            response = requests.get(
+                url,
+                params=params,
+                headers=headers,
+                timeout=30
+            )
+            
+            _logger.info(
+                "BaaS Tier 3 Status Check: Status %s, Body: %s",
+                response.status_code,
+                response.text[:500]
+            )
+            
+            response.raise_for_status()
+            result = response.json()
+            
+            if result.get('status') == 'SUCCESS':
+                data = result.get('data', {})
+                # Possible statuses: PENDING, APPROVED, REJECTED, COMPLETED
+                status = data.get('status', 'PENDING')
+                account_number = data.get('accountNumber')
+                
+                return {
+                    'success': True,
+                    'status': status,
+                    'account_number': account_number,
+                    'message': result.get('message', 'Status retrieved successfully'),
+                    'data': data
+                }
+            else:
+                return {
+                    'success': False,
+                    'status': 'ERROR',
+                    'message': result.get('message', 'Failed to retrieve status'),
+                    'errors': result.get('errors', [])
+                }
+                
+        except Exception as e:
+            _logger.error("BaaS Tier 3 Status Error: %s", str(e))
+            return {
+                'success': False,
+                'status': 'ERROR',
+                'message': f"Request failed: {str(e)}",
+                'errors': [str(e)]
+            }
+
+    def notify_external_system(self, action, subject, partner_id, content=None, loan_id=None):
+        """Centralized method to notify external systems (Frontend/Backend)
+        
+        :param action: Action string (e.g. 'WALLET_READY')
+        :param subject: Human readable subject
+        :param partner_id: ID of the partner related to the notification
+        :param content: Additional data dict
+        :param loan_id: Optional loan ID if applicable
+        """
+        ir_config = self.env['ir.config_parameter'].sudo()
+        frontend_url = ir_config.get_param('caixa.frontend_notify_url')
+        api_key = ir_config.get_param('caixa.frontend_api_key')
+        
+        if not frontend_url:
+            _logger.warning("Notification skipped: caixa.frontend_notify_url not configured")
+            return False
+            
+        partner = self.env['res.partner'].sudo().browse(partner_id)
+        if not partner.exists():
+            _logger.error("Notification failed: Partner %s not found", partner_id)
+            return False
+
+        payload = {
+            "action": action,
+            "subject": subject,
+            "client_id": partner.id,
+            "client_name": partner.name,
+            "wallet_account_number": partner.wallet_account_number,
+            "wallet_tier": partner.wallet_tier,
+            "content": content or {},
+            "loan_id": loan_id
+        }
+        
+        if loan_id:
+            loan = self.env['dev.loan.loan'].sudo().browse(loan_id)
+            if loan.exists():
+                payload["loan_name"] = loan.name
+
+        headers = {
+            "Content-Type": "application/json",
+            "X-API-KEY": api_key or ""
+        }
+        
+        endpoint = f"{frontend_url.rstrip('/')}/api/erp/notifications"
+        _logger.info("Sending notification to %s for partner %s", endpoint, partner.id)
+        
+        try:
+            response = requests.post(
+                endpoint, 
+                json=payload, 
+                headers=headers,
+                timeout=10
+            )
+            _logger.info("External notification response: %s", response.status_code)
+            return response.status_code in (200, 201)
+        except Exception as e:
+            _logger.error("External notification failed: %s", str(e))
+            return False
 

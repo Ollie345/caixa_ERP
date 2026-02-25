@@ -1166,48 +1166,6 @@ class dev_loan_loan(models.Model):
             }
         }
 
-    def _notify_frontend(self, action, subject, content):
-        """
-        Sends a POST request to the frontend notification endpoint.
-        Includes timeout and error handling to ensure Odoo remains responsive.
-        """
-        _logger = logging.getLogger(__name__)
-        params = self.env['ir.config_parameter'].sudo()
-        base_url = params.get_param('caixa.frontend_notify_url')
-        api_key = params.get_param('caixa.frontend_api_key')
-        
-        if not base_url:
-            _logger.warning("Frontend Notify URL not configured.")
-            return
-            
-        _logger.info("Sending notification: %s (Endpoint: %s)", action, base_url)
-            
-        payload = {
-            "action": action,
-            "subject": subject,
-            "client_id": self.client_id.id,
-            "content": content,
-            "loan_id": self.id,
-            "loan_name": self.name
-        }
-        
-        headers = {
-            "Content-Type": "application/json",
-            "X-API-KEY": api_key if api_key else ""
-        }
-        
-        try:
-            # We use a 5-second timeout to prevent Odoo from hanging
-            endpoint = f"{base_url.rstrip('/')}/api/erp/notifications"
-            response = requests.post(
-                endpoint, 
-                json=payload, 
-                headers=headers,
-                timeout=5
-            )
-            _logger.info("Notification response for loan %s: %s", self.name, response.status_code)
-        except Exception as e:
-            _logger.error("Frontend notification failed for loan %s: %s", self.name, str(e))
 
     def action_final_approve_reject(self, reason=None):
         """Managing Director or Admin rejects the loan (reason required)"""
@@ -1277,7 +1235,7 @@ class dev_loan_loan(models.Model):
         if self.client_id:
             if not self.client_id.wallet_account_number:
                 try:
-                    wallet_result = self.client_id.create_wallet_tier_one()
+                    wallet_result = self.client_id.create_wallet_tier_three()
                     if wallet_result.get('success'):
                         self.message_post(
                             body=_(
@@ -1286,7 +1244,7 @@ class dev_loan_loan(models.Model):
                                 "Tier: %s"
                             ) % (
                                 wallet_result.get('account_number'),
-                                'Tier 1'
+                                'Tier 3'
                             )
                         )
                     else:
@@ -1297,6 +1255,9 @@ class dev_loan_loan(models.Model):
                         ) % wallet_result.get('message', 'Unknown error'))
                 except Exception as e:
                     # Fail approval on exception
+                    # If it's already a ValidationError, just re-raise it to keep the formatting
+                    if isinstance(e, ValidationError):
+                        raise e
                     raise ValidationError(_(
                         "Cannot Approve Loan: Error creating wallet: %s"
                     ) % str(e))
@@ -1318,9 +1279,11 @@ class dev_loan_loan(models.Model):
         })
         
         self._notify_frontend(
-            "Loan Approved", 
-            "Loan Approved!", 
-            _("Great news! Your loan application %s for %s has been approved.") % (self.name, self.loan_amount)
+            action="Loan Approved", 
+            subject="Loan Approved!", 
+            partner_id=self.client_id.id,
+            content=_("Great news! Your loan application %s for %s has been approved.") % (self.name, self.loan_amount),
+            loan_id=self.id
         )
         
         # Set account and journal if loan type is defined
@@ -1479,6 +1442,16 @@ class dev_loan_loan(models.Model):
             }
         }
 
+    def _notify_frontend(self, action, subject, content):
+        """Wrapper to use the centralized BaaS notification service"""
+        return self.env["baas.service"].notify_external_system(
+            action=action,
+            subject=subject,
+            partner_id=self.client_id.id,
+            content=content,
+            loan_id=self.id
+        )
+
     def _notify_managing_director(self):
         """Notify Managing Director of loan pending final approval"""
         self.ensure_one()
@@ -1538,9 +1511,11 @@ class dev_loan_loan(models.Model):
             raise ValidationError(_("Please Add Comment !!!"))
         self.state = 'confirm'
         self._notify_frontend(
-            "Loan Confirmed", 
-            "Loan Review in Progress", 
-            _("Your loan application %s has been confirmed and is progressing to final approval.") % (self.name)
+            action="Loan Confirmed", 
+            subject="Loan Review in Progress", 
+            partner_id=self.client_id.id,
+            content=_("Your loan application %s has been confirmed and is progressing to final approval.") % (self.name),
+            loan_id=self.id
         )
 
     def get_credit_lines(self):
@@ -1619,9 +1594,11 @@ class dev_loan_loan(models.Model):
             self.state = 'disburse'
         self.compute_installment(self.disbursement_date)
         self._notify_frontend(
-            "Funds Disbursed", 
-            "Funds Disbursed", 
-            _("Your loan funds for %s have been successfully disbursed.") % (self.name)
+            action="Funds Disbursed", 
+            subject="Funds Disbursed", 
+            partner_id=self.client_id.id,
+            content=_("Your loan funds for %s have been successfully disbursed.") % (self.name),
+            loan_id=self.id
         )
         
     
@@ -1633,9 +1610,11 @@ class dev_loan_loan(models.Model):
     def action_submit_loan(self):
         self.state = 'review'
         self._notify_frontend(
-            "Loan Submitted", 
-            "Loan Request Received", 
-            _("Your loan request %s for %s has been received and is under review.") % (self.name, self.loan_amount)
+            action="Loan Submitted", 
+            subject="Loan Request Received", 
+            partner_id=self.client_id.id,
+            content=_("Your loan request %s for %s has been received and is under review.") % (self.name, self.loan_amount),
+            loan_id=self.id
         )
         
     

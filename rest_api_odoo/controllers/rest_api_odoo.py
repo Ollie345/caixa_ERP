@@ -378,7 +378,7 @@ class RestApi(http.Controller):
             "type": "lead",
             "user_id": int(_get("user_id")) if _get("user_id") else False,
             "loan_amount": _float(_get("loan_amount") or _get("amount")),
-            "loan_term": int(_get("loan_term") or _get("tenor")),
+            "loan_term": _int(_get("loan_term") or _get("tenor")),
             "loan_purpose": _get("loan_purpose") or _get("purpose"),
             "collateral": _get("collateral"),
             "source_of_repayment": _get("source_of_repayment"),
@@ -707,10 +707,26 @@ class RestApi(http.Controller):
         }
         
         # Handle loan_type_id (required for loan)
-        if _get("loan_type_id") is not None:
+        loan_type_val = _get("loan_type_id")
+        if loan_type_val is not None:
             try:
-                vals["loan_type_id"] = int(_get("loan_type_id"))
-            except Exception:
+                loan_type_id = int(loan_type_val)
+                vals["loan_type_id"] = loan_type_id
+                
+                # If a custom term is provided, protect it and ensure standard interest settings
+                # are also set (since onchange_loan_type will skip them if customized is True)
+                if _get("loan_term") or _get("tenor"):
+                    vals["is_amortization_customized"] = True
+                    loan_type = env['dev.loan.type'].sudo().browse(loan_type_id)
+                    if loan_type.exists():
+                        vals.update({
+                            "interest_rate": loan_type.rate or 0.0,
+                            "interest_mode": loan_type.interest_mode or False,
+                            "none_interest_month": loan_type.none_interest_month or 0,
+                            "is_interest_apply": loan_type.is_interest_apply or False,
+                        })
+            except Exception as e:
+                _logger.error("Error processing loan_type_id: %s", str(e))
                 return ("<html><body><h2>Invalid loan_type_id</h2></body></html>")
         else:
             return ("<html><body><h2>loan_type_id is required</h2></body></html>")

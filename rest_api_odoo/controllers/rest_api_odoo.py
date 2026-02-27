@@ -1334,140 +1334,140 @@ class RestApi(http.Controller):
             status=status_code
         )
 
-    @http.route(['/wallet/create-tier-three'], type='http', auth='none', methods=['POST'], csrf=False)
-    def create_wallet_tier_three(self, **kw):
-        """Create Tier Three wallet with full KYC documentation using BaaS API
-        
-        Required headers:
-        - api-key: API key for authentication
-        - db: Database name
-        
-        Request body (multipart/form-data):
-        - firstname, lastname, phone, dob, bvn, nin, address, city, state, country, postal_code, lga
-        - utility_bill (file upload)
-        - partner_id (optional)
-        
-        Returns JSON response with success status and account number
-        """
-        import json
-        from odoo import http
-        from odoo.http import request
-        
-        api_key = request.httprequest.headers.get('api-key')
-        db = request.httprequest.headers.get('db') or request.session.db
-        
-        if not api_key:
-            return request.make_response(
-                data=json.dumps({"success": False, "message": "No API Key provided"}),
-                headers=[('Content-Type', 'application/json')],
-                status=401
-            )
-        
-        if not db:
-            return request.make_response(
-                data=json.dumps({"success": False, "message": "Database not specified"}),
-                headers=[('Content-Type', 'application/json')],
-                status=400
-            )
-            
-        # Get user from API key
-        user = request.env['res.users'].sudo().search([('api_key', '=', api_key)], limit=1)
-        if not user:
-             return request.make_response(
-                 data=json.dumps({"success": False, "message": "Invalid API Key"}),
-                 headers=[('Content-Type', 'application/json')],
-                 status=401
-             )
-             
-        env = request.env(user=user.id)
-        
-        # Merge kw (form fields) and files
-        data = kw.copy()
-        files = request.httprequest.files
-        
-        utility_bill_file = files.get('utility_bill') or files.get('utilityBillImage')
-        if not utility_bill_file:
-            return request.make_response(
-                data=json.dumps({"success": False, "message": "Utility bill file is required for Tier 3"}),
-                headers=[('Content-Type', 'application/json')],
-                status=400
-            )
-
-        partner_id = data.get('partner_id')
-        if partner_id:
-            try:
-                partner = env['res.partner'].sudo().browse(int(partner_id))
-                if not partner.exists():
-                    return request.make_response(
-                        data=json.dumps({"success": False, "message": "Partner not found"}),
-                        headers=[('Content-Type', 'application/json')],
-                        status=404
-                    )
-                
-                # Update partner with KYC fields if provided in request
-                partner_update = {}
-                if data.get('lga'): partner_update['lga'] = data.get('lga')
-                if data.get('bvn'): partner_update['bvn'] = data.get('bvn')
-                if data.get('nin'): partner_update['nin'] = data.get('nin')
-                
-                # Update utility bill
-                bill_content = utility_bill_file.read()
-                import base64
-                partner_update['utility_bill'] = base64.b64encode(bill_content)
-                partner_update['utility_bill_name'] = utility_bill_file.filename
-                
-                partner.sudo().write(partner_update)
-                
-                result = partner.create_wallet_tier_three()
-            except Exception as e:
-                return request.make_response(
-                    data=json.dumps({"success": False, "message": str(e)}),
-                    headers=[('Content-Type', 'application/json')],
-                    status=500
-                )
-        else:
-            # Direct service call
-            try:
-                baas_service = env['baas.service']
-                bill_content = utility_bill_file.read()
-                result = baas_service.create_tier_three_wallet(
-                    firstname=data.get('firstname', ''),
-                    lastname=data.get('lastname', ''),
-                    phone=data.get('phone', ''),
-                    dob=data.get('dob', ''),
-                    bvn=data.get('bvn', ''),
-                    nin=data.get('nin', ''),
-                    address=data.get('address', ''),
-                    city=data.get('city', ''),
-                    state=data.get('state', ''),
-                    country=data.get('country', 'Nigeria'),
-                    postal_code=data.get('postal_code', ''),
-                    lga=data.get('lga', ''),
-                    utility_bill=bill_content,
-                    utility_bill_name=utility_bill_file.filename
-                )
-            except Exception as e:
-                return request.make_response(
-                    data=json.dumps({"success": False, "message": str(e)}),
-                    headers=[('Content-Type', 'application/json')],
-                    status=500
-                )
-
-        status_code = 200 if result.get('success') else 400
-        response_data = {
-            "success": result.get('success', False),
-            "account_number": result.get('account_number'),
-            "reference": result.get('reference'),
-            "message": result.get('message', ''),
-            "wallet_tier": "tier_3",
-            "errors": result.get('errors', [])
-        }
-        
-        return request.make_response(
-            data=json.dumps(response_data),
-            headers=[('Content-Type', 'application/json')],
-            status=status_code
-        )
+    # @http.route(['/wallet/create-tier-three'], type='http', auth='none', methods=['POST'], csrf=False)
+    # def create_wallet_tier_three(self, **kw):
+    #     """Create Tier Three wallet with full KYC documentation using BaaS API
+    #
+    #     Required headers:
+    #     - api-key: API key for authentication
+    #     - db: Database name
+    #
+    #     Request body (multipart/form-data):
+    #     - firstname, lastname, phone, dob, bvn, nin, address, city, state, country, postal_code, lga
+    #     - utility_bill (file upload)
+    #     - partner_id (optional)
+    #
+    #     Returns JSON response with success status and account number
+    #     """
+    #     import json
+    #     from odoo import http
+    #     from odoo.http import request
+    #
+    #     api_key = request.httprequest.headers.get('api-key')
+    #     db = request.httprequest.headers.get('db') or request.session.db
+    #
+    #     if not api_key:
+    #         return request.make_response(
+    #             data=json.dumps({"success": False, "message": "No API Key provided"}),
+    #             headers=[('Content-Type', 'application/json')],
+    #             status=401
+    #         )
+    #
+    #     if not db:
+    #         return request.make_response(
+    #             data=json.dumps({"success": False, "message": "Database not specified"}),
+    #             headers=[('Content-Type', 'application/json')],
+    #             status=400
+    #         )
+    #
+    #     # Get user from API key
+    #     user = request.env['res.users'].sudo().search([('api_key', '=', api_key)], limit=1)
+    #     if not user:
+    #          return request.make_response(
+    #              data=json.dumps({"success": False, "message": "Invalid API Key"}),
+    #              headers=[('Content-Type', 'application/json')],
+    #              status=401
+    #          )
+    #
+    #     env = request.env(user=user.id)
+    #
+    #     # Merge kw (form fields) and files
+    #     data = kw.copy()
+    #     files = request.httprequest.files
+    #
+    #     utility_bill_file = files.get('utility_bill') or files.get('utilityBillImage')
+    #     if not utility_bill_file:
+    #         return request.make_response(
+    #             data=json.dumps({"success": False, "message": "Utility bill file is required for Tier 3"}),
+    #             headers=[('Content-Type', 'application/json')],
+    #             status=400
+    #         )
+    #
+    #     partner_id = data.get('partner_id')
+    #     if partner_id:
+    #         try:
+    #             partner = env['res.partner'].sudo().browse(int(partner_id))
+    #             if not partner.exists():
+    #                 return request.make_response(
+    #                     data=json.dumps({"success": False, "message": "Partner not found"}),
+    #                     headers=[('Content-Type', 'application/json')],
+    #                     status=404
+    #                 )
+    #
+    #             # Update partner with KYC fields if provided in request
+    #             partner_update = {}
+    #             if data.get('lga'): partner_update['lga'] = data.get('lga')
+    #             if data.get('bvn'): partner_update['bvn'] = data.get('bvn')
+    #             if data.get('nin'): partner_update['nin'] = data.get('nin')
+    #
+    #             # Update utility bill
+    #             bill_content = utility_bill_file.read()
+    #             import base64
+    #             partner_update['utility_bill'] = base64.b64encode(bill_content)
+    #             partner_update['utility_bill_name'] = utility_bill_file.filename
+    #
+    #             partner.sudo().write(partner_update)
+    #
+    #             result = partner.create_wallet_tier_three()
+    #         except Exception as e:
+    #             return request.make_response(
+    #                 data=json.dumps({"success": False, "message": str(e)}),
+    #                 headers=[('Content-Type', 'application/json')],
+    #                 status=500
+    #             )
+    #     else:
+    #         # Direct service call
+    #         try:
+    #             baas_service = env['baas.service']
+    #             bill_content = utility_bill_file.read()
+    #             result = baas_service.create_tier_three_wallet(
+    #                 firstname=data.get('firstname', ''),
+    #                 lastname=data.get('lastname', ''),
+    #                 phone=data.get('phone', ''),
+    #                 dob=data.get('dob', ''),
+    #                 bvn=data.get('bvn', ''),
+    #                 nin=data.get('nin', ''),
+    #                 address=data.get('address', ''),
+    #                 city=data.get('city', ''),
+    #                 state=data.get('state', ''),
+    #                 country=data.get('country', 'Nigeria'),
+    #                 postal_code=data.get('postal_code', ''),
+    #                 lga=data.get('lga', ''),
+    #                 utility_bill=bill_content,
+    #                 utility_bill_name=utility_bill_file.filename
+    #             )
+    #         except Exception as e:
+    #             return request.make_response(
+    #                 data=json.dumps({"success": False, "message": str(e)}),
+    #                 headers=[('Content-Type', 'application/json')],
+    #                 status=500
+    #             )
+    #
+    #     status_code = 200 if result.get('success') else 400
+    #     response_data = {
+    #         "success": result.get('success', False),
+    #         "account_number": result.get('account_number'),
+    #         "reference": result.get('reference'),
+    #         "message": result.get('message', ''),
+    #         "wallet_tier": "tier_3",
+    #         "errors": result.get('errors', [])
+    #     }
+    #
+    #     return request.make_response(
+    #         data=json.dumps(response_data),
+    #         headers=[('Content-Type', 'application/json')],
+    #         status=status_code
+    #     )
 
     @http.route(['/loans/<int:loan_id>/log-agreement-email'], 
                 type='http', auth='none', methods=['POST'], csrf=False)

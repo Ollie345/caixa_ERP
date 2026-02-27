@@ -1281,9 +1281,7 @@ class dev_loan_loan(models.Model):
         self._notify_frontend(
             action="Loan Approved", 
             subject="Loan Approved!", 
-            partner_id=self.client_id.id,
             content=_("Great news! Your loan application %s for %s has been approved.") % (self.name, self.loan_amount),
-            loan_id=self.id
         )
         
         # Set account and journal if loan type is defined
@@ -1513,9 +1511,7 @@ class dev_loan_loan(models.Model):
         self._notify_frontend(
             action="Loan Confirmed", 
             subject="Loan Review in Progress", 
-            partner_id=self.client_id.id,
             content=_("Your loan application %s has been confirmed and is progressing to final approval.") % (self.name),
-            loan_id=self.id
         )
 
     def get_credit_lines(self):
@@ -1596,9 +1592,7 @@ class dev_loan_loan(models.Model):
         self._notify_frontend(
             action="Funds Disbursed", 
             subject="Funds Disbursed", 
-            partner_id=self.client_id.id,
             content=_("Your loan funds for %s have been successfully disbursed.") % (self.name),
-            loan_id=self.id
         )
         
     
@@ -1612,9 +1606,7 @@ class dev_loan_loan(models.Model):
         self._notify_frontend(
             action="Loan Submitted", 
             subject="Loan Request Received", 
-            partner_id=self.client_id.id,
             content=_("Your loan request %s for %s has been received and is under review.") % (self.name, self.loan_amount),
-            loan_id=self.id
         )
         
     

@@ -218,6 +218,123 @@ class BaasService(models.AbstractModel):
                 'errors': [str(e)]
             }
 
+    # ------------------------------------------------------------------
+    # Tier‑two helpers (the existing "tier one" logic is reused but points
+    # at a different endpoint and writes a different tier value).
+    # ------------------------------------------------------------------
+    def create_tier_two_wallet(self, firstname, lastname, phone, dob, bvn):
+        """Create a Tier Two wallet via BaaS API
+        (same parameters as :meth:`create_tier_one_wallet`)
+        """
+        # payload validation identical to tier‑one
+        if not all([firstname, lastname, phone, dob, bvn]):
+            return {
+                'success': False,
+                'account_number': None,
+                'message': 'Missing required parameters',
+                'errors': ['Firstname, lastname, phone, dob, and bvn are required']
+            }
+
+        config = self._get_baas_config()
+        try:
+            access_token = self._get_access_token()
+        except ValidationError as e:
+            return {
+                'success': False,
+                'account_number': None,
+                'message': str(e),
+                'errors': [str(e)]
+            }
+
+        url = f"{config['base_url']}/wallet/create-tier-two"
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': '*/*',
+            'Authorization': f'Bearer {access_token}'
+        }
+        payload = {
+            'firstname': firstname,
+            'lastname': lastname,
+            'phone': phone,
+            'dob': dob,
+            'bvn': str(bvn)
+        }
+
+        try:
+            response = requests.post(url, json=payload, headers=headers, timeout=30)
+            _logger.info(
+                "BaaS Tier 2 Wallet Creation Response: Status %s, Body: %s",
+                response.status_code,
+                response.text[:500]
+            )
+            response.raise_for_status()
+            result = response.json()
+            if result.get('status') == 'SUCCESS':
+                data = result.get('data', {})
+                account_number = data.get('accountNumber')
+                return {
+                    'success': True,
+                    'account_number': account_number,
+                    'message': result.get('message', 'success'),
+                    'errors': [],
+                    'full_response': result
+                }
+            else:
+                messages = result.get('messages', [])
+                error_msg = '; '.join(messages) if messages else result.get('message', 'Failed to create wallet')
+                return {
+                    'success': False,
+                    'account_number': None,
+                    'message': error_msg,
+                    'errors': result.get('errors', [error_msg]),
+                    'full_response': result
+                }
+        except requests.exceptions.RequestException as e:
+            _logger.error("BaaS Tier 2 Wallet Creation Error: %s", str(e))
+            return {
+                'success': False,
+                'account_number': None,
+                'message': f"API request failed: {str(e)}",
+                'errors': [str(e)]
+            }
+        except Exception as e:
+            _logger.error("BaaS Tier 2 Wallet Creation Unexpected Error: %s", str(e))
+            return {
+                'success': False,
+                'account_number': None,
+                'message': f"Unexpected error: {str(e)}",
+                'errors': [str(e)]
+            }
+
+    def get_tier_two_status(self, account_number):
+        """Check status of a tier‑two wallet by account number"""
+        if not account_number:
+            return {'success': False, 'status': 'FAILED', 'message': 'Account number is required', 'errors': ['Account number is required']}
+        config = self._get_baas_config()
+        try:
+            access_token = self._get_access_token()
+        except ValidationError as e:
+            return {'success': False, 'status': 'ERROR', 'message': str(e), 'errors': [str(e)]}
+        url = f"{config['base_url']}/wallet/tier-two-status"
+        params = {'account_number': account_number}
+        headers = {
+            'Accept': '*/*',
+            'Authorization': f'Bearer {access_token}'
+        }
+        try:
+            response = requests.get(url, params=params, headers=headers, timeout=30)
+            _logger.info("BaaS Tier 2 Status Check: %s", response.text[:500])
+            response.raise_for_status()
+            result = response.json()
+            if result.get('status') == 'SUCCESS':
+                data = result.get('data', {})
+                return {'success': True, 'status': data.get('status'), 'account_number': data.get('accountNumber'), 'message': result.get('message', '')}
+            else:
+                return {'success': False, 'status': 'ERROR', 'message': result.get('message', ''), 'errors': result.get('errors', [])}
+        except Exception as e:
+            _logger.error("BaaS Tier 2 Status Error: %s", str(e))
+            return {'success': False, 'status': 'ERROR', 'message': f"Request failed: {str(e)}", 'errors': [str(e)]}
+
     # def create_tier_three_wallet(self, firstname, lastname, phone, dob, bvn, nin, address, city, state, country, postal_code, lga, utility_bill, utility_bill_name):
     #     """Create a Tier Three wallet with full KYC documentation
     #     

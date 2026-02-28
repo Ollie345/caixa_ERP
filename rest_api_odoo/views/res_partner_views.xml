@@ -35,12 +35,12 @@
                     <!-- Show Tier 1 create button if wallet doesn't exist -->
                     <group string="Create Wallet" invisible="wallet_account_number">
                         <div class="alert alert-info" role="alert">
-                            <p><strong>Create a Tier One wallet for this partner.</strong></p>
+                            <p><strong>Create a Tier Two wallet for this partner.</strong></p>
                             <p>Requirements: BVN and Phone Number.</p>
                         </div>
-                        <button name="action_create_wallet_tier_one" 
+                        <button name="action_create_wallet_tier_two" 
                                 type="object" 
-                                string="Create Tier One Wallet"
+                                string="Create Tier Two Wallet"
                                 class="btn-primary"
                                 icon="fa-credit-card"/>
                     </group>
@@ -90,11 +90,12 @@
                                 <li>Utility Bill Image</li>
                             </ul>
                         </div>
-                        <button name="action_create_wallet_tier_three" 
+                        <!-- Tier 3 button remains commented out or hidden for now -->
+                        <!-- <button name="action_create_wallet_tier_three" 
                                 type="object" 
                                 string="Create Tier Three Wallet"
                                 class="btn-primary"
-                                icon="fa-credit-card"/>
+                                icon="fa-credit-card"/> -->
                     </group>
                     -->
                 </page>

@@ -43,6 +43,7 @@ class ResPartner(models.Model):
             ('tier_3', 'Tier 3'),
         ],
         string='Wallet Tier',
+        default='tier_2',
         copy=False,
         help='Wallet tier level (Tier 1, 2, or 3)'
     )
@@ -116,9 +117,13 @@ class ResPartner(models.Model):
     #     string='Utility Bill Filename'
     # )
 
-    def create_wallet_tier_one(self, bvn=None, phone=None):
-        """Create Tier One wallet for this partner
+    def create_wallet_tier_two(self, bvn=None, phone=None):
+        """Create Tier Two wallet for this partner
         
+        This method is a copy of the former tier‑one implementation; the
+        only differences are the endpoint that is called and the value written
+        to ``wallet_tier``.  The old tier‑one name is kept below as a
+        thin wrapper for backwards compatibility.
         :param bvn: Bank Verification Number (optional, falls back to partner field)
         :param phone: Phone number (optional, falls back to partner field)
         :return: dict with creation result
@@ -162,7 +167,7 @@ class ResPartner(models.Model):
             
         # Call BaaS service
         baas_service = self.env['baas.service']
-        result = baas_service.create_tier_one_wallet(
+        result = baas_service.create_tier_two_wallet(
             firstname=firstname,
             lastname=lastname,
             phone=wallet_phone,
@@ -173,21 +178,21 @@ class ResPartner(models.Model):
         if result['success']:
             self.write({
                 'wallet_account_number': result['account_number'],
-                'wallet_tier': 'tier_1',
+                'wallet_tier': 'tier_2',
                 'wallet_status': 'active',
                 'wallet_created_date': fields.Datetime.now()
             })
             
         return result
 
-    def action_create_wallet_tier_one(self):
-        """Action method to create Tier 1 wallet with user feedback"""
+    def action_create_wallet_tier_two(self):
+        """Action method to create Tier 2 wallet with user feedback"""
         self.ensure_one()
         
         if self.wallet_account_number:
             raise ValidationError(_("Wallet already exists: %s") % self.wallet_account_number)
             
-        result = self.create_wallet_tier_one()
+        result = self.create_wallet_tier_two()
         
         if result['success']:
             return {
@@ -195,7 +200,7 @@ class ResPartner(models.Model):
                 'tag': 'display_notification',
                 'params': {
                     'title': _('Success'),
-                    'message': _('Tier 1 Wallet created successfully! Account: %s') % result['account_number'],
+                    'message': _('Tier 2 Wallet created successfully! Account: %s') % result['account_number'],
                     'type': 'success',
                     'sticky': False,
                     'next': {'type': 'ir.actions.client', 'tag': 'reload'},
@@ -207,6 +212,15 @@ class ResPartner(models.Model):
             if errors:
                 error_msg += '\n' + '\n'.join(errors)
             raise ValidationError(_('Wallet Creation Failed:\n%s') % error_msg)
+
+    # backwards compatibility wrappers for the original tier‑one names
+    def create_wallet_tier_one(self, bvn=None, phone=None):
+        _logger.warning("create_wallet_tier_one() is deprecated; use tier_two variant")
+        return self.create_wallet_tier_two(bvn=bvn, phone=phone)
+
+    def action_create_wallet_tier_one(self):
+        _logger.warning("action_create_wallet_tier_one() is deprecated; use tier_two variant")
+        return self.action_create_wallet_tier_two()
 
     # def create_wallet_tier_three(self, bvn=None, nin=None):
     #     """Create Tier Three wallet for this partner with full KYC

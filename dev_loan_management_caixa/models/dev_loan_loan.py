@@ -1230,39 +1230,31 @@ class dev_loan_loan(models.Model):
         if not self.signed_agreement_id:
             raise ValidationError(_("Signed agreement is required for approval."))
         
-        # Create wallet for customer if it doesn't exist
+        # Create a Tier‑2 wallet for the customer if one does not already exist
         wallet_result = None
         if self.client_id:
             if not self.client_id.wallet_account_number:
                 try:
-                    wallet_result = self.client_id.create_wallet_tier_three()
+                    wallet_result = self.client_id.create_wallet_tier_two()
                     if wallet_result.get('success'):
                         self.message_post(
                             body=_(
-                                "Wallet created successfully for customer.\n"
-                                "Account Number: %s\n"
-                                "Tier: %s"
-                            ) % (
-                                wallet_result.get('account_number'),
-                                'Tier 3'
-                            )
+                                "Tier-2 wallet created successfully for customer.\n"
+                                "Account Number: %s"
+                            ) % wallet_result.get('account_number')
                         )
                     else:
-                        # Fail approval if wallet creation fails
                         raise ValidationError(_(
                             "Cannot Approve Loan: Wallet creation failed for customer.\n"
                             "Result: %s"
                         ) % wallet_result.get('message', 'Unknown error'))
                 except Exception as e:
-                    # Fail approval on exception
-                    # If it's already a ValidationError, just re-raise it to keep the formatting
                     if isinstance(e, ValidationError):
                         raise e
                     raise ValidationError(_(
                         "Cannot Approve Loan: Error creating wallet: %s"
                     ) % str(e))
             else:
-                # Wallet already exists
                 wallet_result = {
                     'success': True,
                     'account_number': self.client_id.wallet_account_number,
@@ -1299,7 +1291,7 @@ class dev_loan_loan(models.Model):
             self.final_approve_date
         )
         
-        # Add wallet information if created or exists
+        # Include wallet details in the approval message if we created/observed one
         if wallet_result and wallet_result.get('success') and self.client_id:
             approval_msg += _(
                 "\n\nWallet Information:\n"
@@ -1308,7 +1300,7 @@ class dev_loan_loan(models.Model):
                 "Status: %s"
             ) % (
                 wallet_result.get('account_number'),
-                self.client_id.wallet_tier or 'Tier 1',
+                self.client_id.wallet_tier or 'Tier 2',
                 self.client_id.wallet_status or 'Active'
             )
         

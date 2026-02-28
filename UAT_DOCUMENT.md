@@ -350,7 +350,7 @@ Interest Mode: Reducing
 
 ## Module 2: Wallet Management
 
-### TC-2.1: Create Tier One Wallet via API
+### TC-2.1: Create Tier Two Wallet via API
 
 **Objective:** Verify wallet creation through BaaS integration
 
@@ -362,7 +362,7 @@ Interest Mode: Reducing
 
 **Test Steps:**
 
-1. Send POST request to `/wallet/create-tier-one`
+1. Send POST request to `/wallet/create-tier-two`
 2. Headers:
    - `api-key`: Valid API key
    - `db`: Database name
@@ -392,13 +392,13 @@ Interest Mode: Reducing
   "success": true,
   "account_number": "4000039258",
   "message": "success",
-  "wallet_tier": "tier_1",
+  "wallet_tier": "tier_2",
   "errors": []
 }
 ```
 
 - [ ] Customer record updated with wallet account number
-- [ ] Wallet tier = "tier_1"
+- [ ] Wallet tier = "tier_2"
 - [ ] Wallet status = "active"
 
 **Error Scenarios:**

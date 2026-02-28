@@ -1,7 +1,7 @@
 # Wallet Creation Implementation Summary
 
 ## Overview
-This implementation adds Tier One wallet creation functionality with BVN integration using the BaaS API to the `rest_api_odoo` module.
+This implementation adds Tier Two wallet creation functionality with BVN integration using the BaaS API to the `rest_api_odoo` module.
 
 ## Files Created/Modified
 
@@ -33,8 +33,8 @@ This implementation adds Tier One wallet creation functionality with BVN integra
 
 ## API Endpoint
 
-### Create Tier One Wallet
-**Endpoint:** `POST /wallet/create-tier-one`
+### Create Tier Two Wallet
+**Endpoint:** `POST /wallet/create-tier-two`
 
 **Headers:**
 ```
@@ -61,7 +61,7 @@ Content-Type: application/json
     "success": true,
     "account_number": "4000039258",
     "message": "success",
-    "wallet_tier": "tier_1",
+    "wallet_tier": "tier_2",
     "errors": []
 }
 ```
@@ -72,7 +72,7 @@ Content-Type: application/json
     "success": false,
     "account_number": null,
     "message": "Error message",
-    "wallet_tier": "tier_1",
+    "wallet_tier": "tier_2",
     "errors": ["Error details"]
 }
 ```

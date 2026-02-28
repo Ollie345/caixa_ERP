@@ -1227,19 +1227,14 @@ class RestApi(http.Controller):
             )
 
 
-    @http.route(['/wallet/create-tier-one'], type='http', auth='none', methods=['POST'], csrf=False)
-    def create_wallet_tier_one(self, **kw):
-        """Create Tier One wallet using BaaS API
+@http.route(['/wallet/create-tier-two'], type='http', auth='none', methods=['POST'], csrf=False)
+    def create_wallet_tier_two(self, **kw):
+        """Create Tier Two wallet using BaaS API
         
-        Required headers:
-        - api-key: API key for authentication
-        - db: Database name
-        
-        Request body (JSON):
-        - firstname, lastname, phone, dob, bvn
-        - partner_id (optional)
-        
-        Returns JSON response with success status and account number
+        The behaviour is identical to the original tier‑one route; it merely
+        calls the tier‑two partner/service helpers and returns ``tier_2`` in its
+        payload.  The old endpoint URL may be kept around as a separate
+        (deprecated) route if clients still rely on it.
         """
         import json
         from odoo import http
@@ -1294,7 +1289,7 @@ class RestApi(http.Controller):
                 if data.get('bvn'):
                     partner.sudo().write({'bvn': data.get('bvn')})
                 
-                result = partner.create_wallet_tier_one()
+                result = partner.create_wallet_tier_two()
             except Exception as e:
                 return request.make_response(
                     data=json.dumps({"success": False, "message": str(e)}),
@@ -1305,7 +1300,7 @@ class RestApi(http.Controller):
             # Direct service call
             try:
                 baas_service = env['baas.service']
-                result = baas_service.create_tier_one_wallet(
+                result = baas_service.create_tier_two_wallet(
                     firstname=data.get('firstname', ''),
                     lastname=data.get('lastname', ''),
                     phone=data.get('phone', ''),
@@ -1318,13 +1313,13 @@ class RestApi(http.Controller):
                     headers=[('Content-Type', 'application/json')],
                     status=500
                 )
-
+        
         status_code = 200 if result.get('success') else 400
         response_data = {
             "success": result.get('success', False),
             "account_number": result.get('account_number'),
             "message": result.get('message', ''),
-            "wallet_tier": "tier_1",
+            "wallet_tier": "tier_2",
             "errors": result.get('errors', [])
         }
         
@@ -1819,7 +1814,7 @@ class RestApi(http.Controller):
                     
                     wallet_info = {
                         'account_number': loan.client_id.wallet_account_number,
-                        'tier': loan.client_id.wallet_tier or 'tier_1',
+                        'tier': loan.client_id.wallet_tier or 'tier_2',
                         'status': loan.client_id.wallet_status or 'active',
                         'created_date': loan.client_id.wallet_created_date.isoformat() if loan.client_id.wallet_created_date else None,
                         'baas_wallet_id': loan.client_id.baas_wallet_id or None,

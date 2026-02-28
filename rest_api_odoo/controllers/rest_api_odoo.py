@@ -1227,7 +1227,7 @@ class RestApi(http.Controller):
             )
 
 
-@http.route(['/wallet/create-tier-two'], type='http', auth='none', methods=['POST'], csrf=False)
+    @http.route(['/wallet/create-tier-two'], type='http', auth='none', methods=['POST'], csrf=False)
     def create_wallet_tier_two(self, **kw):
         """Create Tier Two wallet using BaaS API
         

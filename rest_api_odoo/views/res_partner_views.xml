@@ -24,80 +24,82 @@
                         </group>
                         <group name="wallet_sync">
                             <field name="wallet_balance_last_updated" readonly="1"/>
-                            <button name="action_refresh_wallet_balance" 
-                                    type="object" 
+                            <button name="action_refresh_wallet_balance"
+                                    type="object"
                                     string="Refresh Balance"
                                     class="oe_link"
                                     icon="fa-refresh"/>
                         </group>
                     </group>
-                    
+
                     <!-- Show Tier 1 create button if wallet doesn't exist -->
                     <group string="Create Wallet" invisible="wallet_account_number">
                         <div class="alert alert-info" role="alert">
-                            <p><strong>Create a Tier Two wallet for this partner.</strong></p>
+                            <p>
+                                <strong>Create a Tier Two wallet for this partner.</strong>
+                            </p>
                             <p>Requirements: BVN and Phone Number.</p>
                         </div>
-                        <button name="action_create_wallet_tier_two" 
-                                type="object" 
+                        <button name="action_create_wallet_tier_two"
+                                type="object"
                                 string="Create Tier Two Wallet"
                                 class="btn-primary"
                                 icon="fa-credit-card"/>
                     </group>
 
-                    <!-- KYC Information for Tier 3 -->
-                    <!-- 
-                    <group string="KYC Information (Tier 3)" invisible="wallet_account_number">
-                        <group>
-                            <field name="bvn" required="not wallet_account_number"/>
-                            <field name="nin"/>
-                            <field name="lga" required="not wallet_account_number"/>
-                        </group>
-                        <group>
-                            <field name="utility_bill" widget="image" required="not wallet_account_number"/>
-                            <field name="utility_bill_name" invisible="1"/>
-                        </group>
-                    </group>
-                    -->
+<!--                    &lt;!&ndash; KYC Information for Tier 3 &ndash;&gt;-->
+<!--                    &lt;!&ndash; -->
+<!--                    <group string="KYC Information (Tier 3)" invisible="wallet_account_number">-->
+<!--                        <group>-->
+<!--                            <field name="bvn" required="not wallet_account_number"/>-->
+<!--                            <field name="nin"/>-->
+<!--                            <field name="lga" required="not wallet_account_number"/>-->
+<!--                        </group>-->
+<!--                        <group>-->
+<!--                            <field name="utility_bill" widget="image" required="not wallet_account_number"/>-->
+<!--                            <field name="utility_bill_name" invisible="1"/>-->
+<!--                        </group>-->
+<!--                    </group>-->
+<!--                    &ndash;&gt;-->
 
-                    <!-- Show creation status if pending -->
-                    <!--
-                    <group string="Creation Status" invisible="wallet_account_number or not wallet_creation_reference">
-                        <field name="wallet_creation_reference" readonly="1"/>
-                        <field name="wallet_creation_status" readonly="1" 
-                               decoration-info="wallet_creation_status == 'PENDING'"
-                               decoration-success="wallet_creation_status == 'COMPLETED'"
-                               decoration-danger="wallet_creation_status in ['FAILED', 'REJECTED']"/>
-                        <button name="action_check_wallet_tier_three_status" 
-                                type="object" 
-                                string="Check Creation Status" 
-                                class="btn-secondary"
-                                icon="fa-refresh"
-                                invisible="wallet_creation_status != 'PENDING'"/>
-                    </group>
-                    -->
+<!--                    &lt;!&ndash; Show creation status if pending &ndash;&gt;-->
+<!--                    &lt;!&ndash;-->
+<!--                    <group string="Creation Status" invisible="wallet_account_number or not wallet_creation_reference">-->
+<!--                        <field name="wallet_creation_reference" readonly="1"/>-->
+<!--                        <field name="wallet_creation_status" readonly="1" -->
+<!--                               decoration-info="wallet_creation_status == 'PENDING'"-->
+<!--                               decoration-success="wallet_creation_status == 'COMPLETED'"-->
+<!--                               decoration-danger="wallet_creation_status in ['FAILED', 'REJECTED']"/>-->
+<!--                        <button name="action_check_wallet_tier_three_status" -->
+<!--                                type="object" -->
+<!--                                string="Check Creation Status" -->
+<!--                                class="btn-secondary"-->
+<!--                                icon="fa-refresh"-->
+<!--                                invisible="wallet_creation_status != 'PENDING'"/>-->
+<!--                    </group>-->
+<!--                    &ndash;&gt;-->
 
-                    <!-- Show create button if wallet doesn't exist and not pending -->
-                    <!--
-                    <group string="Create Wallet" invisible="wallet_account_number or wallet_creation_status == 'PENDING'">
-                        <div class="alert alert-info" role="alert">
-                            <p><strong>Create a Tier Three wallet for this partner.</strong></p>
-                            <p><strong>Requirements:</strong></p>
-                            <ul>
-                                <li>BVN &amp; NIN</li>
-                                <li>Full Address (Street, City, State)</li>
-                                <li>LGA (Local Government Area)</li>
-                                <li>Utility Bill Image</li>
-                            </ul>
-                        </div>
-                        <!-- Tier 3 button remains commented out or hidden for now -->
-                        <!-- <button name="action_create_wallet_tier_three" 
-                                type="object" 
-                                string="Create Tier Three Wallet"
-                                class="btn-primary"
-                                icon="fa-credit-card"/> -->
-                    </group>
-                    -->
+<!--                    &lt;!&ndash; Show create button if wallet doesn't exist and not pending &ndash;&gt;-->
+<!--                    &lt;!&ndash;-->
+<!--                    <group string="Create Wallet" invisible="wallet_account_number or wallet_creation_status == 'PENDING'">-->
+<!--                        <div class="alert alert-info" role="alert">-->
+<!--                            <p><strong>Create a Tier Three wallet for this partner.</strong></p>-->
+<!--                            <p><strong>Requirements:</strong></p>-->
+<!--                            <ul>-->
+<!--                                <li>BVN &amp; NIN</li>-->
+<!--                                <li>Full Address (Street, City, State)</li>-->
+<!--                                <li>LGA (Local Government Area)</li>-->
+<!--                                <li>Utility Bill Image</li>-->
+<!--                            </ul>-->
+<!--                        </div>-->
+<!--                        &lt;!&ndash; Tier 3 button remains commented out or hidden for now &ndash;&gt;-->
+<!--                    &lt;!&ndash; <button name="action_create_wallet_tier_three" -->
+<!--                            type="object" -->
+<!--                            string="Create Tier Three Wallet"-->
+<!--                            class="btn-primary"-->
+<!--                            icon="fa-credit-card"/> &ndash;&gt;-->
+<!--                </group>-->
+<!--                &ndash;&gt;-->
                 </page>
             </xpath>
         </field>

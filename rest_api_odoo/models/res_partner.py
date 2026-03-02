@@ -199,6 +199,7 @@ class ResPartner(models.Model):
             phone=wallet_phone,
             dob=dob,
             bvn=wallet_bvn
+            nin=wallet_nin
         )
         
         if result['success']:

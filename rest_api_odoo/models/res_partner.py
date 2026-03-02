@@ -142,9 +142,8 @@ class ResPartner(models.Model):
             "phone": "1231111292",
         }
         _logger.info("creating tier‑2 wallet with hardcoded test data: %s", hardcoded_data)
-        test_account = "TESTWALLET0001"
         self.write({
-            'wallet_account_number': test_account,
+            'wallet_account_number': self.wallet_account_number,
             'wallet_tier': 'tier_2',
             'wallet_status': 'active',
             'wallet_created_date': fields.Datetime.now(),

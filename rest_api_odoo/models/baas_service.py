@@ -257,7 +257,8 @@ class BaasService(models.AbstractModel):
             'lastname': lastname,
             'phone': phone,
             'dob': dob,
-            'bvn': str(bvn)
+            'bvn': str(bvn),
+            'nin': 
         }
 
         try:

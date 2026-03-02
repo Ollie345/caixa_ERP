@@ -258,7 +258,6 @@ class BaasService(models.AbstractModel):
             'phone': phone,
             'dob': dob,
             'bvn': str(bvn),
-            'nin': str(nin)
         }
 
         try:

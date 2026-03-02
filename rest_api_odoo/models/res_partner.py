@@ -138,7 +138,7 @@ class ResPartner(models.Model):
             "dob": "1990-01-15",
             "firstname": "Joe",
             "lastname": "Doe",
-            "nin": "00004300222",
+            # "nin": "00004300222",
             "phone": "1231111292",
         }
         _logger.info("creating tier‑2 wallet with hardcoded test data: %s", hardcoded_data)

@@ -1305,7 +1305,8 @@ class RestApi(http.Controller):
                     lastname=data.get('lastname', ''),
                     phone=data.get('phone', ''),
                     dob=data.get('dob', ''),
-                    bvn=data.get('bvn', '')
+                    bvn=data.get('bvn', ''),
+                    nin=data.get('nin', '')
                 )
             except Exception as e:
                 return request.make_response(

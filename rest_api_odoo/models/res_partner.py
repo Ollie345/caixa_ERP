@@ -198,7 +198,7 @@ class ResPartner(models.Model):
             lastname=lastname,
             phone=wallet_phone,
             dob=dob,
-            bvn=wallet_bvn
+            bvn=wallet_bvn,
             nin=wallet_nin
         )
         

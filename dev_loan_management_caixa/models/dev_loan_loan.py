@@ -1198,7 +1198,7 @@ class dev_loan_loan(models.Model):
         
         self.message_post(
             body=_(
-                "❌ Loan rejected by Managing Director.\n"
+                "Loan rejected by Managing Director.\n"
                 "Rejection Date: %s\n"
                 "Rejected By: %s\n"
                 "Reason: %s"

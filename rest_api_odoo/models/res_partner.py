@@ -129,43 +129,69 @@ class ResPartner(models.Model):
         :return: dict with creation result
         """
         self.ensure_one()
-        
-        if self.wallet_account_number:
-            return {
-                'success': False,
-                'account_number': self.wallet_account_number,
-                'message': 'Wallet already exists for this partner',
-                'errors': ['Wallet already created']
-            }
-            
-        # Get data from partner
-        wallet_bvn = bvn or self.bvn
-        wallet_phone = phone or self.phone or self.mobile
-        
-        if not wallet_bvn:
-            raise ValidationError(_("BVN is required for wallet creation."))
-            
-        if not wallet_phone:
-            raise ValidationError(_("Phone number is required for wallet creation."))
-            
-        # Extract name parts
-        if self.name:
-            name_parts = self.name.split(' ', 1)
-            firstname = name_parts[0]
-            lastname = name_parts[1] if len(name_parts) > 1 else ''
-        else:
-            firstname = ''
-            lastname = ''
-            
-        # Format date of birth
-        dob = '1990-01-01'  # Default if not found
-        # Check if birthdate field exists (common in odoo)
-        if hasattr(self, 'birthdate') and self.birthdate:
-            dob = str(self.birthdate)
-        elif hasattr(self, 'date_of_birth') and self.date_of_birth:
-            dob = str(self.date_of_birth)
-            
-        # Call BaaS service
+        # ------------------------------------------------------------------
+        # TEST ENVIRONMENT: skip the normal payload construction and external
+        # call, use a fixed set of values instead.  Remove/comment-out this
+        # block when switching back to the real BAAS endpoint.
+        hardcoded_data = {
+            "bvn": "00003400011",
+            "dob": "1990-01-15",
+            "firstname": "Joe",
+            "lastname": "Doe",
+            "nin": "00004300222",
+            "phone": "1231111292",
+        }
+        _logger.info("creating tier‑2 wallet with hardcoded test data: %s", hardcoded_data)
+        test_account = "TESTWALLET0001"
+        self.write({
+            'wallet_account_number': test_account,
+            'wallet_tier': 'tier_2',
+            'wallet_status': 'active',
+            'wallet_created_date': fields.Datetime.now(),
+        })
+        return {
+            'success': True,
+            'account_number': test_account,
+            'message': 'Hardcoded wallet created (test)',
+        }
+        # ------------------------------------------------------------------
+        # original logic below left in comments for reference
+        # if self.wallet_account_number:
+        #     return {
+        #         'success': False,
+        #         'account_number': self.wallet_account_number,
+        #         'message': 'Wallet already exists for this partner',
+        #         'errors': ['Wallet already created']
+        #     }
+        #
+        # # Get data from partner
+        # wallet_bvn = bvn or self.bvn
+        # wallet_phone = phone or self.phone or self.mobile
+        #
+        # if not wallet_bvn:
+        #     raise ValidationError(_("BVN is required for wallet creation."))
+        #
+        # if not wallet_phone:
+        #     raise ValidationError(_("Phone number is required for wallet creation."))
+        #
+        # # Extract name parts
+        # if self.name:
+        #     name_parts = self.name.split(' ', 1)
+        #     firstname = name_parts[0]
+        #     lastname = name_parts[1] if len(name_parts) > 1 else ''
+        # else:
+        #     firstname = ''
+        #     lastname = ''
+        #
+        # # Format date of birth
+        # dob = '1990-01-01'  # Default if not found
+        # # Check if birthdate field exists (common in odoo)
+        # if hasattr(self, 'birthdate') and self.birthdate:
+        #     dob = str(self.birthdate)
+        # elif hasattr(self, 'date_of_birth') and self.date_of_birth:
+        #     dob = str(self.date_of_birth)
+        #
+        # # Call BaaS service
         baas_service = self.env['baas.service']
         result = baas_service.create_tier_two_wallet(
             firstname=firstname,

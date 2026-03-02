@@ -142,17 +142,18 @@ class ResPartner(models.Model):
             "phone": "1231111292",
         }
         _logger.info("creating tier‑2 wallet with hardcoded test data: %s", hardcoded_data)
-        self.write({
-            'wallet_account_number': self.wallet_account_number,
-            'wallet_tier': 'tier_2',
-            'wallet_status': 'active',
-            'wallet_created_date': fields.Datetime.now(),
-        })
-        return {
-            'success': True,
-            'account_number': test_account,
-            'message': 'Hardcoded wallet created (test)',
-        }
+        # send fixed payload to the test BAAS endpoint so it can generate
+        # its own account number
+        baas_service = self.env['baas.service']
+        result = baas_service.create_tier_two_wallet(**hardcoded_data)
+        if result.get('success'):
+            self.write({
+                'wallet_account_number': result.get('account_number'),
+                'wallet_tier': 'tier_2',
+                'wallet_status': 'active',
+                'wallet_created_date': fields.Datetime.now(),
+            })
+        return result
         # ------------------------------------------------------------------
         # original logic below left in comments for reference
         # if self.wallet_account_number:

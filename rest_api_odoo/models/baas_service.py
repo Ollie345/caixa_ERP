@@ -222,9 +222,15 @@ class BaasService(models.AbstractModel):
     # Tier‑two helpers (the existing "tier one" logic is reused but points
     # at a different endpoint and writes a different tier value).
     # ------------------------------------------------------------------
-    def create_tier_two_wallet(self, firstname, lastname, phone, dob, bvn):
+    def create_tier_two_wallet(self, firstname, lastname, phone, dob, bvn, nin=None):
         """Create a Tier Two wallet via BaaS API
-        (same parameters as :meth:`create_tier_one_wallet`)
+        :param firstname: Customer first name
+        :param lastname: Customer last name
+        :param phone: Phone number
+        :param dob: Date of birth (YYYY-MM-DD format)
+        :param bvn: Bank Verification Number
+        :param nin: National Identification Number
+        :return: dict with success, account_number, message, errors
         """
         # payload validation identical to tier‑one
         if not all([firstname, lastname, phone, dob, bvn]):
@@ -246,7 +252,8 @@ class BaasService(models.AbstractModel):
                 'errors': [str(e)]
             }
 
-        url = f"{config['base_url']}/wallet/create-tier-two"
+        # url = f"{config['base_url']}/wallet/create-tier-two"
+        url = f"{config['base_url']}/wallet/create"  # Temporary fix using working endpoint
         headers = {
             'Content-Type': 'application/json',
             'Accept': '*/*',
@@ -258,12 +265,13 @@ class BaasService(models.AbstractModel):
             'phone': phone,
             'dob': dob,
             'bvn': str(bvn),
+            'nin': str(nin) if nin else None,
         }
 
         try:
             response = requests.post(url, json=payload, headers=headers, timeout=30)
             _logger.info(
-                "BaaS Tier 2 Wallet Creation Response: Status %s, Body: %s",
+                "BaaS Tier 2 Wallet Creation (via /wallet/create) Response: Status %s, Body: %s",
                 response.status_code,
                 response.text[:500]
             )

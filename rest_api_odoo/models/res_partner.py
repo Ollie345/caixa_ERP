@@ -120,32 +120,25 @@ class ResPartner(models.Model):
     def create_wallet_tier_two(self, bvn=None, phone=None):
         """Create Tier Two wallet for this partner
         
-        This method is a copy of the former tier‑one implementation; the
-        only differences are the endpoint that is called and the value written
-        to ``wallet_tier``.  The old tier‑one name is kept below as a
-        thin wrapper for backwards compatibility.
-        :param bvn: Bank Verification Number (optional, falls back to partner field)
-        :param phone: Phone number (optional, falls back to partner field)
+        :param bvn: Bank Verification Number (optional)
+        :param phone: Phone number (optional)
         :return: dict with creation result
         """
         self.ensure_one()
-        # ------------------------------------------------------------------
-        # TEST ENVIRONMENT: skip the normal payload construction and external
-        # call, use a fixed set of values instead.  Remove/comment-out this
-        # block when switching back to the real BAAS endpoint.
+        
         hardcoded_data = {
-            "bvn": "00003400011",
-            "dob": "1990-01-15",
             "firstname": "Joe",
             "lastname": "Doe",
-            # "nin": "00004300222",
             "phone": "1231111292",
+            "dob": "1990-01-15",
+            "bvn": "00003400011",
+            "nin": "00004300222",
         }
-        _logger.info("creating tier‑2 wallet with hardcoded test data: %s", hardcoded_data)
-        # send fixed payload to the test BAAS endpoint so it can generate
-        # its own account number
+        _logger.info("Creating tier-2 wallet with actual test data (including NIN): %s", hardcoded_data)
+        
         baas_service = self.env['baas.service']
         result = baas_service.create_tier_two_wallet(**hardcoded_data)
+        
         if result.get('success'):
             self.write({
                 'wallet_account_number': result.get('account_number'),
@@ -154,8 +147,10 @@ class ResPartner(models.Model):
                 'wallet_created_date': fields.Datetime.now(),
             })
         return result
+
         # ------------------------------------------------------------------
-        # original logic below left in comments for reference
+        # ACTUAL LOGIC (Commented out for future use)
+        # ------------------------------------------------------------------
         # if self.wallet_account_number:
         #     return {
         #         'success': False,
@@ -192,25 +187,25 @@ class ResPartner(models.Model):
         #     dob = str(self.date_of_birth)
         #
         # # Call BaaS service
-        baas_service = self.env['baas.service']
-        result = baas_service.create_tier_two_wallet(
-            firstname=firstname,
-            lastname=lastname,
-            phone=wallet_phone,
-            dob=dob,
-            bvn=wallet_bvn,
-            nin=wallet_nin
-        )
-        
-        if result['success']:
-            self.write({
-                'wallet_account_number': result['account_number'],
-                'wallet_tier': 'tier_2',
-                'wallet_status': 'active',
-                'wallet_created_date': fields.Datetime.now()
-            })
-            
-        return result
+        # baas_service = self.env['baas.service']
+        # result = baas_service.create_tier_two_wallet(
+        #     firstname=firstname,
+        #     lastname=lastname,
+        #     phone=wallet_phone,
+        #     dob=dob,
+        #     bvn=wallet_bvn,
+        #     nin=wallet_nin
+        # )
+        #
+        # if result['success']:
+        #     self.write({
+        #         'wallet_account_number': result['account_number'],
+        #         'wallet_tier': 'tier_2',
+        #         'wallet_status': 'active',
+        #         'wallet_created_date': fields.Datetime.now()
+        #     })
+        #
+        # return result
 
     def action_create_wallet_tier_two(self):
         """Action method to create Tier 2 wallet with user feedback"""

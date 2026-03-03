@@ -102,6 +102,12 @@ class ResPartner(models.Model):
         string='Balance Last Updated',
         help='Last time wallet balance was fetched'
     )
+
+    wallet_payment_count = fields.Integer(
+        string='Wallet Payments Count',
+        compute='_compute_wallet_payment_count',
+        help='Number of wallet-related payments'
+    )
     
     # Tier 3 KYC Fields
     # lga = fields.Char(
@@ -457,6 +463,30 @@ class ResPartner(models.Model):
                     partner.wallet_balance = 0.0
             else:
                 partner.wallet_balance = 0.0
+
+    def _compute_wallet_payment_count(self):
+        """Compute the number of wallet payments for this partner"""
+        for partner in self:
+            count = self.env['account.payment'].sudo().search_count([
+                ('partner_id', '=', partner.id),
+                ('ref', 'ilike', 'Wallet Tx:%')
+            ])
+            partner.wallet_payment_count = count
+
+    def action_view_wallet_payments(self):
+        """Redirect to the list of wallet payments for this partner"""
+        self.ensure_one()
+        return {
+            'name': _('Wallet Payments'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.payment',
+            'view_mode': 'list,form',
+            'domain': [
+                ('partner_id', '=', self.id),
+                ('ref', 'ilike', 'Wallet Tx:%')
+            ],
+            'context': {'default_partner_id': self.id, 'default_partner_type': 'customer'},
+        }
 
     def action_refresh_wallet_balance(self):
         """Action method to manually refresh wallet balance"""

@@ -1536,27 +1536,51 @@ class dev_loan_loan(models.Model):
         """Verify the disbursement transaction against BaaS API."""
         self.ensure_one()
         if not self.disbursement_transaction_id:
-            raise UserError(_("Please enter a Transaction ID first."))
-            
-        res = self.env['baas.service'].get_transaction_details(self.disbursement_transaction_id)
-        
+            raise UserError(_(
+                "Please enter a Transaction ID first. "
+                "This should be the clientReference used when you transferred funds via Postman/BaaS."
+            ))
+
+        wallet_account = self.client_id.wallet_account_number
+        if not wallet_account:
+            raise UserError(_("Customer does not have a wallet account number. Cannot verify disbursement."))
+
+        res = self.env['baas.service'].get_transaction_details(
+            self.disbursement_transaction_id,
+            account_number=wallet_account,
+            expected_amount=self.loan_amount,
+        )
+
         if not res.get('success'):
-            raise UserError(_("Verification Failed: %s") % res.get('message'))
-            
-        # Amount Validation
-        if round(res.get('amount'), 2) != round(self.loan_amount, 2):
-            raise UserError(_("Amount Mismatch! BaaS shows %s, but Loan is %s") % (res.get('amount'), self.loan_amount))
-            
+            raise UserError(_(
+                "Verification Failed: %s\n\n"
+                "Tip: Make sure the Transaction ID matches the exact 'clientReference' used "
+                "in your Postman wallet transfer request."
+            ) % res.get('message'))
+
+        # Amount Validation — allow small floating-point tolerances
+        if round(res.get('amount', 0), 2) != round(self.loan_amount, 2):
+            raise UserError(_(
+                "Amount Mismatch! BaaS transaction shows ₦%s, but Loan amount is ₦%s"
+            ) % (res.get('amount'), self.loan_amount))
+
         # Account Validation
-        expected_wallet = self.client_id.wallet_account_number
-        if res.get('account_number') != expected_wallet:
-            raise UserError(_("Account Mismatch! BaaS shows recipient %s, but Customer wallet is %s") % (res.get('account_number'), expected_wallet))
-            
+        if res.get('account_number') and res.get('account_number') != wallet_account:
+            raise UserError(_(
+                "Account Mismatch! BaaS shows recipient %s, but Customer wallet is %s"
+            ) % (res.get('account_number'), wallet_account))
+
         # Status Validation
-        if res.get('status') not in ['SUCCESSFUL', 'SUCCESS']:
-             raise UserError(_("Transaction is not successful according to BaaS (Status: %s)") % res.get('status'))
+        tx_status = (res.get('status') or '').upper()
+        if tx_status and tx_status not in ('SUCCESSFUL', 'SUCCESS', ''):
+            raise UserError(_(
+                "Transaction is not successful according to BaaS (Status: %s)"
+            ) % res.get('status'))
 
         self.is_disbursement_verified = True
+        self.message_post(
+            body=_("Disbursement verified successfully via BaaS transaction history. Reference: %s") % self.disbursement_transaction_id
+        )
         return True
 
     def action_disburse_loan(self):

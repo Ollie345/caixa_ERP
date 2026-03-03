@@ -633,9 +633,7 @@ class BaasService(models.AbstractModel):
                 'errors': [str(e)]
             }
         
-        # NOTE: Endpoint /wallet/debit is assumed based on common BaaS patterns
-        # Adjust if the actual API uses a different endpoint or method
-        url = f"{config['base_url']}/wallet/debit"
+        url = f"{config['base_url']}/wallet/debit-wallet"
         
         headers = {
             'Content-Type': 'application/json',
@@ -647,7 +645,7 @@ class BaasService(models.AbstractModel):
             'accountNumber': account_number,
             'amount': amount,
             'reference': reference,
-            'channel': 'LOAN_REPAYMENT'
+            'reason': 'LOAN_REPAYMENT'
         }
         
         try:
@@ -706,55 +704,121 @@ class BaasService(models.AbstractModel):
                 'errors': [str(e)]
             }
 
-    def get_transaction_details(self, transaction_id):
-        """Get transaction details from BaaS API for verification
-        
-        :param transaction_id: The transaction ID/reference to check
+    
+
+    def get_transaction_details(self, transaction_id, account_number=None, expected_amount=None):
+        """Verify a disbursement by checking the wallet transaction history.
+
+        Since the BaaS API does not have a direct GET /wallet/transaction/{id}
+        endpoint, this method uses GET /wallet/transaction-history to look up
+        today's transactions for the customer's wallet and finds a matching
+        CREDIT entry.
+
+        :param transaction_id: The clientReference or transaction ref entered by the user
+        :param account_number: Customer's wallet account number (used to fetch history)
+        :param expected_amount: Loan amount used for fallback amount-matching
         :return: dict with success, amount, account_number, status, message
         """
         if not transaction_id:
             return {'success': False, 'message': 'Transaction ID is required'}
-            
+
         config = self._get_baas_config()
         try:
             access_token = self._get_access_token()
         except ValidationError as e:
             return {'success': False, 'message': str(e)}
 
-        # Using the receipt/status endpoint pattern from Postman
-        url = f"{config['base_url']}/wallet/transaction/{transaction_id}"
-        
         headers = {
-            'Content-Type': 'application/json',
             'Accept': '*/*',
             'Authorization': f'Bearer {access_token}'
         }
-        
+
+        from datetime import date as _date
+        today_str = _date.today().strftime('%Y-%m-%d')
+
+        # Build query params — account_number is needed for a useful lookup
+        params = {
+            'startDate': today_str,
+            'endDate': today_str,
+        }
+        if account_number:
+            params['accountNumber'] = account_number
+
+        url = f"{config['base_url']}/wallet/transaction-history"
+
         try:
-            response = requests.get(url, headers=headers, timeout=30)
-            _logger.info("BaaS Transaction Status Response [%s]: %s", transaction_id, response.text[:500])
-            
-            # If 404, transaction might not exist yet or wrong endpoint
+            response = requests.get(url, headers=headers, params=params, timeout=30)
+            _logger.info(
+                "BaaS Transaction History Response [ref=%s, acct=%s]: HTTP %s | %s",
+                transaction_id, account_number, response.status_code, response.text[:800]
+            )
+
             if response.status_code == 404:
-                return {'success': False, 'message': 'Transaction not found'}
-                
+                return {'success': False, 'message': 'Transaction history endpoint not found (404)'}
+
             response.raise_for_status()
             result = response.json()
-            
-            if result.get('status') == 'SUCCESS':
-                data = result.get('data', {})
+
+            if result.get('status') not in ('SUCCESS', 'success'):
+                return {'success': False, 'message': result.get('message', 'Failed to retrieve transaction history')}
+
+            # The data may be a list directly or nested under 'data'
+            data = result.get('data', result)
+            transactions = data if isinstance(data, list) else data.get('content', data.get('transactions', []))
+
+            if not transactions:
+                return {'success': False, 'message': 'No transactions found for today on this wallet'}
+
+            _logger.info("BaaS returned %s transaction(s) for today", len(transactions))
+
+            # 1. Try to match by clientReference / transactionRef
+            matched = None
+            for tx in transactions:
+                ref = tx.get('clientReference') or tx.get('transactionRef') or tx.get('reference') or ''
+                if str(ref).strip() == str(transaction_id).strip():
+                    matched = tx
+                    break
+
+            # 2. Fallback: if no ref match, try to find by amount (CREDIT only)
+            if not matched and expected_amount is not None:
+                for tx in transactions:
+                    tx_type = (tx.get('type') or tx.get('transactionType') or '').upper()
+                    tx_amount = float(tx.get('amount') or 0.0)
+                    if 'CREDIT' in tx_type and round(tx_amount, 2) == round(float(expected_amount), 2):
+                        matched = tx
+                        _logger.info("Disbursement matched by amount fallback: %s", tx)
+                        break
+
+            if not matched:
                 return {
-                    'success': True,
-                    'amount': float(data.get('amount') or 0.0),
-                    'account_number': data.get('accountNumber') or data.get('toAccountNumber'),
-                    'status': data.get('status'), # e.g. 'SUCCESSFUL', 'PENDING'
-                    'message': 'Transaction details retrieved'
+                    'success': False,
+                    'message': (
+                        f"No matching transaction found for reference '{transaction_id}' in today's history. "
+                        f"Found {len(transactions)} transaction(s). "
+                        "Ensure the Transaction ID is the exact clientReference used during the wallet transfer."
+                    )
                 }
-            else:
-                return {'success': False, 'message': result.get('message', 'Failed to retrieve transaction')}
-                
+
+            tx_status = (matched.get('status') or '').upper()
+            tx_amount = float(matched.get('amount') or 0.0)
+            tx_account = (
+                matched.get('accountNumber')
+                or matched.get('toAccountNumber')
+                or matched.get('destinationAccountNumber')
+                or account_number
+            )
+
+            return {
+                'success': True,
+                'amount': tx_amount,
+                'account_number': tx_account,
+                'status': tx_status or 'SUCCESSFUL',
+                'message': 'Transaction details retrieved from history',
+                'raw': matched,
+            }
+
         except Exception as e:
-            _logger.error("BaaS Transaction Detail Error [%s]: %s", transaction_id, str(e))
+            _logger.error("BaaS Transaction History Error [ref=%s]: %s", transaction_id, str(e))
             return {'success': False, 'message': f"Request failed: {str(e)}"}
 
     # def get_tier_three_status(self, reference):

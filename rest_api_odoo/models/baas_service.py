@@ -255,7 +255,8 @@ class BaasService(models.AbstractModel):
 
         # url = f"{config['base_url']}/wallet/create-tier-two"
         # url = f"{config['base_url']}/wallet/create-tier-2"
-        url = f"{config['base_url']}/wallet/create-tier-1"  # Temporary fix using working Tier 1 endpoint
+        # url = f"{config['base_url']}/wallet/create-tier-1"
+        url = f"{config['base_url']}/wallet/create-tier-2"  # Correct digit-based endpoint
         headers = {
             'Content-Type': 'application/json',
             'Accept': '*/*',

@@ -147,7 +147,8 @@ class BaasService(models.AbstractModel):
                 'errors': [str(e)]
             }
 
-        url = f"{config['base_url']}/wallet/create"
+        # url = f"{config['base_url']}/wallet/create"  # Old endpoint
+        url = f"{config['base_url']}/wallet/create-tier-2"  # Corrected pattern
         
         headers = {
             'Content-Type': 'application/json',
@@ -253,7 +254,8 @@ class BaasService(models.AbstractModel):
             }
 
         # url = f"{config['base_url']}/wallet/create-tier-two"
-        url = f"{config['base_url']}/wallet/create"  # Temporary fix using working endpoint
+        # url = f"{config['base_url']}/wallet/create-tier-2"
+        url = f"{config['base_url']}/wallet/create-tier-1"  # Temporary fix using working Tier 1 endpoint
         headers = {
             'Content-Type': 'application/json',
             'Accept': '*/*',

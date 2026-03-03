@@ -469,7 +469,7 @@ class ResPartner(models.Model):
         for partner in self:
             count = self.env['account.payment'].sudo().search_count([
                 ('partner_id', '=', partner.id),
-                ('ref', 'ilike', 'Wallet Tx:%')
+                ('memo', 'ilike', 'Wallet Tx:%')
             ])
             partner.wallet_payment_count = count
 
@@ -483,7 +483,7 @@ class ResPartner(models.Model):
             'view_mode': 'list,form',
             'domain': [
                 ('partner_id', '=', self.id),
-                ('ref', 'ilike', 'Wallet Tx:%')
+                ('memo', 'ilike', 'Wallet Tx:%')
             ],
             'context': {'default_partner_id': self.id, 'default_partner_type': 'customer'},
         }

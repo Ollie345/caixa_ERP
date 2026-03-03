@@ -2647,7 +2647,7 @@ class RestApi(http.Controller):
 
             # 5. Check Duplicates
             existing_payment = env['account.payment'].sudo().search([
-                ('ref', 'ilike', tx_ref),
+                ('memo', 'ilike', tx_ref),
                 ('partner_id', '=', partner.id),
                 ('amount', '=', amount)
             ], limit=1)
@@ -2674,7 +2674,7 @@ class RestApi(http.Controller):
                 'partner_id': partner.id,
                 'amount': amount,
                 'date': date.today(),
-                'ref': f"Wallet Tx: {tx_ref}",
+                'memo': f"Wallet Tx: {tx_ref}",
                 'journal_id': journal.id,
                 'payment_type': payment_type,
                 'partner_type': 'customer',

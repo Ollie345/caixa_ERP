@@ -1533,30 +1533,26 @@ class dev_loan_loan(models.Model):
         
     
     def action_verify_disbursement(self):
-        """Verify the disbursement transaction against BaaS API."""
+        """Verify the disbursement transaction against BaaS API.
+
+        Uses GET /wallet/transaction-history and looks for a DEPOSIT matching
+        the loan amount. The optional 'disbursement_transaction_id' field
+        is used to narrow the match by txnNo if provided.
+        """
         self.ensure_one()
-        if not self.disbursement_transaction_id:
-            raise UserError(_(
-                "Please enter a Transaction ID first. "
-                "This should be the clientReference used when you transferred funds via Postman/BaaS."
-            ))
 
         wallet_account = self.client_id.wallet_account_number
         if not wallet_account:
             raise UserError(_("Customer does not have a wallet account number. Cannot verify disbursement."))
 
         res = self.env['baas.service'].get_transaction_details(
-            self.disbursement_transaction_id,
+            self.disbursement_transaction_id or '',
             account_number=wallet_account,
             expected_amount=self.loan_amount,
         )
 
         if not res.get('success'):
-            raise UserError(_(
-                "Verification Failed: %s\n\n"
-                "Tip: Make sure the Transaction ID matches the exact 'clientReference' used "
-                "in your Postman wallet transfer request."
-            ) % res.get('message'))
+            raise UserError(_("Verification Failed: %s") % res.get('message'))
 
         # Amount Validation — allow small floating-point tolerances
         if round(res.get('amount', 0), 2) != round(self.loan_amount, 2):
@@ -1570,18 +1566,12 @@ class dev_loan_loan(models.Model):
                 "Account Mismatch! BaaS shows recipient %s, but Customer wallet is %s"
             ) % (res.get('account_number'), wallet_account))
 
-        # Status Validation
-        tx_status = (res.get('status') or '').upper()
-        if tx_status and tx_status not in ('SUCCESSFUL', 'SUCCESS', ''):
-            raise UserError(_(
-                "Transaction is not successful according to BaaS (Status: %s)"
-            ) % res.get('status'))
-
         self.is_disbursement_verified = True
         self.message_post(
-            body=_("Disbursement verified successfully via BaaS transaction history. Reference: %s") % self.disbursement_transaction_id
+            body=_("Disbursement verified successfully via BaaS transaction history. Amount: ₦%s") % self.loan_amount
         )
         return True
+
 
     def action_disburse_loan(self):
         # SECURITY CHECK: Must be verified first

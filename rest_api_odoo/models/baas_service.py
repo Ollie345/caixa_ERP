@@ -709,8 +709,7 @@ class BaasService(models.AbstractModel):
     def get_transaction_details(self, transaction_id, account_number=None, expected_amount=None):
         """Verify a disbursement by checking the wallet transaction history.
 
-        Since the BaaS API does not have a direct GET /wallet/transaction/{id}
-        endpoint, this method uses GET /wallet/transaction-history to look up
+        This method uses GET /wallet/transaction-history to look up
         today's transactions for the customer's wallet and finds a matching
         CREDIT entry.
 
@@ -762,7 +761,7 @@ class BaasService(models.AbstractModel):
             if result.get('status') not in ('SUCCESS', 'success'):
                 return {'success': False, 'message': result.get('message', 'Failed to retrieve transaction history')}
 
-            # The data may be a list directly or nested under 'data'
+            # The data is a list under 'data'
             data = result.get('data', result)
             transactions = data if isinstance(data, list) else data.get('content', data.get('transactions', []))
 
@@ -771,42 +770,46 @@ class BaasService(models.AbstractModel):
 
             _logger.info("BaaS returned %s transaction(s) for today", len(transactions))
 
-            # 1. Try to match by clientReference / transactionRef
+            # 1. If a transaction_id is provided, try to match by txnNo
             matched = None
-            for tx in transactions:
-                ref = tx.get('clientReference') or tx.get('transactionRef') or tx.get('reference') or ''
-                if str(ref).strip() == str(transaction_id).strip():
-                    matched = tx
-                    break
+            if transaction_id:
+                for tx in transactions:
+                    txn_no = tx.get('txnNo') or tx.get('transactionRef') or tx.get('reference') or ''
+                    if str(txn_no).strip() == str(transaction_id).strip():
+                        matched = tx
+                        _logger.info("Disbursement matched by txnNo: %s", txn_no)
+                        break
 
-            # 2. Fallback: if no ref match, try to find by amount (CREDIT only)
+            # 2. Fallback: match by amount on a DEPOSIT transaction
             if not matched and expected_amount is not None:
                 for tx in transactions:
-                    tx_type = (tx.get('type') or tx.get('transactionType') or '').upper()
+                    tx_type = (tx.get('transactionType') or tx.get('type') or '').upper()
                     tx_amount = float(tx.get('amount') or 0.0)
-                    if 'CREDIT' in tx_type and round(tx_amount, 2) == round(float(expected_amount), 2):
+                    if 'DEPOSIT' in tx_type and round(tx_amount, 2) == round(float(expected_amount), 2):
                         matched = tx
-                        _logger.info("Disbursement matched by amount fallback: %s", tx)
+                        _logger.info("Disbursement matched by amount (fallback): amount=%s, txnNo=%s", tx_amount, tx.get('txnNo'))
                         break
 
             if not matched:
                 return {
                     'success': False,
                     'message': (
-                        f"No matching transaction found for reference '{transaction_id}' in today's history. "
+                        f"No matching DEPOSIT transaction found for today (amount={expected_amount}). "
                         f"Found {len(transactions)} transaction(s). "
-                        "Ensure the Transaction ID is the exact clientReference used during the wallet transfer."
+                        "Make sure the wallet was credited today with the exact loan amount."
                     )
                 }
 
-            tx_status = (matched.get('status') or '').upper()
             tx_amount = float(matched.get('amount') or 0.0)
+            # BaaS uses 'accountNo', not 'accountNumber'
             tx_account = (
-                matched.get('accountNumber')
+                matched.get('accountNo')
+                or matched.get('accountNumber')
                 or matched.get('toAccountNumber')
-                or matched.get('destinationAccountNumber')
                 or account_number
             )
+            # The history entries don't have a status field; if present, use it, else default to SUCCESSFUL
+            tx_status = (matched.get('status') or 'SUCCESSFUL').upper()
 
             return {
                 'success': True,

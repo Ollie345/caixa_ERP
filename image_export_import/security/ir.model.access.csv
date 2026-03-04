@@ -1,5 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_image_export_wizard,image.export.wizard,model_image_export_wizard,base.group_user,1,1,1,1
-access_image_export_wizard_admin,image.export.wizard,model_image_export_wizard,base.group_system,1,1,1,1
-access_image_import_wizard,image.import.wizard,model_image_import_wizard,base.group_user,1,1,1,1
-access_image_import_wizard_admin,image.import.wizard,model_image_import_wizard,base.group_system,1,1,1,1
